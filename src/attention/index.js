@@ -9,20 +9,20 @@ import registerData from "./register_data";
 import submitTrafficLog from "./submit_traffic_log";
 import vote from "./vote";
 
-export async function handle(state, action) {
-  const handlers = [
-    batchAction,
-    deregisterData,
-    distributeRewards,
-    gateway,
-    proposeSlash,
-    rankProposal,
-    registerBatchData,
-    registerData,
-    submitTrafficLog,
-    vote
-  ];
+const handlers = [
+  batchAction,
+  deregisterData,
+  distributeRewards,
+  gateway,
+  proposeSlash,
+  rankProposal,
+  registerBatchData,
+  registerData,
+  submitTrafficLog,
+  vote
+];
 
+export async function handle(state, action) {
   const handler = handlers.find((fn) => fn.name === action.input.function);
   if (handler) return await handler(state, action);
   throw new ContractError(`Invalid function: "${action.input.function}"`);
