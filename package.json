@@ -1,0 +1,14 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/open-koi/contracts.git",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.1"
+  }
+}
