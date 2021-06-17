@@ -6,8 +6,8 @@
 
 Examples:
 
-`yarn deploy attention`
-`yarn deploy koi`
+- `yarn deploy koi`
+- `yarn deploy attention`
 
 ## Testing
 
