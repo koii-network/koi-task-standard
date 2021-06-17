@@ -1,24 +1,24 @@
 import batchAction from "./batch_action";
 import deregisterData from "./deregister_data";
-import distributeRewards from "./distribute_rewards";
+import distribution from "./distribution";
 import gateway from "./gateway";
 import proposeSlash from "./propose_slash";
 import rankProposal from "./rank_proposal";
-import registerBatchData from "./register_batch_data";
+import registerBundler from "./register_bundler";
 import registerData from "./register_data";
-import submitTrafficLog from "./submit_traffic_log";
+import submitPayload from "./submit_payload";
 import vote from "./vote";
 
 const handlers = [
   batchAction,
   deregisterData,
-  distributeRewards,
+  distribution,
   gateway,
   proposeSlash,
   rankProposal,
-  registerBatchData,
+  registerBundler,
   registerData,
-  submitTrafficLog,
+  submitPayload,
   vote
 ];
 

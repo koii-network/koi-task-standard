@@ -3,6 +3,7 @@ export default function mint(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;
+
   const target = input.target;
   const qty = input.qty;
 
@@ -12,7 +13,7 @@ export default function mint(state, action) {
   if (owner !== caller)
     throw new ContractError("Only the owner can mint new tokens");
 
-  if (target in balances) balances[target] += qty;
+  if (balances[target]) balances[target] += qty;
   else balances[target] = qty;
 
   return { state };

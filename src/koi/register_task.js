@@ -18,6 +18,6 @@ export default function registerTask(state, action) {
     KOI_Reward: KOI_Reward
   });
 
-  balances[caller] -= 1; // burn 1 koi per registeration
+  --balances[caller]; // burn 1 koi per registration
   return { state };
 }

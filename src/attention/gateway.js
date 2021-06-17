@@ -18,7 +18,7 @@ export default function gateway(state, action) {
     throw new ContractError("The gateway must be a valid URL or IP");
   }
 
-  balances[caller] -= 1; // burn 1 koi per registration
+  --balances[caller]; // burn 1 koi per registration
   gateways[caller] = {
     url: url,
     publicKey: publicKey,

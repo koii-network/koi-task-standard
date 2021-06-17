@@ -4,12 +4,13 @@ export default function deregisterData(state, action) {
   const input = action.input;
   const txId = input.txId;
 
-  // check is txid is valid
+  // check is txId is valid
   if (!txId) throw new ContractError("No txid specified");
   if (!(txId in registeredRecords))
     throw new ContractError("Transaction/content is not registered");
   if (caller !== state.owner)
     throw new ContractError("You can not Delete a Content");
+
   delete registeredRecords[txId];
 
   return { state };

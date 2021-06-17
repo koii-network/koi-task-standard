@@ -10,10 +10,11 @@ export default function transfer(state, action) {
     throw new ContractError('Invalid value for "qty". Must be an integer');
   if (qty <= 0 || caller === target)
     throw new ContractError("Invalid token transfer");
-  if (balances[caller] < qty)
+  if (balances[caller] < qty) {
     throw new ContractError(
       `Caller balance not high enough to send ${qty} token(s)!`
     );
+  }
 
   balances[caller] -= qty;
   if (target in balances) balances[target] += qty;

@@ -1,9 +1,11 @@
 export default async function vote(state, action) {
-  const votes = state.votes;
-  const caller = action.caller;
   const input = action.input;
+  const caller = action.caller;
+  const votes = state.votes;
   const voteId = input.voteId;
   const userVote = input.userVote;
+  const vote = votes[voteId];
+  const voted = vote.voted;
 
   if (typeof userVote !== "boolean") {
     throw new ContractError(
@@ -15,13 +17,10 @@ export default async function vote(state, action) {
       'Invalid value for "voting id". Must be an integer'
     );
   }
-  const vote = votes[voteId];
-  if (SmartWeave.block.height > vote.end || vote.status == "passive") {
+  if (SmartWeave.block.height > vote.end || vote.status == "passed")
     throw new ContractError("vote passed");
-  }
 
-  const voted = vote.voted;
-  const MAIN_CONTRACT = "Bq6dib6GLqe-rFspNXqmIbZspMNchdPAjTPKV6-vwNE";
+  const MAIN_CONTRACT = "_4VN9iv9A5TZYVS-2nWCYqmYVoTe9YZ9o-yK1ca_djs";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
@@ -29,10 +28,10 @@ export default async function vote(state, action) {
   if (stakes[caller] < vote.stakeAmount)
     throw new ContractError("staked amount is less than than required");
   if (voted.includes(caller))
-    throw new ContractError("caller has alreday voted in this evet");
+    throw new ContractError("caller has alreday voted");
 
-  if (userVote) vote["yays"] += 1;
-  else vote["nays"] += 1;
+  if (userVote) ++vote["yays"];
+  else ++vote["nays"];
   voted.push(caller);
 
   return { state };

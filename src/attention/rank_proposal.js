@@ -1,43 +1,44 @@
-export default function rankProposal(state, _action) {
-  const trafficLogs = state.trafficLogs;
+export default function rankProposal(state, action) {
+  const task = state.task;
   const votes = state.votes;
   // if (
-  //   SmartWeave.block.height > trafficLogs.close ||
-  //   SmartWeave.block.height < trafficLogs.close - 75
+  //   SmartWeave.block.height > task.close ||
+  //   SmartWeave.block.height < task.close - 75
   // ) {
   //   throw new ContractError("Ranking time finished or not Ranking time");
   // }
 
-  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-    (trafficlog) => trafficlog.block === trafficLogs.open
+  const currentTask = task.dailyPayload.find(
+    (task) => task.block === task.open
   );
 
-  if (currentTrafficLogs.isRanked)
+  if (currentTask.isRanked)
     throw new ContractError("it has already been ranked");
-  const proposedLog = currentTrafficLogs.proposedLogs;
+  const payloads = currentTask.payloads;
   const proposedGateWays = {};
-  proposedLog.forEach((prp) => {
+  payloads.forEach((prp) => {
     const prpVote = votes[prp.voteId];
-    if (!proposedGateWays[prp.gateWayId] && prpVote.yays > prpVote.nays) {
-      proposedGateWays[prp.gateWayId] = prp;
-      prp.won = true;
-      prpVote.status = "passive";
+    if (!proposedGateWays[prp.gateWayId]) {
+      if (prpVote.yays > prpVote.nays) {
+        proposedGateWays[prp.gateWayId] = prp;
+        prp.won = true;
+        prpVote.status = "passed";
+      }
     } else {
       const currentSelectedPrp = proposedGateWays[prp.gateWayId];
       const selectedPrpVote = votes[currentSelectedPrp.voteId];
       const selectedPrpVoteTotal = selectedPrpVote.yays + selectedPrpVote.nays;
       const prpVoteTotal = prpVote.yays + prpVote.nays;
-
       if (prpVoteTotal > selectedPrpVoteTotal && prpVote.yays > prpVote.nays) {
         proposedGateWays[prp.gateWayId] = prp;
         prp.won = true;
         currentSelectedPrp.won = false;
-        prpVote.status = "passive";
+        prpVote.status = "passed";
+        currentSelectedPrp.status = "passed";
       }
 
       const prpVotePassPer = prpVote.yays - prpVote.nays;
       const selPrpVotePassPer = selectedPrpVote.yays - selectedPrpVote.nays;
-
       if (
         prpVoteTotal === selectedPrpVoteTotal &&
         prpVotePassPer > selPrpVotePassPer
@@ -45,7 +46,8 @@ export default function rankProposal(state, _action) {
         proposedGateWays[prp.gateWayId] = prp;
         prp.won = true;
         currentSelectedPrp.won = false;
-        prpVote.status = "passive";
+        prpVote.status = "passed";
+        currentSelectedPrp.status = "passed";
       }
 
       if (
@@ -56,7 +58,8 @@ export default function rankProposal(state, _action) {
         proposedGateWays[prp.gateWayId] = prp;
         prp.won = true;
         currentSelectedPrp.won = false;
-        prpVote.status = "passive";
+        prpVote.status = "passed";
+        currentSelectedPrp.status = "passed";
       }
     }
   });

@@ -1,10 +1,9 @@
 export default async function proposeSlash(state, action) {
+  const votes = state.votes;
+  const blackList = state.blackList;
   const receipt = action.input.receipt;
   const payload = receipt.vote;
   const vote = payload.vote;
-  const votes = state.votes;
-  const blackList = state.blackList;
-  // const trafficLogs = state.stateUpdate.trafficLogs;
 
   // if (
   //   SmartWeave.block.height > trafficLogs.close - 75 ||
@@ -13,10 +12,12 @@ export default async function proposeSlash(state, action) {
   //   throw new ContractError("Slash time not reached or passed");
   // }
   if (!receipt) throw new ContractError("No receipt specified");
+
   const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     vote.owner
   );
   const suspectedVote = votes[vote.voteId];
+
   if (suspectedVote.includes(voterAddress))
     throw new ContractError("vote is found");
 
@@ -32,6 +33,7 @@ export default async function proposeSlash(state, action) {
   );
 
   if (!isVoteValid) throw new ContractError("vote is not valid");
+
   const receiptString = JSON.stringify(payload);
   const receiptBuffer = await SmartWeave.arweave.utils.stringToBuffer(
     receiptString
@@ -45,7 +47,8 @@ export default async function proposeSlash(state, action) {
     rawReceiptSignature
   );
 
-  if (isReceiptValid) throw new ContractError("receipt is not valid");
+  if (!isReceiptValid) throw new ContractError("receipt is not valid");
+
   const bundlerAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     receipt.owner
   );

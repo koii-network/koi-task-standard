@@ -5,13 +5,14 @@ export default function stake(state, action) {
   const input = action.input;
   const qty = input.qty;
 
-  if (qty <= 0) throw new ContractError("Invalid stake amount");
   if (!Number.isInteger(qty))
     throw new ContractError('Invalid value for "qty". Must be an integer');
-  if (balances[caller] < qty)
+  if (qty <= 0) throw new ContractError("Invalid stake amount");
+  if (balances[caller] < qty) {
     throw new ContractError(
       "Balance is too low to stake that amount of tokens"
     );
+  }
 
   balances[caller] -= qty;
   // stake for 14 days which 10080 blocks
