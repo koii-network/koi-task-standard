@@ -1,5 +1,5 @@
 export default function rankProposal(state, action) {
-   const task = state.task;
+  const task = state.task;
   const votes = state.votes;
   // if (
   //   SmartWeave.block.height > task.close ||
