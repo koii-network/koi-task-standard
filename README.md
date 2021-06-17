@@ -1,5 +1,14 @@
 # Contracts
 
+## Deployment
+
+`yarn deploy [contract]`
+
+Examples:
+
+`yarn deploy attention`
+`yarn deploy koi`
+
 ## Testing
 
 1. Ensure docker is running
