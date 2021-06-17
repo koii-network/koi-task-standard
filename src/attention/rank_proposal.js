@@ -7,17 +7,17 @@ export default function rankProposal(state, action) {
   // ) {
   //   throw new ContractError("Ranking time finished or not Ranking time");
   // }
-
   const currentTask = task.dailyPayload.find(
-    (task) => task.block === task.open
+    (dailyPayload) => dailyPayload.block === task.open
   );
-
-  if (currentTask.isRanked)
+  if (currentTask.isRanked) {
     throw new ContractError("it has already been ranked");
+  }
   const payloads = currentTask.payloads;
   const proposedGateWays = {};
   payloads.forEach((prp) => {
     const prpVote = votes[prp.voteId];
+
     if (!proposedGateWays[prp.gateWayId]) {
       if (prpVote.yays > prpVote.nays) {
         proposedGateWays[prp.gateWayId] = prp;
@@ -34,7 +34,7 @@ export default function rankProposal(state, action) {
         prp.won = true;
         currentSelectedPrp.won = false;
         prpVote.status = "passed";
-        currentSelectedPrp.status = "passed";
+        votes[currentSelectedPrp.voteId].status = "passed";
       }
 
       const prpVotePassPer = prpVote.yays - prpVote.nays;
@@ -46,8 +46,8 @@ export default function rankProposal(state, action) {
         proposedGateWays[prp.gateWayId] = prp;
         prp.won = true;
         currentSelectedPrp.won = false;
+        votes[currentSelectedPrp.voteId].status = "passed";
         prpVote.status = "passed";
-        currentSelectedPrp.status = "passed";
       }
 
       if (
@@ -59,12 +59,14 @@ export default function rankProposal(state, action) {
         prp.won = true;
         currentSelectedPrp.won = false;
         prpVote.status = "passed";
-        currentSelectedPrp.status = "passed";
+        votes[currentSelectedPrp.voteId].status = "passed";
+      } else {
+        prpVote.status = "passed";
       }
     }
   });
 
-  currentTrafficLogs.isRanked = true;
+  currentTask.isRanked = true;
 
   return { state };
 }
