@@ -40,17 +40,6 @@ async function main() {
     )
   ).state;
   console.log(state);
-  state = (
-    await interactDryRun(
-      arweave,
-      contractSrc,
-      wallet,
-      transferInput,
-      state,
-      walletAddress
-    )
-  ).state;
-  console.log(state);
 }
 
 /**
