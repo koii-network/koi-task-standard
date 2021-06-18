@@ -10,21 +10,17 @@ const arweave = Arweave.init({
   logging: false
 });
 
-const wallet = process.env.WALLET_LOCATION;
-if (!wallet) {
-  console.error("Wallet path not specified in .env, aborting");
-  process.exit(1);
-}
-const walletParse = JSON.parse(fs.readFileSync(wallet));
+const walletPath = process.env.WALLET_LOCATION;
+if (!walletPath) throw new Error("Wallet path not specified in .env");
 const contract = process.argv[2];
-if (!contract) {
-  console.error("Contract name not specified, aborting");
-  process.exit(2);
-}
+if (!contract) throw new Error("Contract name not specified");
+
+const wallet = JSON.parse(fs.readFileSync(wallet));
 const src = fs.readFileSync(`dist/${contract}.js`);
 const state = fs.readFileSync(`src/${contract}/init_state.json`);
+
 async function deploy() {
-  const id = await smartweave.createContract(arweave, walletParse, src, state);
+  const id = await smartweave.createContract(arweave, wallet, src, state);
   console.log(`Deployed ${contract} Contract with ID ${id}`);
   fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
 }
