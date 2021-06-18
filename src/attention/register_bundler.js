@@ -8,7 +8,8 @@ export default async function registerBundler(state, action) {
     MAIN_CONTRACT
   );
   const stakes = tokenContractState.stakes;
-  if (!(caller in stakes) || balances[stakes] < 1000) {
+  const balances = tokenContractState.balances;
+  if (!(caller in stakes) || balances[caller] < 1000) {
     throw new Contract(
       "You should stake minimum 1000 koi to register as valid bundler"
     );
