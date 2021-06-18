@@ -15,7 +15,7 @@ if (!walletPath) throw new Error("Wallet path not specified in .env");
 const contract = process.argv[2];
 if (!contract) throw new Error("Contract name not specified");
 
-const wallet = JSON.parse(fs.readFileSync(wallet));
+const wallet = JSON.parse(fs.readFileSync(walletPath));
 const src = fs.readFileSync(`dist/${contract}.js`);
 const state = fs.readFileSync(`src/${contract}/init_state.json`);
 
