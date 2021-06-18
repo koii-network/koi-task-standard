@@ -43,7 +43,7 @@ async function main() {
 /**
  * Does a dry run of an interaction with a local contract state and source
  * @param {Arweave} arweave     Arweave client instance
- * @param {string} contractSrc  String
+ * @param {string} contractSrc  Contract source code
  * @param {JWKInterface} wallet Wallet used to sign the transaction
  * @param {any} input           Interaction input object
  * @param {any} state           Contract state to be interacted
