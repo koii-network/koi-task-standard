@@ -18,7 +18,6 @@ export default async function distributeRewards(state, action) {
   const currentPayload = dailyPayload[lastDistributionIndex];
 
   currentPayload.payloads.map((payload) => {
-    console.log(payload);
     const address = payload.owner;
     balances[address] -= 1;
   });
