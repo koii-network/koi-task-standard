@@ -1,5 +1,6 @@
 export default async function proposeSlash(state, action) {
   const votes = state.votes;
+  const validBundlers = state.validBundlers;
   const blackList = state.blackList;
   const receipt = action.input.receipt;
   const payload = receipt.vote;
@@ -14,9 +15,9 @@ export default async function proposeSlash(state, action) {
   if (!receipt) throw new ContractError("No receipt specified");
 
   const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
-    vote.owner
+    payload.owner
   );
-  const suspectedVote = votes[vote.voteId];
+  const suspectedVote = votes[vote.voteId].voted;
 
   if (suspectedVote.includes(voterAddress))
     throw new ContractError("vote is found");
@@ -24,10 +25,10 @@ export default async function proposeSlash(state, action) {
   const voteString = JSON.stringify(vote);
   const voteBuffer = await SmartWeave.arweave.utils.stringToBuffer(voteString);
   const rawSignature = await SmartWeave.arweave.utils.b64UrlToBuffer(
-    vote.signature
+    payload.signature
   );
   const isVoteValid = await SmartWeave.arweave.crypto.verify(
-    vote.owner,
+    payload.owner,
     voteBuffer,
     rawSignature
   );
@@ -52,6 +53,12 @@ export default async function proposeSlash(state, action) {
   const bundlerAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     receipt.owner
   );
+
+  const index = validBundlers.indexOf(bundlerAddress);
+  if (index > -1) {
+    validBundlers.splice(index, 1);
+  }
+
   blackList.push(bundlerAddress);
 
   return { state };
