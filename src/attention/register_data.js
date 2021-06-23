@@ -1,5 +1,5 @@
 export default async function registerData(state, action) {
-  const registeredRecords = state.registeredRecord;
+  //const registeredRecords = state.registeredRecords;
   const caller = action.caller;
   const input = action.input;
   const txId = input.txId;
@@ -14,14 +14,20 @@ export default async function registerData(state, action) {
   const balances = tokenContractState.balances;
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you need min 1 KOI to register data");
-
-  if (txId in registeredRecords) {
-    throw new ContractError(
-      `Transaction/content has been registered already under ${registeredRecords[txId]} wallet`
-    );
+  const hasregisterRecordsKeyExist = "registeredRecords" in state;
+  if (hasregisterRecordsKeyExist) {
+    const registeredRecords = state.registeredRecords;
+    if (txId in registeredRecords) {
+      throw new ContractError(
+        `Transaction/content has been registered already under ${registeredRecords[txId]} wallet`
+      );
+    }
+    registeredRecords[txId] = ownerWallet || caller;
+  } else {
+    state.registeredRecords = {};
+    state.registeredRecords[txId] = ownerWallet || caller;
   }
 
-  registeredRecords[txId] = ownerWallet || caller;
   //balances[caller] -= 1;
 
   return { state };
