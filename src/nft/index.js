@@ -51,7 +51,7 @@ export function handle(state, action) {
 
       const ethOwnerAddress = input.ethOwnerAddress;
       ContractAssert(ethOwnerAddress, `No ethereum address specified.`);
-       state.delegatedOwner = ethOwnerAddress;
+       state.ethOwnerAddress = ethOwnerAddress;
        return state;
       }
     throw new ContractError(`No function supplied or function not recognised: "${input.function}".`);
