@@ -6,9 +6,11 @@ import registerTask from "./register_task";
 import stake from "./stake";
 import transfer from "./transfer";
 import withdraw from "./withdraw";
+import burnKoi from "./burn_koi";
 
 const handlers = [
   account,
+  burnKoi,
   deregisterTask,
   distributeRewards,
   mint,

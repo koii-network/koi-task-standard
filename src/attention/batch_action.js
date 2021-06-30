@@ -6,7 +6,6 @@ export default async function batchAction(state, action) {
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
   const vote = votes[voteId];
-
   // if (SmartWeave.block.height > vote.end)
   //   throw new ContractError('it is closed');
   if (!batchTxId) throw new ContractError("No txId specified");
@@ -19,8 +18,7 @@ export default async function batchAction(state, action) {
     throw new ContractError("batchTxId should be string");
   if (!validBundlers.includes(action.caller))
     throw new ContractError("Only selected bundlers can write batch actions.");
-
-  const MAIN_CONTRACT = "KEOnz_i-YWTb1Heomm_QWDgZTbqc0Nb9IBXUskySVp8";
+  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
@@ -28,7 +26,6 @@ export default async function batchAction(state, action) {
   if (!(caller in stakes)) {
     throw new ContractError("caller hasn't staked");
   }
-
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
     string: true
@@ -48,7 +45,6 @@ export default async function batchAction(state, action) {
       voteBuffer,
       rawSignature
     );
-
     if (
       isVoteValid &&
       voteObj.vote.voteId === voteId &&
@@ -64,9 +60,7 @@ export default async function batchAction(state, action) {
       }
     }
   }
-
   if (!(caller in vote.bundlers)) vote.bundlers[caller] = [];
   vote.bundlers[caller].push(batchTxId);
-
   return { state };
 }

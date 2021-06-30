@@ -1,17 +1,20 @@
 export default async function registerBundler(state, action) {
   const validBundlers = state.validBundlers;
+  const blackList = state.blackList;
   const caller = action.caller;
   if (validBundlers.includes(caller))
     throw new ContractError(`${caller} is already registered`);
-  const MAIN_CONTRACT = "KEOnz_i-YWTb1Heomm_QWDgZTbqc0Nb9IBXUskySVp8";
+  if (blackList.includes(caller)) {
+    throw new ContractError(`${caller}address is in blacklist`);
+  }
+  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
   const stakes = tokenContractState.stakes;
-  const balances = tokenContractState.balances;
-  if (!(caller in stakes) || balances[caller] < 1000) {
+  if (!(caller in stakes) || stakes[caller] < 1000) {
     throw new Contract(
-      "You should stake minimum 1000 koi to register as valid bundler"
+      "You should stake minimum 1000 stake to register as valid bundler"
     );
   }
   validBundlers.push(caller);

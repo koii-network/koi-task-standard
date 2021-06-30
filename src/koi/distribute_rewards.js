@@ -3,29 +3,49 @@ export default async function distributeRewards(state, action) {
   const koi_tasks = state.KOI_TASKS;
   const input = action.input;
   const taskId = input.taskId;
-
-  const task = koi_tasks.filter((task) => task.TaskId === taskId);
-  const TASK_CONTRACT = task[0].TaskTxId;
-  const contractState = await SmartWeave.contracts.readContractState(
-    TASK_CONTRACT
-  );
-  const rewardReport = contractState.task.rewardReport;
-  const dailyPayload = contractState.task.dailyPayload;
-  const length = rewardReport.length;
-  const lastDistributionIndex = length - 1;
-  const distributionRewardReport = rewardReport[lastDistributionIndex];
-  const distribution = distributionRewardReport.distribution;
-  const currentPayload = dailyPayload[lastDistributionIndex];
-
-  currentPayload.payloads.map((payload) => {
-    const address = payload.owner;
-    balances[address] -= 1;
-  });
-
-  for (let address in distribution) {
-    if (address in balances) balances[address] += distribution[address];
-    else balances[address] = distribution[address];
+  const task = koi_tasks.find((task) => task.TaskId === taskId);
+  const TASK_CONTRACT = task.TaskTxId;
+  const taskType = task.TaskName;
+  if (taskType === "AttentionGame") {
+    const contractState = await SmartWeave.contracts.readContractState(
+      TASK_CONTRACT
+    );
+    const rewardReport = contractState.task.rewardReport;
+    for (let blockHeight of task.TrafficBlockRewarded) {
+      const report = rewardReport.find(
+        (distributionReport) =>
+          distributionReport.dailyTrafficBlock === blockHeight
+      );
+      if (report.distribution) {
+        const index = task.TrafficBlockRewarded.indexOf(blockHeight);
+        if (index > -1) {
+          task.TrafficBlockRewarded.splice(index, 1);
+        }
+      }
+    }
+    const unRewardedDistributions = rewardReport.filter(
+      (unRewardedDistribution) => unRewardedDistribution.distributed === false
+    );
+    if (unRewardedDistributions !== undefined) {
+      for (let unRewardedDistribution of unRewardedDistributions) {
+        let rewardedBlockHeight = task.TrafficBlockRewarded;
+        if (
+          !rewardedBlockHeight.includes(
+            unRewardedDistribution.dailyTrafficBlock
+          )
+        ) {
+          let distributionReport = unRewardedDistribution.distribution;
+          for (let address in distributionReport) {
+            if (address in balances)
+              balances[address] += distributionReport[address];
+            else balances[address] = distributionReport[address];
+          }
+          task.TrafficBlockRewarded.push(
+            unRewardedDistribution.dailyTrafficBlock
+          );
+        }
+      }
+    }
   }
-
   return { state };
 }
