@@ -2,8 +2,7 @@
     "owner": "xxxxxxxxxxxxxxxxxx",
     "name": "koii vault",
     "registry":{
-       
-        "ethereum":{
+         "ethereum":{
             "nftidarweave":"nftIdeth"
         }
     }
