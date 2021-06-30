@@ -3,16 +3,13 @@ export default async function proposeSlash(state, action) {
   const validBundlers = state.validBundlers;
   const blackList = state.blackList;
   const receiptTxId = action.input.receiptTxId;
-
   // if (
   //   SmartWeave.block.height > trafficLogs.close - 75 ||
   //   SmartWeave.block.height < trafficLogs.close - 150
   // ) {
   //   throw new ContractError("Slash time not reached or passed");
   // }
-
   if (!receiptTxId) throw new ContractError("No receipt specified");
-
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
     {
@@ -23,14 +20,12 @@ export default async function proposeSlash(state, action) {
   const receipt = JSON.parse(receiptData);
   const payload = receipt.vote;
   const vote = payload.vote;
-  const voterAddress = await SmartWeave.arweave.wallets.ownerToAddress(
+  const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     payload.owner
   );
   const suspectedVote = votes[vote.voteId].voted;
-
   if (suspectedVote.includes(voterAddress))
     throw new ContractError("vote is found");
-
   const voteString = JSON.stringify(vote);
   const voteBuffer = await SmartWeave.arweave.utils.stringToBuffer(voteString);
   const rawSignature = await SmartWeave.arweave.utils.b64UrlToBuffer(
@@ -41,9 +36,7 @@ export default async function proposeSlash(state, action) {
     voteBuffer,
     rawSignature
   );
-
   if (!isVoteValid) throw new ContractError("vote is not valid");
-
   const receiptString = JSON.stringify(payload);
   const receiptBuffer = await SmartWeave.arweave.utils.stringToBuffer(
     receiptString
@@ -56,19 +49,21 @@ export default async function proposeSlash(state, action) {
     receiptBuffer,
     rawReceiptSignature
   );
-
   if (!isReceiptValid) throw new ContractError("receipt is not valid");
-
-  const bundlerAddress = await SmartWeave.arweave.wallets.ownerToAddress(
+  const bundlerAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     receipt.owner
   );
-
   const index = validBundlers.indexOf(bundlerAddress);
   if (index > -1) {
     validBundlers.splice(index, 1);
   }
-
   blackList.push(bundlerAddress);
-
+  if (vote.userVote === "true") {
+    votes[vote.voteId].yays += 1;
+  }
+  if (vote.userVote === "false") {
+    votes[vote.voteId].nays += 1;
+  }
+  suspectedVote.push(voterAddress);
   return { state };
 }

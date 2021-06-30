@@ -17,7 +17,6 @@ export default function rankProposal(state, action) {
   const proposedGateWays = {};
   payloads.forEach((prp) => {
     const prpVote = votes[prp.voteId];
-
     if (!proposedGateWays[prp.gateWayId]) {
       if (prpVote.yays > prpVote.nays) {
         proposedGateWays[prp.gateWayId] = prp;
@@ -36,7 +35,6 @@ export default function rankProposal(state, action) {
         prpVote.status = "passed";
         votes[currentSelectedPrp.voteId].status = "passed";
       }
-
       const prpVotePassPer = prpVote.yays - prpVote.nays;
       const selPrpVotePassPer = selectedPrpVote.yays - selectedPrpVote.nays;
       if (
@@ -49,7 +47,6 @@ export default function rankProposal(state, action) {
         votes[currentSelectedPrp.voteId].status = "passed";
         prpVote.status = "passed";
       }
-
       if (
         prpVoteTotal === selectedPrpVoteTotal &&
         prpVotePassPer === selPrpVotePassPer &&
@@ -65,8 +62,6 @@ export default function rankProposal(state, action) {
       }
     }
   });
-
   currentTask.isRanked = true;
-
   return { state };
 }

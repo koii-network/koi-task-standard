@@ -5,23 +5,41 @@ export default async function submitPayload(state, action) {
   const batchTxId = input.batchTxId;
   const gateWayUrl = input.gateWayUrl;
   const stakeAmount = input.stakeAmount;
-  const type = input.type;
-
   if (!batchTxId) throw new ContractError("No batchTxId specified");
   if (!gateWayUrl) throw new ContractError("No gateWayUrl specified");
-  const MAIN_CONTRACT = "KEOnz_i-YWTb1Heomm_QWDgZTbqc0Nb9IBXUskySVp8";
+  const currentTask = task.dailyPayload[task.dailyPayload.length - 1];
+  const gatewayProposed = currentTask.payloads.find(
+    (payload) => payload.gateWayId === gateWayUrl
+  );
+  if (gatewayProposed !== undefined) {
+    throw new ContractError(
+      `Logs are already proposed from ${gateWayUrl} gateWay`
+    );
+  }
+  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
   const balances = tokenContractState.balances;
-  if (!(caller in balances) || balances[caller] < 1)
-    throw new ContractError("you need min 1 KOI to propose gateway");
+  const koi_tasks = tokenContractState.KOI_TASKS;
+  const attentionTask = koi_tasks.find(
+    (task) => task.TaskName === "AttentionGame"
+  );
+  for (let rewardedBlock of attentionTask.TrafficBlockRewarded) {
+    const rewardDistributionReport = task.rewardReport.find(
+      (distributionReport) =>
+        distributionReport.dailyTrafficBlock === rewardedBlock
+    );
+    if (rewardDistributionReport !== undefined) {
+      rewardDistributionReport.distributed = true;
+    }
+  }
+
   // if (SmartWeave.block.height > task.close - 420)
   //   throw new ContractError("proposing is closed. wait for another round");
-
   const vote = {
     id: state.votes.length,
-    type: type,
+    type: "trafficLogs",
     status: "active",
     voted: [],
     stakeAmount: stakeAmount,
@@ -31,7 +49,6 @@ export default async function submitPayload(state, action) {
     start: SmartWeave.block.height,
     end: task.close
   };
-
   const payload = {
     TLTxId: batchTxId,
     owner: caller,
@@ -40,10 +57,7 @@ export default async function submitPayload(state, action) {
     blockHeight: SmartWeave.block.height,
     won: false
   };
-
-  const currentTask = task.dailyPayload[task.dailyPayload.length - 1];
   currentTask.payloads.push(payload);
   state.votes.push(vote);
-
   return { state };
 }
