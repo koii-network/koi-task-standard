@@ -1,0 +1,10 @@
+{
+    "owner": "xxxxxxxxxxxxxxxxxx",
+    "name": "koii vault",
+    "registry":{
+         "ethereum":{
+            "nftidarweave":"nftIdeth"
+        }
+    }
+}
+
