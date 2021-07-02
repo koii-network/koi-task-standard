@@ -43,6 +43,8 @@ export default async function distributeRewards(state, action) {
           task.TrafficBlockRewarded.push(
             unRewardedDistribution.dailyTrafficBlock
           );
+        } else {
+          throw new ContractError("It is already Distributed");
         }
       }
     }
