@@ -1,8 +1,20 @@
-export default function burnKoi(state, action){
+export default function burnKoi(state, action) {
   const balances = state.balances;
   const caller = action.caller;
+  const preRegisterDatas = state.temp_array;
+  const input = action.input;
+  const contractId = input.contractId;
+  const contentType = input.contentType;
+  const contentTxId = input.contentTxId;
+
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
   --balances[caller]; // burn 1 koi per registration
+  preRegisterDatas.push({
+    contractId: contractId,
+    insertBlock: SmartWeave.block.height,
+    content: { [contentType]: contentTxId },
+    owner: caller
+  });
   return { state };
 }

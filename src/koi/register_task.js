@@ -15,7 +15,8 @@ export default function registerTask(state, action) {
       TaskOwner: caller,
       TaskName: taskName,
       TaskTxId: taskTxId,
-      TrafficBlockRewarded: []
+      TrafficBlockRewarded: [],
+      preRegisteredDatas: []
     });
   } else {
     state.KOI_TASKS.push({
