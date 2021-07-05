@@ -1,6 +1,6 @@
-export default async function migratePreRegisterNfts(state, action) {
+export default async function migratePreRegisteredNfts(state, action) {
   const registeredRecords = state.registeredRecords;
-  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
+  const MAIN_CONTRACT = "apWEeknIubej-YF_f5E0uC28cUv3nn6E92yubWByk5g";
   const contractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );

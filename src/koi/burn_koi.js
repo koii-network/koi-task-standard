@@ -1,7 +1,7 @@
 export default function burnKoi(state, action) {
   const balances = state.balances;
   const caller = action.caller;
-  const preRegisterDatas = state.temp_array;
+  const preRegisterDatas = state.preRegisterDatas;
   const input = action.input;
   const contractId = input.contractId;
   const contentType = input.contentType;

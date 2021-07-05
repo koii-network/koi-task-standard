@@ -7,7 +7,7 @@ export default async function registerBundler(state, action) {
   if (blackList.includes(caller)) {
     throw new ContractError(`${caller}address is in blacklist`);
   }
-  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
+  const MAIN_CONTRACT = "apWEeknIubej-YF_f5E0uC28cUv3nn6E92yubWByk5g";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );

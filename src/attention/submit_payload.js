@@ -16,11 +16,10 @@ export default async function submitPayload(state, action) {
       `Logs are already proposed from ${gateWayUrl} gateWay`
     );
   }
-  const MAIN_CONTRACT = "e9raEJJacDDCWqOshtfXaxjiXfeEfRvTj34eq4GqzVQ";
+  const MAIN_CONTRACT = "apWEeknIubej-YF_f5E0uC28cUv3nn6E92yubWByk5g";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
-  const balances = tokenContractState.balances;
   const koi_tasks = tokenContractState.KOI_TASKS;
   const attentionTask = koi_tasks.find(
     (task) => task.TaskName === "AttentionGame"
