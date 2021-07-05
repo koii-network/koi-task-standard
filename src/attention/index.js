@@ -5,19 +5,19 @@ import gateway from "./gateway";
 import proposeSlash from "./propose_slash";
 import rankProposal from "./rank_proposal";
 import registerBundler from "./register_bundler";
-import registerData from "./register_data";
 import submitPayload from "./submit_payload";
 import vote from "./vote";
+import migratePreRegisteredNfts from "./migratePreRegisteredNfts";
 
 const handlers = [
   batchAction,
   deregisterData,
   distribution,
   gateway,
+  migratePreRegisteredNfts,
   proposeSlash,
   rankProposal,
   registerBundler,
-  registerData,
   submitPayload,
   vote
 ];

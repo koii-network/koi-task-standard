@@ -20,17 +20,19 @@ async function main() {
 
   const wallet = JSON.parse(fs.readFileSync(walletPath));
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-  const contractSrc = fs.readFileSync(`dist/attention.js`, "utf8");
-  let state = JSON.parse(fs.readFileSync(`src/attention/init_state.json`));
+  const contractSrc = fs.readFileSync(`dist/koi.js`, "utf8");
+  let state = JSON.parse(fs.readFileSync(`src/koi/init_state.json`));
   //const receiptTxId = "PgqkHhrhjnkWZF4s7IXVVjv9iw2f1HfcwQSrwlWSyTY";
-  const input = {
-    txId: "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ",
-    owner: "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo"
-  };
+  // const input = {
+  //   contractId: "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ",
+  //   contentTxId: "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE",
+  //   contentType: "nft"
+  // };
   const transferInput = {
-    function: "registerData",
-    txId: input.txId,
-    owner: input.owner
+    function: "burnKoi",
+    contractId: "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ",
+    contentTxId: "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE",
+    contentType: "nft"
   };
   console.log(state);
   state = (
@@ -43,7 +45,7 @@ async function main() {
       walletAddress
     )
   ).state;
-  console.log(state);
+  console.log(state.preRegisterDatas);
 }
 
 /**
