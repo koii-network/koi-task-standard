@@ -11,18 +11,21 @@ export default async function distributeRewards(state, action) {
       TASK_CONTRACT
     );
     const rewardReport = contractState.task.rewardReport;
+    const rewardedBlock = [];
     for (let blockHeight of task.TrafficBlockRewarded) {
       const report = rewardReport.find(
         (distributionReport) =>
           distributionReport.dailyTrafficBlock === blockHeight
       );
       if (report.distribution) {
-        const index = task.TrafficBlockRewarded.indexOf(blockHeight);
-        if (index > -1) {
-          task.TrafficBlockRewarded.splice(index, 1);
-        }
+        rewardedBlock.push(blockHeight);
       }
     }
+    //filtering the distributed blockHieght.
+    task.TrafficBlockRewarded = task.TrafficBlockRewarded.filter(
+      (blockHeight) => !rewardedBlock.includes(blockHeight)
+    );
+    // Distributing Reward for not Rewarded blocks
     const unRewardedDistributions = rewardReport.filter(
       (unRewardedDistribution) => unRewardedDistribution.distributed === false
     );
