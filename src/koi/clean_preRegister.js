@@ -14,14 +14,10 @@ export default async function cleanPreRegister(state, action) {
         contractId
       );
       const registerRecords = contractState.registeredRecords;
-      preRegisterDatas.map((preRegisterData) => {
-        if ("nftId" in preRegisterData.content) {
-          if (preRegisterData.content.nftId in registerRecords) {
-            const index = preRegisterDatas.indexOf(preRegisterData);
-            preRegisterDatas.splice(index, 1);
-          }
-        }
-      });
+      state.preRegisterDatas = state.preRegisterDatas.filter(
+        (preRegisterData) => !(preRegisterData.content.nftId in registerRecords)
+      );
     })
   );
+  return { state };
 }
