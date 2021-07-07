@@ -18,5 +18,21 @@ export default [
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/nft/index.js",
+    output: {
+      file: "dist/nft.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/vault/index.js",
+    output: {
+      file: "dist/vault.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   }
 ];
