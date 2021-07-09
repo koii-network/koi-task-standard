@@ -12,7 +12,7 @@ export function handle(state, action) {
     const link=input.link
     ContractAssert(state.addresses?state.addresses.Arweave:null, `Arweave address doesn't exist.`);
     ContractAssert(
-      state.addresses.Arweave !== caller,
+      state.addresses.Arweave === caller,
       `The owner can only update KID.`      
     );
     if(name){
