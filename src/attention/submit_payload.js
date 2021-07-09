@@ -58,5 +58,10 @@ export default async function submitPayload(state, action) {
   };
   currentTask.payloads.push(payload);
   state.votes.push(vote);
+  if (!(caller in task.partcipatesRate)) {
+    task.partcipatesRate[caller] = 1;
+  } else {
+    task.partcipatesRate[caller]++;
+  }
   return { state };
 }
