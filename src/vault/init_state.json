@@ -1,10 +1,9 @@
 {
-    "owner": "xxxxxxxxxxxxxxxxxx",
-    "name": "koii vault",
-    "registry":{
-         "ethereum":{
-            "nftidarweave":"nftIdeth"
-        }
+  "owner": "fWjYZQ2SAP7OPTv6_OiI2AtKilORFQ0MdjbmDJ2biHk",
+  "name": "koii vault",
+  "registry": {
+    "ethereum": {
+      "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ": "1UDe0Wqh51-O03efPzoc_HhsUPrmgBR2ziUfaI7CpZk"
     }
+  }
 }
-

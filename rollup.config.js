@@ -34,5 +34,21 @@ export default [
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/KID/index.js",
+    output: {
+      file: "dist/KID.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/koi_task/index.js",
+    output: {
+      file: "dist/koi_task.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   }
 ];

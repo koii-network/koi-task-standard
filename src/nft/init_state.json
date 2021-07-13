@@ -1,13 +1,15 @@
 {
-    "owner": "Wj1NpKuRFFGf-YmYpnM99WVYQdAMnB9pNoatHY0NQbA",
-    "title": "Koii the best",
-    "name": "Ihor Hryshchuk",
-    "description": "the best ",
-    "ticker": "KOINFT",
-    "balances": {
-      "Wj1NpKuRFFGf-YmYpnM99WVYQdAMnB9pNoatHY0NQbA": 1
-    },
-    "contentType": "image/jpeg",
-    "createdAt": "1624057295",
-    "tags":[]
-  }
+  "owner": "fWjYZQ2SAP7OPTv6_OiI2AtKilORFQ0MdjbmDJ2biHk",
+  "title": "Koii the best",
+  "name": "Ihor Hryshchuk",
+  "description": "the best ",
+  "ticker": "KOINFT",
+  "balances": {
+    "fWjYZQ2SAP7OPTv6_OiI2AtKilORFQ0MdjbmDJ2biHk": 0,
+    "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ": 1
+  },
+  "contentType": "image/jpeg",
+  "createdAt": "1624057295",
+  "tags": [],
+  "ethOwnerAddress": "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE"
+}

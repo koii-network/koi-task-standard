@@ -18,7 +18,7 @@ export default async function batchAction(state, action) {
     throw new ContractError("batchTxId should be string");
   if (!validBundlers.includes(action.caller))
     throw new ContractError("Only selected bundlers can write batch actions.");
-  const MAIN_CONTRACT = "Qa9SzAuwJR6xZp3UiKzokKEoRnt_utJKjFjTaSR85Xw";
+  const MAIN_CONTRACT = "lUzDoS27l3-27mG2zUqi7p3filCvDL6PAcLdicsz8aQ";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );

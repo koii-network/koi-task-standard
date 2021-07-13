@@ -23,8 +23,12 @@ export default function registerTask(state, action) {
       TaskOwner: caller,
       TaskName: taskName,
       TaskTxId: taskTxId,
-      Bounty: KOI_Reward
+      Bounty: KOI_Reward,
+      lockBounty: {
+        [caller]: KOI_Reward
+      }
     });
+    balances[caller] -= KOI_Reward;
   }
   --balances[caller]; // burn 1 koi per registration
   return { state };

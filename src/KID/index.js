@@ -4,37 +4,40 @@ export function handle(state, action) {
 
   if (input.function === "updateKID") {
     const name = input.name;
-    const description=input.description
-    const avatar=input.avatar
-    const Arweave=input.addresses?input.addresses.Arweave:null
-    const Ethereum=input.addresses?input.addresses.Ethereum:null
-    const Polkadot=input.addresses?input.addresses.Polkadot:null
-    const link=input.link
-    ContractAssert(state.addresses?state.addresses.Arweave:null, `Arweave address doesn't exist.`);
+    const description = input.description;
+    const avatar = input.avatar;
+    const Arweave = input.addresses ? input.addresses.Arweave : null;
+    const Ethereum = input.addresses ? input.addresses.Ethereum : null;
+    const Polkadot = input.addresses ? input.addresses.Polkadot : null;
+    const link = input.link;
+    ContractAssert(
+      state.addresses ? state.addresses.Arweave : null,
+      `Arweave address doesn't exist.`
+    );
     ContractAssert(
       state.addresses.Arweave === caller,
-      `The owner can only update KID.`      
+      `The owner can only update KID.`
     );
-    if(name){
-      state.name=name
+    if (name) {
+      state.name = name;
     }
-    if(description){
-      state.description=description
+    if (description) {
+      state.description = description;
     }
-    if(avatar){
-      state.avatar=avatar
+    if (avatar) {
+      state.avatar = avatar;
     }
-    if(Arweave){
-      state.addresses.Arweave=Arweave
+    if (Arweave) {
+      state.addresses.Arweave = Arweave;
     }
-    if(Ethereum){
-      state.addresses.Ethereum=Ethereum
+    if (Ethereum) {
+      state.addresses.Ethereum = Ethereum;
     }
-    if(Polkadot){
-      state.addresses.Polkadot=Polkadot
+    if (Polkadot) {
+      state.addresses.Polkadot = Polkadot;
     }
-    if(link){
-      state.link=link
+    if (link) {
+      state.link = link;
     }
     return { state };
   }
