@@ -29,10 +29,11 @@ async function main() {
   //   contentType: "nft"
   // };
   const transferInput = {
-    function: "burnKoi",
-    contractId: "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ",
-    contentTxId: "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE",
-    contentType: "nft"
+    function: "registerTask",
+    taskId: 1235,
+    taskname: "bitcoin-price",
+    taskTxId: "aliraiperupa",
+    KOI_Reward: 200
   };
   console.log(state);
   state = (
@@ -45,7 +46,7 @@ async function main() {
       walletAddress
     )
   ).state;
-  console.log(state.preRegisterDatas);
+  console.log(state);
 }
 
 /**

@@ -11,14 +11,14 @@
   ],
   "votes": [],
   "task": {
-    "open": 722486,
-    "close": 722999,
+    "open": 726723,
+    "close": 726800,
     "partcipatesRate": {},
     "rewardReport": [],
-    "dailyPayload": [
+    "dailyProposedLogs": [
       {
         "block": 722486,
-        "payloads": [],
+        "proposedTrafficLogs": [],
         "isRanked": false,
         "isDistributed": false
       }

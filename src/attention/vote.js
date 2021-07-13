@@ -20,7 +20,7 @@ export default async function vote(state, action) {
   if (SmartWeave.block.height > vote.end || vote.status == "passed")
     throw new ContractError("vote passed");
 
-  const MAIN_CONTRACT = "Qa9SzAuwJR6xZp3UiKzokKEoRnt_utJKjFjTaSR85Xw";
+  const MAIN_CONTRACT = "lUzDoS27l3-27mG2zUqi7p3filCvDL6PAcLdicsz8aQ";
   const tokenContractState = await SmartWeave.contracts.readContractState(
     MAIN_CONTRACT
   );
