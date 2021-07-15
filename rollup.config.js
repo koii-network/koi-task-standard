@@ -50,5 +50,13 @@ export default [
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/attentionM/index.js",
+    output: {
+      file: "dist/attentionM.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   }
 ];
