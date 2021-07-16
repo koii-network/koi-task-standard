@@ -6,8 +6,6 @@ export default async function batchAction(state, action) {
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
   const vote = votes[voteId];
-  // if (SmartWeave.block.height > vote.end)
-  //   throw new ContractError('it is closed');
   if (!batchTxId) throw new ContractError("No txId specified");
   if (!Number.isInteger(voteId)) {
     throw new ContractError(
@@ -18,14 +16,6 @@ export default async function batchAction(state, action) {
     throw new ContractError("batchTxId should be string");
   if (!validBundlers.includes(action.caller))
     throw new ContractError("Only selected bundlers can write batch actions.");
-  // const MAIN_CONTRACT = "lUzDoS27l3-27mG2zUqi7p3filCvDL6PAcLdicsz8aQ";
-  // const tokenContractState = await SmartWeave.contracts.readContractState(
-  //   MAIN_CONTRACT
-  // );
-  // const stakes = tokenContractState.stakes;
-  // if (!(caller in stakes)) {
-  //   throw new ContractError("caller hasn't staked");
-  // }
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
     string: true
