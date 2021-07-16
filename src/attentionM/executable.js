@@ -72,7 +72,7 @@ async function witness() {
 }
 
 async function getStateAndBlock() {
-  const state = await smartweave.readContract(Namespace.taskTxId);
+  const state = await tools.getContractState();//await smartweave.readContract(Namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
