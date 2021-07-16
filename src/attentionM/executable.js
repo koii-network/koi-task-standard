@@ -72,7 +72,7 @@ async function witness() {
 }
 
 async function getStateAndBlock() {
-  const state = await tools.getContractState(); //await smartweave.readContract(namespace.taskTxId);
+  const state = await tools.kyveGetContractState(); //await smartweave.readContract(namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
@@ -180,7 +180,7 @@ async function submitBatch(state) {
   let task = "submitting votes";
   while (activeVotes.length > 0) {
     const voteId = activeVotes[activeVotes.length - 1];
-    const state = await tools.getContractState();
+    const state = await tools.kyveGetContractState();
     const bundlers = state.votes[voteId].bundlers;
     const bundlerAddress = await tools.getWalletAddress();
     if (!(bundlerAddress in bundlers)) {
@@ -364,7 +364,7 @@ async function tryVote(state) {
     const voteId = id + 1;
     const payload = {
       voteId,
-      direct: this.direct
+      direct: direct
     };
     const { message } = await tools.vote(payload);
     console.log(`VoteId ${voteId}: ${message}`);
