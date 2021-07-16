@@ -1,12 +1,12 @@
 export default async function distributeRewards(state, action) {
   const balances = state.balances;
-  const koi_tasks = state.KOI_TASKS;
+  const tasks = state.tasks;
   const input = action.input;
-  const taskId = input.taskId;
-  const task = koi_tasks.find((task) => task.TaskId === taskId);
-  const TASK_CONTRACT = task.TaskTxId;
-  const taskType = task.TaskName;
-  if (taskType === "AttentionGame") {
+  const taskTxId = input.taskTxId;
+  const task = tasks.find((task) => task.txId === taskTxId);
+  const TASK_CONTRACT = task.txId;
+  const taskType = task.name;
+  if (taskType === "Attention_Game") {
     const contractState = await SmartWeave.contracts.readContractState(
       TASK_CONTRACT
     );

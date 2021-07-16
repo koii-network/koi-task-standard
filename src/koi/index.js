@@ -1,6 +1,6 @@
 import account from "./account";
 import deregisterTask from "./deregister_task";
-import distributeRewards from "./distribute_rewards";
+import distributeRewards from "./distributeReward";
 import mint from "./mint";
 import registerTask from "./register_task";
 import stake from "./stake";
