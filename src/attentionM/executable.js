@@ -15,6 +15,16 @@ Namespace {
 
 const RESPONSE_ACTION_FAILED = 411;
 
+const OFFSET_SUBMIT_END = 300;
+const OFFSET_BATCH_SUBMIT = 470;
+const OFFSET_PROPOSE_SLASH = 570;
+const OFFSET_RANK = 645;
+
+const URL_GATEWAY_LOGS = "http://gateway.koi.rocks/logs";
+
+const MS_TO_MIN = 60000;
+const TIMEOUT_TX = 30 * MS_TO_MIN;
+
 var lastBlock = 0;
 var lastLogClose = 0;
 var isDistributed = false;
@@ -40,11 +50,9 @@ async function service() {
     }
 
     if (canSubmitTrafficLog(state, block)) await submitTrafficLog();
-    if (canSubmitBatch(state, block)) {
-      const activeVotes = await activeVoteId(state);
-      await submitVote(activeVotes);
-    }
-    await tryRankDistribute(state, block);
+    if (canSubmitBatch(state, block)) await submitBatch(state);
+    if (canRankProposal(state, block)) await rankProposal();
+    if (canDistribute(state, block)) await distribute();
   }
 }
 
@@ -59,7 +67,7 @@ async function witness() {
     }
 
     if (checkForVote(state, block)) await tryVote(state);
-    await tryRankDistribute(state, block);
+    if (checkProposeSlash(state, block)) await tools.proposeSlash();
   }
 }
 
@@ -80,7 +88,7 @@ async function getStateAndBlock() {
     lastLogClose = logClose;
   }
 
-  if (block > this.lastBlock)
+  if (block > lastBlock)
     console.log(
       block,
       "Searching for a task, distribution in",
@@ -90,6 +98,291 @@ async function getStateAndBlock() {
   lastBlock = block;
 
   return [state, block];
+}
+
+/**
+ *
+ * @param {string} txId // Transaction ID
+ * @param {*} task
+ * @returns {bool} Whether transaction was found (true) or timedout (false)
+ */
+async function checkTxConfirmation(txId, task) {
+  const start = new Date().getTime() - 1;
+  const update_period = MS_TO_MIN * 5;
+  const timeout = start + TIMEOUT_TX;
+  let next_update = start + update_period;
+  console.log(`Waiting for "${task}" TX to be mined`);
+  for (;;) {
+    const now = new Date().getTime();
+    const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+    if (now > timeout) {
+      console.log(`${task}" timed out after waiting ${elapsed_mins}m`);
+      return false;
+    }
+    if (now > next_update) {
+      next_update = now + update_period;
+      console.log(`${elapsed_mins}m waiting for "${task}" TX to be mined `);
+    }
+    try {
+      await tools.getTransaction(txId);
+      console.log(`Transaction found in ${elapsed_mins}m`);
+      return true;
+    } catch (_err) {
+      // Silently catch error, might be dangerous
+    }
+  }
+}
+
+function canSubmitTrafficLog(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  if (
+    block >= trafficLogs.open + OFFSET_SUBMIT_END || // block too late or
+    isLogsSubmitted // logs already submitted
+  )
+    return false;
+
+  // Check that our log isn't on the state yet and that our gateway hasn't been submitted yet
+  const currentTrafficLogs = state.stateUpdate.trafficLogs.dailyTrafficLog.find(
+    (log) => log.block === trafficLogs.open
+  );
+  const proposedLogs = currentTrafficLogs.proposedLogs;
+  const matchingLog = proposedLogs.find(
+    (log) => log.owner === tools.address || log.gateWayId === URL_GATEWAY_LOGS
+  );
+  isLogsSubmitted = matchingLog !== undefined;
+  return !isLogsSubmitted;
+}
+
+async function submitTrafficLog() {
+  var task = "submitting traffic log";
+  let arg = {
+    gateWayUrl: URL_GATEWAY_LOGS,
+    stakeAmount: 2
+  };
+
+  let tx = await tools.submitTrafficLog(arg);
+  if (await checkTxConfirmation(tx, task)) {
+    isLogsSubmitted = true;
+    console.log("Logs submitted");
+  }
+}
+
+function canSubmitBatch(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  return (
+    trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
+    block < trafficLogs.open + OFFSET_PROPOSE_SLASH
+  );
+}
+
+async function submitBatch(state) {
+  const activeVotes = await activeVoteId(state);
+  let task = "submitting votes";
+  while (activeVotes.length > 0) {
+    const voteId = activeVotes[activeVotes.length - 1];
+    const state = await tools.getContractState();
+    const bundlers = state.votes[voteId].bundlers;
+    const bundlerAddress = await tools.getWalletAddress();
+    if (!(bundlerAddress in bundlers)) {
+      const txId = (await batchUpdateContractState(voteId)).id;
+      if (!(await checkTxConfirmation(txId, task))) {
+        console.log("Vote submission failed");
+        return;
+      }
+      const arg = {
+        batchFile: txId,
+        voteId: voteId,
+        bundlerAddress: bundlerAddress
+      };
+      const resultTx = await tools.batchAction(arg);
+      task = "batch";
+      if (!(await checkTxConfirmation(resultTx, task))) {
+        console.log("Batch failed");
+        return;
+      }
+      activeVotes.pop();
+    }
+    activeVotes.pop();
+  }
+}
+
+async function activeVoteId(state) {
+  // Check if votes are tracked simultaneously
+  const votes = state.votes;
+  const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
+  const areVotesTracked = await Promise.all(areVotesTrackedProms);
+
+  // Get active votes
+  const close = state.stateUpdate.trafficLogs.close;
+  const activeVotes = [];
+  for (let i = 0; i < votes.length; i++)
+    if (votes[i].end === close && areVotesTracked[i])
+      activeVotes.push(votes[i].id);
+  return activeVotes;
+}
+
+/**
+ * Checks if vote file is present to verify it exists
+ * @param {*} voteId
+ * @returns {boolean} Whether vote exists
+ */
+async function isVoteTracked(voteId) {
+  const batchFileName = "/../app/bundles/" + voteId;
+  try {
+    await fs("access", batchFileName, fsConstants.F_OK);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+async function batchUpdateContractState(voteId) {
+  const batchStr = await getVotesFile(voteId);
+  const batch = batchStr.split("\r\n").map(JSON.parse);
+  return await bundleAndExport(batch);
+}
+
+/**
+ *
+ * @param {*} fileId ID of vote file to read
+ * @returns {string} Vote file contents in utf8
+ */
+async function getVotesFile(fileId) {
+  const batchFileName = "/../bundles/" + fileId;
+  await fs("access", batchFileName, fsConstants.F_OK);
+  return await fs("readFile", batchFileName, "utf8");
+}
+
+/**
+ *
+ * @param {*} bundle
+ * @returns
+ */
+async function bundleAndExport(bundle) {
+  let myTx = await arweave.createTransaction(
+    {
+      data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
+    },
+    tools.wallet
+  );
+
+  await arweave.transactions.sign(myTx, tools.wallet);
+  const result = await arweave.transactions.post(myTx);
+  result.id = myTx.id;
+  return result;
+}
+
+/**
+ * Checks wether proposal is ranked or not
+ * @param {*} state Current contract state data
+ * @param {number} block Block height
+ * @returns {boolean} Wether we can rank
+ */
+function canRankProposal(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  if (
+    block < trafficLogs.open + OFFSET_RANK || // if too early to rank or
+    trafficLogs.close < block || // too late to rank or
+    isRanked // already ranked
+  )
+    return false;
+
+  // If our rank isn't on the state yet
+  if (!trafficLogs.dailyTrafficLog.length) return false;
+  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
+    (trafficLog) => trafficLog.block === trafficLogs.open
+  );
+  isRanked = currentTrafficLogs.isRanked;
+  return !currentTrafficLogs.isRanked;
+}
+
+/**
+ *
+ */
+async function rankProposal() {
+  const task = "ranking reward";
+  const tx = await tools.rankProposal();
+  if (await checkTxConfirmation(tx, task)) {
+    isRanked = true;
+    console.log("Ranked");
+  }
+}
+
+/**
+ *
+ * @param {*} state Current contract state data
+ * @param {number} block Block height
+ * @returns {boolean} Wether we can distribute
+ */
+function canDistribute(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  if (
+    block < trafficLogs.close || // not time to distribute or
+    isDistributed || // we've already distributed or
+    !trafficLogs.dailyTrafficLog.length // daily traffic log is empty
+  )
+    return false;
+
+  // If our distribution isn't on the state yet
+  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
+    (trafficLog) => trafficLog.block === trafficLogs.open
+  );
+  isDistributed = currentTrafficLogs.isDistributed;
+  return !isDistributed;
+}
+
+/**
+ *
+ */
+async function distribute() {
+  const task = "distributing reward";
+  const tx = await tools.distributeDailyRewards();
+  if (await checkTxConfirmation(tx, task)) {
+    isDistributed = true;
+    console.log("Distributed");
+  }
+}
+
+/**
+ * Checks if voting is available
+ * @param {*} state Contract state data
+ * @param {number} block Current block height
+ * @returns {boolean} Whether voting is possible
+ */
+function checkForVote(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  return block < trafficLogs.open + OFFSET_BATCH_SUBMIT;
+}
+
+/**
+ * Tries to vote
+ * @param {*} state Current contract state data
+ */
+async function tryVote(state) {
+  while (tools.totalVoted < state.votes.length - 1) {
+    const id = tools.totalVoted;
+    const voteId = id + 1;
+    const payload = {
+      voteId,
+      direct: this.direct
+    };
+    const { message } = await tools.vote(payload);
+    console.log(`VoteId ${voteId}: ${message}`);
+  }
+}
+
+/**
+ *
+ * @param {*} state
+ * @param {number} block Current block height
+ * @returns {boolean} If can slash
+ */
+function checkProposeSlash(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  return (
+    trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
+    block < trafficLogs.open + OFFSET_RANK
+  );
 }
 
 // ############ Setup code below ###########
