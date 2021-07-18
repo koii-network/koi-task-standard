@@ -1,6 +1,5 @@
-export default async function cleanInvalidTransation(state, action) {
+export default async function cleanInvalidTransations(state) {
   const registeredNfts = state.registeredNfts;
-  //const caller = action.caller;
   const registerdTransactions = Object.keys(registeredNfts);
   await Promise.all(
     registerdTransactions.map(async (transaction) => {

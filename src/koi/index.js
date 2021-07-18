@@ -1,6 +1,6 @@
 import account from "./account";
 import deregisterTask from "./deregister_task";
-import distributeRewards from "./distributeReward";
+import distributeReward from "./distribute_reward";
 import mint from "./mint";
 import registerTask from "./register_task";
 import stake from "./stake";
@@ -13,7 +13,7 @@ const handlers = [
   account,
   burnKoi,
   deregisterTask,
-  distributeRewards,
+  distributeReward,
   mint,
   registerTask,
   stake,

@@ -1,4 +1,4 @@
-export default async function cleanPreRegister(state, action) {
+export default async function cleanPreRegister(state) {
   const preRegisterDatas = state.preRegisterDatas;
 
   const contractIds = [];

@@ -1,10 +1,11 @@
 export default async function migratePreRegister(state, action) {
+  const registeredRecords = state.registeredRecords;
   const input = action.input;
   const contractId = input.contractId;
-  const registeredRecords = state.registeredRecords;
-  const MAIN_CONTRACT = "YM6sdKfEaCVPWT-JQBxiTeyOCPQ0ilhqhSjpM_LZW0Q";
+  const mainContactId = input.mainContactId;
+
   const contractState = await SmartWeave.contracts.readContractState(
-    MAIN_CONTRACT
+    mainContactId
   );
   const preRegisterDatas = contractState.preRegisterDatas;
   const preRegisterNfts = preRegisterDatas.filter(
