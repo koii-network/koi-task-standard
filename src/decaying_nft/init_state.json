@@ -1,0 +1,21 @@
+{
+  "owner": "fWjYZQ2SAP7OPTv6_OiI2AtKilORFQ0MdjbmDJ2biHk",
+  "title": "Tom Brady",
+  "name": "nfl_collectibles",
+  "description": "GOAT",
+  "ticker": "NFL",
+  "balances": {
+    "CJNinEnDs8tnHFPmT3SzSSbCZ1NXX82czqDgSWiFfOQ": 1
+  },
+  "contentType": "image/jpeg",
+  "createdAt": "1624057295",
+  "durability" : 100, // always starts at 100
+  "decay":{ 
+    "minted": "", // needs to be set on creation
+    "rate" : "1", // represents the number of 'degradation points' the item will suffer 
+    "period" : "10", // represents the number of blocks after which a degradation will occur
+    "lastDecay" : "" // should be reset every time 'checkDecay()' is called
+  },
+  "tags": [],
+  "ethOwnerAddress": "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE"
+}
