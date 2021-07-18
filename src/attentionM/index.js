@@ -1,20 +1,22 @@
 import submitDistribution from "./submit_distribution";
 import auditPropose from "./audit";
-import rank from "./rank";
+import rankAndPrepareDistribution from "./rank";
 import vote from "./vote";
 import batch from "./batchAction";
 import proposeSlash from "./propose_slash";
 import registerBundler from "./register_bundler";
 import registerExecutableId from "./register_excutableId";
+import cleanInvalidTransations from "./clean_invalidTrasanctions";
 const handlers = [
   submitDistribution,
   auditPropose,
-  rank,
+  rankAndPrepareDistribution,
   vote,
   batch,
   proposeSlash,
   registerBundler,
-  registerExecutableId
+  registerExecutableId,
+  cleanInvalidTransations
 ];
 
 export async function handle(state, action) {

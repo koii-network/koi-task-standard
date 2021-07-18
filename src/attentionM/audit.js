@@ -2,6 +2,7 @@ export default function auditPropose(state, action) {
   const votes = state.votes;
   const caller = action.caller;
   const input = action.input;
+  const descripition = input.descripition;
   const id = input.id;
   const triggeredVote = votes.find((vote) => vote.id == id);
   if (triggeredVote !== undefined) {
@@ -9,11 +10,11 @@ export default function auditPropose(state, action) {
   }
   const vote = {
     id: id,
-    descripition: "malicious_data",
+    descripition: descripition,
     voteTrigger: caller,
-    yays: 1,
+    yays: 0,
     nays: 0,
-    votersList: [caller]
+    votersList: []
   };
   votes.push(vote);
   return { state };

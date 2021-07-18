@@ -1,7 +1,7 @@
 {
   "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
   "name": "Attention_Game",
-  "registeredNfts": {
+  "registeredRecords": {
     "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ": "sQTWslyCdKF6oeQ7xXUYUV1bluP0_5-483FXH_RVZKU",
     "PzNLuVRTpV1tdcS8K9ADCIG6944kka431ShtJYJMZQI": "MqKaTw9bV2p6bnkZCKXOF7Rt8TTqU740saOILALB-Q0",
     "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
@@ -26,10 +26,28 @@
   "task": {
     "open": 0,
     "close": 720,
-    "dailyProposedDistribution": [
+    "prepareDistribution": [],
+    "proposedPaylods": [
       {
         "block": 0,
-        "proposedDistribution": [],
+        "proposedDatas": [
+          {
+            "txId": "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
+            "distributer": "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
+            "cacheUrl": "http://bundler/cache",
+            "id": "w3ZHPciJ09CPxB0HA5f2gtyD4tFA0OCaBiTFCrnfAdw",
+            "blockHeight": 728116,
+            "status": "pending"
+          },
+          {
+            "txId": "ER-Jg4scnTc7oKQsXNv6KAg7J2h_uSciycFHoFjF4lQ",
+            "distributer": "DFocTjuIRI7KPbbB2rb24pmrf10Fv_kB7DYLwUzBhS4",
+            "cacheUrl": "http://bundler/cache",
+            "id": "kNeZkrW-ZtKxC85JVs_aGKiVO06FZIeIhd0Hl4JBRzY",
+            "blockHeight": 728119,
+            "status": "pending"
+          }
+        ],
         "isRanked": false
       }
     ]
