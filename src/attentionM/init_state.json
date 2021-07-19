@@ -24,30 +24,13 @@
   },
   "votes": [],
   "task": {
-    "open": 0,
-    "close": 720,
+    "open": 730823,
+    "close": 731543,
     "prepareDistribution": [],
     "proposedPaylods": [
       {
-        "block": 0,
-        "proposedDatas": [
-          {
-            "txId": "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
-            "distributer": "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
-            "cacheUrl": "http://bundler/cache",
-            "id": "w3ZHPciJ09CPxB0HA5f2gtyD4tFA0OCaBiTFCrnfAdw",
-            "blockHeight": 728116,
-            "status": "pending"
-          },
-          {
-            "txId": "ER-Jg4scnTc7oKQsXNv6KAg7J2h_uSciycFHoFjF4lQ",
-            "distributer": "DFocTjuIRI7KPbbB2rb24pmrf10Fv_kB7DYLwUzBhS4",
-            "cacheUrl": "http://bundler/cache",
-            "id": "kNeZkrW-ZtKxC85JVs_aGKiVO06FZIeIhd0Hl4JBRzY",
-            "blockHeight": 728119,
-            "status": "pending"
-          }
-        ],
+        "block": 730823,
+        "proposedDatas": [],
         "isRanked": false
       }
     ]

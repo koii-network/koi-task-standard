@@ -34,6 +34,6 @@ export default async function submitDistribution(state, action) {
     blockHeight: SmartWeave.block.height,
     status: "pending"
   };
-  currentTask.proposedPaylods.push(payload);
+  currentTask.proposedDatas.push(payload);
   return { state };
 }
