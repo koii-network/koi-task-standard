@@ -3,7 +3,7 @@ Available APIs:
 
 tools
 require
-Namespace {
+namespace {
   redisGet()
   redisSet()
   fs()
@@ -38,11 +38,11 @@ var isLogsSubmitted = false;
 var isRanked = false;
 
 function setup(_init_state) {
-  if (Namespace.app) Namespace.express("post", "/submit-vote", submitVote);
+  if (namespace.app) namespace.express("post", "/submit-vote", submitVote);
 }
 
 async function execute(_init_state) {
-  await (Namespace.app ? service() : witness());
+  await (namespace.app ? service() : witness());
 }
 
 async function service() {
@@ -78,7 +78,7 @@ async function witness() {
 }
 
 async function getStateAndBlock() {
-  const state = await tools.getContractState(); //await smartweave.readContract(Namespace.taskTxId);
+  const state = await tools.getContractState(); //await smartweave.readContract(namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
@@ -449,13 +449,13 @@ async function checkVote(payload) {
 async function appendToBatch(submission) {
   const batchFileName = "/bundles/" + submission.vote.voteId;
   try {
-    await Namespace.fs("access", batchFileName, fsConstants.F_OK);
+    await namespace.fs("access", batchFileName, fsConstants.F_OK);
   } catch {
     // If file doesn't exist
     // Check for duplicate otherwise append file
-    const data = await Namespace.fs("readFile", batchFileName);
+    const data = await namespace.fs("readFile", batchFileName);
     if (data.includes(submission.senderAddress)) return "duplicate";
-    await Namespace.fs(
+    await namespace.fs(
       "appendFile",
       batchFileName,
       "\r\n" + JSON.stringify(submission)
@@ -465,7 +465,7 @@ async function appendToBatch(submission) {
 
   // If file does exist
   // Write to file and generate receipt if no error
-  await Namespace.fs("writeFile", batchFileName, JSON.stringify(submission));
+  await namespace.fs("writeFile", batchFileName, JSON.stringify(submission));
   return generateReceipt(submission);
 }
 
