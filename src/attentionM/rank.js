@@ -6,12 +6,15 @@ export default async function rankAndPrepareDistribution(state) {
   const currentProposed = task.proposedPaylods.find(
     (proposedData) => proposedData.block === task.open
   );
-
+  if (currentProposed.isRanked) {
+    throw new ContractError("It is Ranked");
+  }
   const proposeDatas = currentProposed.proposedDatas;
   let acceptedProposedTxIds = [];
   proposeDatas.map((proposeData) => {
     if (votes.length !== 0) {
       for (let vote of votes) {
+        vote.status = "passed";
         if (vote.id === proposeData.id && vote.yays > vote.nays) {
           proposeData.status = "rejected";
         } else {

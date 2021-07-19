@@ -1,5 +1,6 @@
-export default function auditPropose(state, action) {
+export default function audit(state, action) {
   const votes = state.votes;
+  const task = state.task;
   const caller = action.caller;
   const input = action.input;
   const descripition = input.descripition;
@@ -10,11 +11,14 @@ export default function auditPropose(state, action) {
   }
   const vote = {
     id: id,
+    status: "active",
     descripition: descripition,
     voteTrigger: caller,
     yays: 0,
     nays: 0,
-    votersList: []
+    votersList: [],
+    open: task.open,
+    close: task.close
   };
   votes.push(vote);
   return { state };
