@@ -1,5 +1,5 @@
 import register from "./register";
-import unRegister from "./unregister";
+// import unRegister from "./unregister";
 
 const handlers = [register, unRegister];
 export async function handle(state, action) {
