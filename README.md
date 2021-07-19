@@ -17,7 +17,7 @@ Examples:
 
 ## Testing testweave
 
-1. Ensure docker is running 
+1. Ensure docker is running (after installing docker and docker-compose)
     ```
     sudo groupadd docker
     sudo usermod -aG docker
@@ -27,7 +27,7 @@ Examples:
 2. Follow install instructions for [TestWeave Docker](https://github.com/ArweaveTeam/testweave-docker)
     ```
     git clone --depth 1 https://github.com/ArweaveTeam/testweave-docker.git
-    cd testweaave-docker
+    cd testweave-docker
     docker-compose up -d
     ```
 3. Follow install instructions for [TestWeave SDK](https://github.com/ArweaveTeam/testweave-sdk)
