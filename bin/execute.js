@@ -1,10 +1,7 @@
 require("dotenv").config();
-const smartweave = require("smartweave");
-const { constants } = require("fs");
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
-const arweave = require("@_koi/sdk/common").arweave;
 
 const executable = process.argv[2];
 const operationMode = process.argv[3];
