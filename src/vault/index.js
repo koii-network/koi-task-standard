@@ -1,7 +1,7 @@
 import register from "./register";
-// import unRegister from "./unregister";
+import unregister from "./unregister";
 
-const handlers = [register, unRegister];
+const handlers = [register, unregister];
 export async function handle(state, action) {
   const handler = handlers.find((fn) => fn.name === action.input.function);
   if (handler) return await handler(state, action);
