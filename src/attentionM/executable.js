@@ -37,8 +37,16 @@ var isDistributed = false;
 var isLogsSubmitted = false;
 var isRanked = false;
 
+const logsInfo = {
+  "filename":getTodayDateAsString(),
+  "oldFileName":getYesterdayDateAsString()
+}
+
 function setup(_init_state) {
+  console.log(namespace.express)
   if (namespace.app) namespace.express("post", "/submit-vote", submitVote);
+  if (namespace.app) namespace.express("post", "/submit-port", submitPort);
+
 }
 
 async function execute(_init_state) {
@@ -77,6 +85,118 @@ async function witness() {
   }
 }
 
+/**
+ * Accepts Port traffic logs
+ * @param {*} fileName express.js request
+ */
+ async function PublishPoRT() {
+  let portLogs = await readRawLogs();
+  let nftArray=[]
+  let attentionArray=[]
+  let finalLogs = {}
+  for(let i=0;i<portLogs.length;i++){
+    const e = portLogs[i]
+    let keys = Object.keys(finalLogs);
+    if(keys.find(e["trxId"])){
+      finalLogs[e["trxId"]].push(e["waller"])
+    }else {
+      finalLogs["trxId"] = [e["wallet"]];
+    }
+  }
+}
+
+async function readRawLogs() {
+  return new Promise(async(resolve, reject) => {
+    let fullLogs = await fs("readFile", logInfo.filename);
+    let logs = fullLogs.toString().split("\n");
+    // console.log('logs are', logs)
+    var prettyLogs = [];
+    for (var log of logs) {
+      // console.log('log is', log)
+      try {
+        if (log && !(log === " ") && !(log === "")) {
+          try {
+            var logJSON = JSON.parse(log);
+            prettyLogs.push(logJSON);
+          } catch (err) {
+            // console.error('error reading json in Koi log middleware', err)
+            // reject(err)
+          }
+        }
+      } catch (err) {
+        // console.error('err', err)
+        // reject(err)
+      }
+    }
+    // console.log('resolving some prettyLogs ('+ prettyLogs.length +') sample:', prettyLogs[prettyLogs.length - 1])
+    resolve(prettyLogs);
+  });
+}
+
+function getTodayDateAsString() {
+  let date = new Date();
+  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(date);
+  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
+  let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
+  return `${day}-${month}-${year}`;
+}
+function getYesterdayDateAsString() {
+  let date = new Date();
+  const yesterday = new Date(date);
+  yesterday.setDate(yesterday.getDate() - 1)
+  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(yesterday);
+  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(yesterday);
+  let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(yesterday);
+  return `${day}-${month}-${year}`;
+}
+async function submitPort(req, res) {
+  try {
+    const signature = _req.body["x-request-signature"];
+    const publicKey = _req.body["request-public-key"];
+
+    if (signature) {
+      let dataAndSignature = JSON.parse(signature);
+      console.log(typeof dataAndSignature);
+      let valid = await tools.verifySignature({
+        ...dataAndSignature,
+        owner: publicKey
+      });
+      if (!valid) {
+        console.log("Signature verification failed");
+      }
+      console.log(valid);
+      let signatureHash = await arweave.crypto.hash(
+        Buffer.from(JSON.stringify(dataAndSignature.signature))
+      );
+      signatureHash = signatureHash.toString("hex");
+
+      if (!difficultyFunction(signatureHash)) {
+        console.log("Signature hash incorrect");
+      }
+
+      let data = dataAndSignature.data;
+      var payload = {
+        date: new Date(),
+        timestamp: data.timestamp,
+        trxId: data.resourceId,
+        wallet: await arweave.wallets.ownerToAddress(dataAndSignature["request-public-key"]), //generate from public modulo
+        proof: {
+          signature: dataAndSignature["x-request-signature"], //req.headers['x-request-signature'],
+          public_key: dataAndSignature["request-public-key"] //req.headers['request-public-key'],
+        }
+      };
+      let fileName = getTodayDateAsString();
+      fs("appendFile", filename, JSON.stringify(payload));
+
+      res.status(200).json({
+        message: "Port Received"
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: "ERROR: " + e });
+  }
+}
 async function getStateAndBlock() {
   const state = await tools.getContractState(); //await smartweave.readContract(namespace.taskTxId);
   let block = await tools.getBlockHeight();
