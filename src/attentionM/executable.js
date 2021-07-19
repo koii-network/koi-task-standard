@@ -2,9 +2,7 @@
 Available APIs:
 
 tools
-smartweave
-arweave
-fsConstants
+require
 Namespace {
   redisGet()
   redisSet()
@@ -12,6 +10,14 @@ Namespace {
   express()
 }
 */
+
+const { fsConstants } = require("fs");
+const Arweave = require("arweave");
+const arweave = Arweave.init({
+  host: "arweave.net",
+  protocol: "https",
+  port: 443
+});
 
 const RESPONSE_ACTION_FAILED = 411;
 

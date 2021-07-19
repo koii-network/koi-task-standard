@@ -9,7 +9,13 @@ Examples:
 - `yarn deploy koi`
 - `yarn deploy attention`
 
-## Testing
+## Testing executable
+
+- `yarn test attentionM`
+- `yarn test attentionM bundler`
+
+
+## Testing testweave
 
 1. Ensure docker is running
 2. Follow install instructions for [TestWeave Docker](https://github.com/ArweaveTeam/testweave-docker)
