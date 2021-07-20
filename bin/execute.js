@@ -89,7 +89,7 @@ class Namespace {
     return fsPromises[method](`${this.taskTxId}/${path}`, ...args);
   }
   express(method, path, callback) {
-    return this.app[method](this.taskTxId + path, callback);
+    return this.app[method]("/" + this.taskTxId + path, callback);
   }
 }
 
