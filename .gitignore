@@ -1,3 +1,5 @@
+my-db.db
+
 package-lock.json
 dist
 .env
