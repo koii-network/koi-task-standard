@@ -46,7 +46,7 @@ function setup(_init_state) {
   console.log(namespace.express)
   if (namespace.app) namespace.express("post", "/submit-vote", submitVote);
   if (namespace.app) namespace.express("post", "/submit-port", submitPort);
-
+  if (namespace.app) namespace.express("get","/cache",servePortCache)
 }
 
 async function execute(_init_state) {
@@ -83,6 +83,14 @@ async function witness() {
     if (checkProposeSlash(state, block)) await tools.proposeSlash();
   }
 }
+async function servePortCache(req,res){
+  let logs =  await namespace.fs("readFile", logsInfo.filename, "utf8");
+  res.send(logs)
+}
+
+async function auditPort(cacheUrl){
+    let logs = []//fetch ;
+}
 
 /**
  * Accepts Port traffic logs
@@ -90,23 +98,23 @@ async function witness() {
  */
  async function PublishPoRT() {
   let portLogs = await readRawLogs();
-  let nftArray=[]
-  let attentionArray=[]
   let finalLogs = {}
   for(let i=0;i<portLogs.length;i++){
     const e = portLogs[i]
     let keys = Object.keys(finalLogs);
-    if(keys.find(e["trxId"])){
-      finalLogs[e["trxId"]].push(e["waller"])
+    if(keys.includes(e["trxId"])){
+      finalLogs[e["trxId"]].push(e["wallet"])
     }else {
-      finalLogs["trxId"] = [e["wallet"]];
+      finalLogs[e["trxId"]] = [e["wallet"]];
     }
   }
+  return finalLogs
 }
+PublishPoRT().then(console.log)
 
 async function readRawLogs() {
   return new Promise(async(resolve, reject) => {
-    let fullLogs = await fs("readFile", logInfo.filename);
+    let fullLogs = await namespace.fs("readFile", logsInfo.filename);
     let logs = fullLogs.toString().split("\n");
     // console.log('logs are', logs)
     var prettyLogs = [];
@@ -148,7 +156,10 @@ function getYesterdayDateAsString() {
   let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(yesterday);
   return `${day}-${month}-${year}`;
 }
-async function submitPort(req, res) {
+function difficultyFunction(hash){
+  return hash.startsWith("00")|| hash.startsWith("01")
+}
+async function submitPort(_req, _res) {
   try {
     const signature = _req.body["x-request-signature"];
     const publicKey = _req.body["request-public-key"];
@@ -164,8 +175,9 @@ async function submitPort(req, res) {
         console.log("Signature verification failed");
       }
       console.log(valid);
+      console.log(Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature))))
       let signatureHash = await arweave.crypto.hash(
-        Buffer.from(JSON.stringify(dataAndSignature.signature))
+        Buffer.from(dataAndSignature.signature)
       );
       signatureHash = signatureHash.toString("hex");
 
@@ -176,26 +188,28 @@ async function submitPort(req, res) {
       let data = dataAndSignature.data;
       var payload = {
         date: new Date(),
-        timestamp: data.timestamp,
+        timestamp: data.timeStamp,
         trxId: data.resourceId,
-        wallet: await arweave.wallets.ownerToAddress(dataAndSignature["request-public-key"]), //generate from public modulo
+        wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
         proof: {
-          signature: dataAndSignature["x-request-signature"], //req.headers['x-request-signature'],
-          public_key: dataAndSignature["request-public-key"] //req.headers['request-public-key'],
+          signature, //req.headers['x-request-signature'],
+          public_key:publicKey
         }
       };
       let fileName = getTodayDateAsString();
-      fs("appendFile", filename, JSON.stringify(payload));
+      await namespace.fs("appendFile", logsInfo.filename, JSON.stringify(payload)+"\n");
 
-      res.status(200).json({
+      _res.status(200).json({
         message: "Port Received"
       });
     }
   } catch (e) {
     console.error(e);
-    res.status(500).send({ error: "ERROR: " + e });
+    _res.status(500).send({ error: "ERROR: " + e });
   }
 }
+
+
 async function getStateAndBlock() {
   const state = await tools.kyveGetContractState(); //await smartweave.readContract(namespace.taskTxId);
   let block = await tools.getBlockHeight();
