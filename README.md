@@ -9,13 +9,22 @@ Examples:
 - `yarn deploy koi`
 - `yarn deploy attention`
 
-## Testing executable
+## Testing Contract
 
-- `yarn test attentionM`
-- `yarn test attentionM bundler`
+`yarn build`
+
+- `node test/attentionM.test.js path/to/wallet.json`
+- `node test/koi.test.js path/to/wallet.json`
+
+## Testing Executable
+
+`yarn build`
+
+- `yarn execute attentionM`
+- `yarn execute attentionM bundler` to test bundler mode
 
 
-## Testing testweave
+## Testing TestWeave
 
 1. Ensure docker is running (after installing docker and docker-compose)
     ```

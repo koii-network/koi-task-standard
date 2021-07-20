@@ -9,12 +9,12 @@
   },
   "contentType": "image/jpeg",
   "createdAt": "1624057295",
-  "durability" : 100, // always starts at 100
-  "decay":{ 
-    "minted": "", // needs to be set on creation
-    "rate" : "1", // represents the number of 'degradation points' the item will suffer 
-    "period" : "10", // represents the number of blocks after which a degradation will occur
-    "lastDecay" : "" // should be reset every time 'checkDecay()' is called
+  "durability": 100,
+  "decay": {
+    "minted": "",
+    "rate": "1",
+    "period": "10",
+    "lastDecay": ""
   },
   "tags": [],
   "ethOwnerAddress": "XR8M07aIHSpDpPrUxGfnoMZChIuZIfI4omlx-XEI7QE"

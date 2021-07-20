@@ -28,14 +28,14 @@ async function main() {
   const attentionInitState = JSON.parse(
     fs.readFileSync(`src/attentionM/init_state.json`)
   );
-
   smartest.writeContractState(attentionContractId, attentionInitState);
+
   const attentionInput = {
     function: "submitDistribution",
     distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
     cacheUrl: "http/bundler/cache",
-    mainContractId: "q5w6e7r8",
-    contractId: "a1s2d3f4"
+    mainContractId: koiContractId,
+    contractId: attentionContractId
   };
   await smartest.interactWrite(
     arweave,
@@ -46,12 +46,13 @@ async function main() {
     walletAddress,
     attentionContractId
   );
+
   const attentionInput0 = {
     function: "submitDistribution",
     distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
     cacheUrl: "http/bundler/cache",
-    mainContractId: "q5w6e7r8",
-    contractId: "a1s2d3f4"
+    mainContractId: koiContractId,
+    contractId: attentionContractId
   };
   await smartest.interactWrite(
     arweave,
@@ -62,6 +63,7 @@ async function main() {
     walletAddress,
     attentionContractId
   );
+
   const state = smartest.readContractState(attentionContractId);
   const proposedPaylods = state.task.proposedPaylods.find(
     (proposedPaylod) => proposedPaylod.block === state.task.open
@@ -81,6 +83,7 @@ async function main() {
     walletAddress,
     attentionContractId
   );
+
   const attentionInput2 = {
     function: "vote",
     voteId: proposedDataId,
@@ -95,6 +98,7 @@ async function main() {
     walletAddress,
     attentionContractId
   );
+
   const attentionInput3 = {
     function: "rankAndPrepareDistribution"
   };
@@ -107,10 +111,12 @@ async function main() {
     walletAddress,
     attentionContractId
   );
-  const koiInput = {
-    function: "distributeReward"
-  };
 
+  const koiInput = {
+    function: "registerTask",
+    taskTxId: attentionContractId,
+    taskName: "Attention_Game"
+  };
   await smartest.interactWrite(
     arweave,
     koiSrc,
@@ -121,10 +127,23 @@ async function main() {
     koiContractId
   );
 
-  console.log(
-    "Koi initial states: ",
+  const koiInput0 = {
+    function: "distributeReward"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput0,
     smartest.readContractState(koiContractId),
-    "Attention initial states:",
+    walletAddress,
+    koiContractId
+  );
+
+  console.log(
+    "Koi final state: ",
+    smartest.readContractState(koiContractId),
+    "Attention final state:",
     smartest.readContractState(attentionContractId)
   );
 }
