@@ -1,4 +1,4 @@
-const smartest = require("@_koi/smartest");
+const smartest = require("../index");
 const Arweave = require("arweave");
 const fs = require("fs");
 
@@ -34,8 +34,8 @@ async function main() {
     function: "submitDistribution",
     distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
     cacheUrl: "http/bundler/cache",
-    mainContractId: "q5w6e7r8",
-    contractId: "a1s2d3f4"
+    mainContractId: koiContractId,
+    contractId: attentionContractId
   };
   await smartest.interactWrite(
     arweave,
@@ -50,8 +50,8 @@ async function main() {
     function: "submitDistribution",
     distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
     cacheUrl: "http/bundler/cache",
-    mainContractId: "q5w6e7r8",
-    contractId: "a1s2d3f4"
+    mainContractId: koiContractId,
+    contractId: attentionContractId
   };
   await smartest.interactWrite(
     arweave,
@@ -108,6 +108,21 @@ async function main() {
     attentionContractId
   );
   const koiInput = {
+    function: "registerTask",
+    taskTxId: attentionContractId,
+    taskName: "Attention_Game"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
+
+  const koiInput0 = {
     function: "distributeReward"
   };
 
@@ -115,7 +130,7 @@ async function main() {
     arweave,
     koiSrc,
     wallet,
-    koiInput,
+    koiInput0,
     smartest.readContractState(koiContractId),
     walletAddress,
     koiContractId

@@ -15,9 +15,9 @@ export default function vote(state, action) {
   const votersList = vote.votersList;
   if (votersList.includes(caller))
     throw new ContractError("caller has alreday voted");
-  if (vote.voteTrigger === caller) {
-    throw new ContractError("Can not vote for your proposed vote");
-  }
+  // if (vote.voteTrigger === caller) {
+  //   throw new ContractError("Can not vote for your proposed vote");
+  // }
   if (userVote) ++vote["yays"];
   else ++vote["nays"];
   votersList.push(caller);
