@@ -41,12 +41,12 @@ async function main() {
     expressApp.listen(port, () => {
       console.log(`Open http://localhost:${port} to view in browser`);
     });
+    const routes = expressApp._router.stack
+      .map((route) => route.route)
+      .filter((route) => route !== undefined)
+      .map((route) => route.path);
+    console.log("Routes:\n-", routes.join("\n- "));
   }
-  const routes = expressApp._router.stack
-    .map((route) => route.route)
-    .filter((route) => route !== undefined)
-    .map((route) => route.path);
-  console.log("Routes:\n-", routes.join("\n- "));
 
   // Execute tasks
   await Promise.all(
