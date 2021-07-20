@@ -2,7 +2,7 @@ export default function registerTask(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;
-  const taskName = input.taskname;
+  const taskName = input.taskName;
   const taskTxId = input.taskTxId;
   const koiReward = input.koiReward;
   if (!taskTxId) throw new ContractError("No txid specified");
