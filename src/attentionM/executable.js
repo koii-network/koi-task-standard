@@ -62,7 +62,6 @@ async function service() {
       console.error(e.message);
       continue;
     }
-
     if (canSubmitTrafficLog(state, block)) await submitTrafficLog();
     if (canSubmitBatch(state, block)) await submitBatch(state);
     if (canRankProposal(state, block)) await rankProposal();
@@ -198,7 +197,7 @@ async function submitPort(req, res) {
   }
 }
 async function getStateAndBlock() {
-  const state = await tools.getContractState(); //await smartweave.readContract(namespace.taskTxId);
+  const state = await tools.kyveGetContractState(); //await smartweave.readContract(namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
@@ -286,6 +285,7 @@ async function submitTrafficLog() {
     stakeAmount: 2
   };
 
+  console.log(tools.wallet);
   let tx = await tools.submitTrafficLog(arg);
   if (await checkTxConfirmation(tx, task)) {
     isLogsSubmitted = true;

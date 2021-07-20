@@ -7,6 +7,8 @@ const executable = process.argv[2];
 const operationMode = process.argv[3];
 
 async function main() {
+  await tools.nodeLoadWallet(process.env.WALLET_LOCATION);
+
   let expressApp;
   if (operationMode === "bundler") {
     tools.loadRedisClient();
@@ -40,6 +42,11 @@ async function main() {
       console.log(`Open http://localhost:${port} to view in browser`);
     });
   }
+  const routes = expressApp._router.stack
+    .map((route) => route.route)
+    .filter((route) => route !== undefined)
+    .map((route) => route.path);
+  console.log("Routes:\n-", routes.join("\n- "));
 
   // Execute tasks
   await Promise.all(
