@@ -57,21 +57,21 @@ async function execute(_init_state) {
 
 async function service() {
   let state, block;
-  //for (;;) {
+  for (;;) {
   try {
     [state, block] = await getAttentionStateAndBlock();
   } catch (e) {
     console.error("Error", e.message);
-    //continue;
+    continue;
   }
 
   if (canSubmitData(state, block)) await submitData();
-  if (canAudit(state, block)) await audit(state);
-  if (canSubmitBatch(state, block)) await submitBatch(state);
+  // if (canAudit(state, block)) await audit(state);
+  // if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankAndPrepareDistribution(state, block))
     await rankAndPerpareDistribution();
   if (canDistributeReward(state)) await distribute();
-  //}
+  }
 }
 
 async function witness() {
@@ -264,9 +264,8 @@ async function submitPort(_req, _res) {
 async function getAttentionStateAndBlock() {
   const state = await smartweave.readContract(
     arweave,
-    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg"
+    "KwJ_ZsbopdVpyFiDb4iIBqU_M-UK_6XETIG3fvAuWvQ"
   );
-  console.log(state.task.proposedPaylods);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
@@ -336,6 +335,7 @@ function canSubmitData(state, block) {
   const task = state.task;
   if (
     // block >= task.open + OFFSET_SUBMIT_END || // block too late or
+    block >= task.open ||
     !isLogsSubmitted // logs already submitted
   )
     return true;
@@ -346,21 +346,20 @@ async function submitData() {
   const result = await bundleAndExport(payload);
   let task = "post payload";
   if (await checkTxConfirmation(result.id, task)) {
-    isLogsSubmitted = true;
     console.log("poyload posted");
   }
   let input = {
     function: "submitDistribution",
-    distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A", // it should be ressult.id
+    distributionTxId: result.id, // it should be ressult.id
     cacheUrl: "http://localhost:8887/test/cache",
-    mainContractId: "X06Z2le7ezTlf8elLpx9a9_wMDpYQLaoGOd8q53fH7c",
-    contractId: "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg"
+    mainContractId: "OYPC8FKoU7KnbHpLEduI7Mge3bovkx7xVrK64ztpIJE",
+    contractId: "KwJ_ZsbopdVpyFiDb4iIBqU_M-UK_6XETIG3fvAuWvQ"
   };
   task = "submitData";
   const tx = await smartweave.interactWrite(
     arweave,
     tools.wallet,
-    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg",
+    "KwJ_ZsbopdVpyFiDb4iIBqU_M-UK_6XETIG3fvAuWvQ",
     input
   );
 
@@ -423,8 +422,8 @@ async function audit(state) {
 }
 
 function canSubmitBatch(state, block) {
-  if (state.stateUpdate === undefined) return false;
-  const trafficLogs = state.stateUpdate.trafficLogs;
+  if (state.task === undefined) return false;
+  const trafficLogs = state.task;
   return (
     trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
     block < trafficLogs.open + OFFSET_PROPOSE_SLASH
@@ -434,19 +433,19 @@ function canSubmitBatch(state, block) {
 async function submitBatch(state) {
   const activeVotes = await activeVoteId(state);
   let task = "submitting votes";
-  while (activeVotes.length > 0) {
-    const voteId = activeVotes[activeVotes.length - 1];
+  for (let activeVoteId of activeVotes) {
     const state = await tools.getContractState();
-    const bundlers = state.votes[voteId].bundlers;
+    const vote = state.votes.find((vote) => vote.id == activeVoteId);
+    const bundlers = vote.bundlers;
     const bundlerAddress = await tools.getWalletAddress();
-    if (!(bundlerAddress in bundlers)) {
-      const txId = (await batchUpdateContractState(voteId)).id;
+     if (!(bundlerAddress in bundlers)) {
+      const txId = (await batchUpdateContractState(activeVoteId)).id;
       if (!(await checkTxConfirmation(txId, task))) {
         console.log("Vote submission failed");
         return;
       }
       const arg = {
-        batchFile: txId,
+        batchFile: activeVoteId,
         voteId: voteId,
         bundlerAddress: bundlerAddress
       };
@@ -456,10 +455,8 @@ async function submitBatch(state) {
         console.log("Batch failed");
         return;
       }
-      activeVotes.pop();
-    }
-    activeVotes.pop();
   }
+  
 }
 
 async function activeVoteId(state) {
@@ -469,7 +466,7 @@ async function activeVoteId(state) {
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
-  const close = state.stateUpdate.trafficLogs.close;
+  const close = state.task.close;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])
@@ -537,7 +534,7 @@ async function bundleAndExport(bundle) {
 function canRankAndPrepareDistribution(state, block) {
   const task = state.task;
   if (
-    //block < task.close || // not time to rank and distribute or
+    block < task.close || // not time to rank and distribute or
     isRanked || // we've already rank and distribute or
     !task.proposedPaylods.length // daily traffic log is empty
   )
@@ -560,7 +557,7 @@ async function rankAndPerpareDistribution() {
   const tx = await smartweave.interactWrite(
     arweave,
     tools.wallet,
-    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg",
+    "KwJ_ZsbopdVpyFiDb4iIBqU_M-UK_6XETIG3fvAuWvQ",
     input
   );
   const task = "ranking and prepare distribution";
@@ -599,7 +596,7 @@ async function distribute() {
   const tx = await smartweave.interactWrite(
     arweave,
     tools.wallet,
-    "X06Z2le7ezTlf8elLpx9a9_wMDpYQLaoGOd8q53fH7c",
+    "OYPC8FKoU7KnbHpLEduI7Mge3bovkx7xVrK64ztpIJE",
     input
   );
   const task = "distributing reward to main Contract";
@@ -714,7 +711,7 @@ async function validateAndVote(id, state) {
  * @returns {boolean} If can slash
  */
 function checkProposeSlash(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
+  const trafficLogs = state.task;
   return (
     trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
     block < trafficLogs.open + OFFSET_RANK

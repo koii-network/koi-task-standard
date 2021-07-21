@@ -17,6 +17,7 @@ export default function audit(state, action) {
     yays: 0,
     nays: 0,
     votersList: [],
+    bundlers: {},
     open: task.open,
     close: task.close
   };
