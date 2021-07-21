@@ -4,7 +4,8 @@ const koiSdk = require("@_koi/sdk/node");
 const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
 
 const executable = process.argv[2];
-const operationMode = process.argv[3];
+const taskTxId = process.argv[3];
+const operationMode = process.argv[4];
 
 async function main() {
   await tools.nodeLoadWallet(process.env.WALLET_LOCATION);
@@ -29,7 +30,7 @@ async function main() {
     await fsPromises.readFile(`src/${executable}/executable.js`, "utf8")
   ];
   const executableTasks = taskSrcs.map((src) =>
-    loadTaskSource(src, new Namespace("test", expressApp))
+    loadTaskSource(src, new Namespace(taskTxId, expressApp))
   );
 
   // Initialize tasks then start express app
