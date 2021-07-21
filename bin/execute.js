@@ -82,12 +82,18 @@ class Namespace {
     return tools.redisSetAsync(this.taskTxId + path, data);
   }
   async fs(method, path, ...args) {
+    const basePath = "namespace/" + this.taskTxId;
     try {
-      await fsPromises.access(this.taskTxId);
+      try {
+        await fsPromises.access("namespace");
+      } catch {
+        await fsPromises.mkdir("namespace");
+      }
+      await fsPromises.access(basePath);
     } catch {
-      await fsPromises.mkdir(this.taskTxId);
+      await fsPromises.mkdir(basePath);
     }
-    return fsPromises[method](`${this.taskTxId}/${path}`, ...args);
+    return fsPromises[method](`${basePath}/${path}`, ...args);
   }
   express(method, path, callback) {
     return this.app[method]("/" + this.taskTxId + path, callback);

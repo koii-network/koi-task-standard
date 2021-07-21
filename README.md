@@ -20,8 +20,12 @@ Examples:
 
 `yarn build`
 
-- `yarn execute attentionM taskTxId`
-- `yarn execute attentionM taskTxId bundler` to test bundler mode
+- `yarn execute taskName taskTxId`
+- `yarn execute taskName taskTxId bundler` to test bundler mode
+
+for example
+
+`yarn execute attentionM IpEKWpnCCa09-fALeXsQmVD_UYHCuyblVpgPOrsMXEM bundler`
 
 If your executable does not make use of `namespace.taskTxId`, you can set `taskTxId` to `"test"` or any random value.
 
