@@ -15,11 +15,13 @@ export default async function proposeSlash(state, action) {
   const receipt = JSON.parse(receiptData);
   const payload = receipt.vote;
   const vote = payload.vote;
+  const voteId = vote.voteId;
   const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
     payload.owner
   );
-  const suspectedVote = votes[vote.voteId].voted;
-  if (suspectedVote.includes(voterAddress))
+  const suspectedVote = votes.find((vote) => vote.id === voteId);
+  const votersList = suspectedVote.votersList;
+  if (votersList.includes(voterAddress))
     throw new ContractError("vote is found");
   const voteString = JSON.stringify(vote);
   const voteBuffer = await SmartWeave.arweave.utils.stringToBuffer(voteString);

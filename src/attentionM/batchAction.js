@@ -5,13 +5,9 @@ export default async function batchAction(state, action) {
   const input = action.input;
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
-  const vote = votes[voteId];
+
+  const vote = votes.find((vote) => vote.id === voteId);
   if (!batchTxId) throw new ContractError("No txId specified");
-  if (!Number.isInteger(voteId)) {
-    throw new ContractError(
-      'Invalid value for "voting id". Must be an integer'
-    );
-  }
   if (!(typeof batchTxId === "string"))
     throw new ContractError("batchTxId should be string");
   if (!validBundlers.includes(action.caller))
@@ -42,11 +38,11 @@ export default async function batchAction(state, action) {
     ) {
       if (voteObj.vote.userVote === "true") {
         vote["yays"] += 1;
-        vote.voted.push(voteObj.senderAddress);
+        vote.votersList.push(voteObj.senderAddress);
       }
       if (voteObj.vote.userVote === "false") {
         vote["nays"] += 1;
-        vote.voted.push(voteObj.senderAddress);
+        vote.votersList.push(voteObj.senderAddress);
       }
     }
   }

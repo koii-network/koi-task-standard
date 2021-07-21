@@ -13,6 +13,8 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
+const smartweave = require("smartweave");
+const axios = require("axios");
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
@@ -38,15 +40,15 @@ var isLogsSubmitted = false;
 var isRanked = false;
 
 const logsInfo = {
-  "filename":getTodayDateAsString(),
-  "oldFileName":getYesterdayDateAsString()
-}
+  filename: getTodayDateAsString(),
+  oldFileName: getYesterdayDateAsString()
+};
 
 function setup(_init_state) {
-  console.log(namespace.express)
+  console.log(namespace.express);
   if (namespace.app) namespace.express("post", "/submit-vote", submitVote);
   if (namespace.app) namespace.express("post", "/submit-port", submitPort);
-  if (namespace.app) namespace.express("get","/cache",servePortCache)
+  if (namespace.app) namespace.express("get", "/cache", servePortCache);
 }
 
 async function execute(_init_state) {
@@ -55,25 +57,28 @@ async function execute(_init_state) {
 
 async function service() {
   let state, block;
-  for (;;) {
-    try {
-      [state, block] = await getStateAndBlock();
-    } catch (e) {
-      console.error(e.message);
-      continue;
-    }
-    if (canSubmitTrafficLog(state, block)) await submitTrafficLog();
-    if (canSubmitBatch(state, block)) await submitBatch(state);
-    if (canRankProposal(state, block)) await rankProposal();
-    if (canDistribute(state, block)) await distribute();
+  //for (;;) {
+  try {
+    [state, block] = await getAttentionStateAndBlock();
+  } catch (e) {
+    console.error("Error", e.message);
+    //continue;
   }
+
+  if (canSubmitData(state, block)) await submitData();
+  if (canAudit(state, block)) await audit(state);
+  if (canSubmitBatch(state, block)) await submitBatch(state);
+  if (canRankAndPrepareDistribution(state, block))
+    await rankAndPerpareDistribution();
+  if (canDistributeReward(state)) await distribute();
+  //}
 }
 
 async function witness() {
   let state, block;
   for (;;) {
     try {
-      [state, block] = await getStateAndBlock();
+      [state, block] = await getAttentionStateAndBlock();
     } catch (e) {
       console.error(e.message);
       continue;
@@ -83,37 +88,74 @@ async function witness() {
     if (checkProposeSlash(state, block)) await tools.proposeSlash();
   }
 }
-async function servePortCache(req,res){
-  let logs =  await namespace.fs("readFile", logsInfo.filename, "utf8");
-  res.send(logs)
+async function servePortCache(req, res) {
+  let logs = await namespace.fs("readFile", logsInfo.filename, "utf8");
+  res.send(logs);
 }
 
-async function auditPort(cacheUrl){
-    let logs = []//fetch ;
+async function auditPort(txId) {
+  let response = await axios.get("http://localhost:8887/test/cache");
+  const fullLogs = response.data;
+  var prettyLogs = [];
+  let logs = fullLogs.toString().split("\n");
+  for (let log of logs) {
+    try {
+      if (log && !(log === " ") && !(log === "")) {
+        try {
+          var logJSON = JSON.parse(log);
+          prettyLogs.push(logJSON);
+        } catch (err) {
+          // console.error('error reading json in Koi log middleware', err)
+          // reject(err)
+        }
+      }
+    } catch (err) {
+      // console.error('err', err)
+      // reject(err)
+    }
+  }
+  let finalLogs = {};
+  for (let i = 0; i < prettyLogs.length; i++) {
+    const e = prettyLogs[i];
+    let keys = Object.keys(finalLogs);
+    if (keys.includes(e["trxId"])) {
+      finalLogs[e["trxId"]].push(e["wallet"]);
+    } else {
+      finalLogs[e["trxId"]] = [e["wallet"]];
+    }
+  }
+  const str = JSON.stringify(finalLogs);
+  const parseCacheData = JSON.parse(str);
+  const proposedData = await arweave.transactions.getData(txId, {
+    decode: true,
+    string: true
+  });
+  const parseProposedData = JSON.parse(proposedData);
+
+  return parseProposedData == parseCacheData;
 }
 
 /**
  * Accepts Port traffic logs
  * @param {*} fileName express.js request
  */
- async function PublishPoRT() {
+async function PublishPoRT() {
   let portLogs = await readRawLogs();
-  let finalLogs = {}
-  for(let i=0;i<portLogs.length;i++){
-    const e = portLogs[i]
+  let finalLogs = {};
+  for (let i = 0; i < portLogs.length; i++) {
+    const e = portLogs[i];
     let keys = Object.keys(finalLogs);
-    if(keys.includes(e["trxId"])){
-      finalLogs[e["trxId"]].push(e["wallet"])
-    }else {
+    if (keys.includes(e["trxId"])) {
+      finalLogs[e["trxId"]].push(e["wallet"]);
+    } else {
       finalLogs[e["trxId"]] = [e["wallet"]];
     }
   }
-  return finalLogs
+  return finalLogs;
 }
-PublishPoRT().then(console.log)
 
 async function readRawLogs() {
-  return new Promise(async(resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let fullLogs = await namespace.fs("readFile", logsInfo.filename);
     let logs = fullLogs.toString().split("\n");
     // console.log('logs are', logs)
@@ -150,14 +192,18 @@ function getTodayDateAsString() {
 function getYesterdayDateAsString() {
   let date = new Date();
   const yesterday = new Date(date);
-  yesterday.setDate(yesterday.getDate() - 1)
-  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(yesterday);
-  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(yesterday);
+  yesterday.setDate(yesterday.getDate() - 1);
+  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
+    yesterday
+  );
+  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(
+    yesterday
+  );
   let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(yesterday);
   return `${day}-${month}-${year}`;
 }
-function difficultyFunction(hash){
-  return hash.startsWith("00")|| hash.startsWith("01")
+function difficultyFunction(hash) {
+  return hash.startsWith("00") || hash.startsWith("01");
 }
 async function submitPort(_req, _res) {
   try {
@@ -175,7 +221,9 @@ async function submitPort(_req, _res) {
         console.log("Signature verification failed");
       }
       console.log(valid);
-      console.log(Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature))))
+      console.log(
+        Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature)))
+      );
       let signatureHash = await arweave.crypto.hash(
         Buffer.from(dataAndSignature.signature)
       );
@@ -193,11 +241,15 @@ async function submitPort(_req, _res) {
         wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
         proof: {
           signature, //req.headers['x-request-signature'],
-          public_key:publicKey
+          public_key: publicKey
         }
       };
       let fileName = getTodayDateAsString();
-      await namespace.fs("appendFile", logsInfo.filename, JSON.stringify(payload)+"\n");
+      await namespace.fs(
+        "appendFile",
+        logsInfo.filename,
+        JSON.stringify(payload) + "\n"
+      );
 
       _res.status(200).json({
         message: "Port Received"
@@ -209,13 +261,16 @@ async function submitPort(_req, _res) {
   }
 }
 
-
-async function getStateAndBlock() {
-  const state = await tools.kyveGetContractState(); //await smartweave.readContract(namespace.taskTxId);
+async function getAttentionStateAndBlock() {
+  const state = await smartweave.readContract(
+    arweave,
+    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg"
+  );
+  console.log(state.task.proposedPaylods);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
-  const logClose = state.stateUpdate.trafficLogs.close;
+  const logClose = state.task.close;
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Logs updated, resetting trackers");
@@ -271,40 +326,100 @@ async function checkTxConfirmation(txId, task) {
     }
   }
 }
-
-function canSubmitTrafficLog(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
+/**
+ *
+ * @param {*} state
+ * @param {number} block
+ * @returns {bool}
+ */
+function canSubmitData(state, block) {
+  const task = state.task;
   if (
-    block >= trafficLogs.open + OFFSET_SUBMIT_END || // block too late or
-    isLogsSubmitted // logs already submitted
+    // block >= task.open + OFFSET_SUBMIT_END || // block too late or
+    !isLogsSubmitted // logs already submitted
   )
-    return false;
-
-  // Check that our log isn't on the state yet and that our gateway hasn't been submitted yet
-  const currentTrafficLogs = state.stateUpdate.trafficLogs.dailyTrafficLog.find(
-    (log) => log.block === trafficLogs.open
-  );
-  const proposedLogs = currentTrafficLogs.proposedLogs;
-  const matchingLog = proposedLogs.find(
-    (log) => log.owner === tools.address || log.gateWayId === URL_GATEWAY_LOGS
-  );
-  isLogsSubmitted = matchingLog !== undefined;
-  return !isLogsSubmitted;
+    return true;
 }
 
-async function submitTrafficLog() {
-  var task = "submitting traffic log";
-  let arg = {
-    gateWayUrl: URL_GATEWAY_LOGS,
-    stakeAmount: 2
+async function submitData() {
+  const payload = await PublishPoRT();
+  const result = await bundleAndExport(payload);
+  let task = "post payload";
+  if (await checkTxConfirmation(result.id, task)) {
+    isLogsSubmitted = true;
+    console.log("poyload posted");
+  }
+  let input = {
+    function: "submitDistribution",
+    distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A", // it should be ressult.id
+    cacheUrl: "http://localhost:8887/test/cache",
+    mainContractId: "X06Z2le7ezTlf8elLpx9a9_wMDpYQLaoGOd8q53fH7c",
+    contractId: "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg"
   };
+  task = "submitData";
+  const tx = await smartweave.interactWrite(
+    arweave,
+    tools.wallet,
+    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg",
+    input
+  );
 
-  console.log(tools.wallet);
-  let tx = await tools.submitTrafficLog(arg);
   if (await checkTxConfirmation(tx, task)) {
     isLogsSubmitted = true;
     console.log("Logs submitted");
   }
+}
+/**
+ *
+ * @param {*} state
+ * @param {number} block
+ * @returns {bool}
+ */
+async function canAudit(state, block) {
+  const task = state.task;
+  const activeProposedDatas = task.proposedPaylods.find(
+    (proposedDatas) => proposedDatas.block === task.open
+  );
+
+  const proposedDatas = activeProposedDatas.proposedDatas;
+  if (!proposedDatas.length) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+async function audit(state) {
+  const task = state.task;
+  const activeProposedDatas = task.proposedPaylods.find(
+    (proposedDatas) => proposedDatas.block === task.open
+  );
+
+  const proposedDatas = activeProposedDatas.proposedDatas;
+  await Promise.all(
+    proposedDatas.map(async (proposedData) => {
+      const valid = await auditPort(proposedData.txId);
+      if (!valid) {
+        let input = {
+          function: "audit",
+          id: proposedData.id,
+          descripition: "malicious_data"
+        };
+        let task = "submit audit";
+        const tx = await smartweave.interactWrite(
+          arweave,
+          tools.wallet,
+          "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg",
+          input
+        );
+
+        if (await checkTxConfirmation(tx, task)) {
+          isLogsSubmitted = true;
+          console.log("audit submitted");
+        }
+      }
+    })
+  );
 }
 
 function canSubmitBatch(state, block) {
@@ -418,19 +533,17 @@ async function bundleAndExport(bundle) {
  * @param {number} block Block height
  * @returns {boolean} Wether we can rank
  */
-function canRankProposal(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
+function canRankAndPrepareDistribution(state, block) {
+  const task = state.task;
   if (
-    block < trafficLogs.open + OFFSET_RANK || // if too early to rank or
-    trafficLogs.close < block || // too late to rank or
-    isRanked // already ranked
+    //block < task.close || // not time to rank and distribute or
+    isRanked || // we've already rank and distribute or
+    !task.proposedPaylods.length // daily traffic log is empty
   )
     return false;
 
-  // If our rank isn't on the state yet
-  if (!trafficLogs.dailyTrafficLog.length) return false;
-  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-    (trafficLog) => trafficLog.block === trafficLogs.open
+  const currentTrafficLogs = task.proposedPaylods.find(
+    (proposedTask) => proposedTask.block === task.open
   );
   isRanked = currentTrafficLogs.isRanked;
   return !currentTrafficLogs.isRanked;
@@ -439,44 +552,56 @@ function canRankProposal(state, block) {
 /**
  *
  */
-async function rankProposal() {
-  const task = "ranking reward";
-  const tx = await tools.rankProposal();
+async function rankAndPerpareDistribution() {
+  let input = {
+    function: "rankAndPrepareDistribution"
+  };
+  const tx = await smartweave.interactWrite(
+    arweave,
+    tools.wallet,
+    "PDRqoAIKRgLwwYYMkbMMiZUUI-gHJpWj0DWrLSD7IBg",
+    input
+  );
+  const task = "ranking and prepare distribution";
   if (await checkTxConfirmation(tx, task)) {
     isRanked = true;
     console.log("Ranked");
   }
 }
-
 /**
  *
  * @param {*} state Current contract state data
  * @param {number} block Block height
  * @returns {boolean} Wether we can distribute
  */
-function canDistribute(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  if (
-    block < trafficLogs.close || // not time to distribute or
-    isDistributed || // we've already distributed or
-    !trafficLogs.dailyTrafficLog.length // daily traffic log is empty
-  )
-    return false;
-
-  // If our distribution isn't on the state yet
-  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-    (trafficLog) => trafficLog.block === trafficLogs.open
+function canDistributeReward(subContractState) {
+  console.log(subContractState);
+  const prepareDistribution = subContractState.task.prepareDistribution;
+  // check if there is not rewarded distributions
+  const unRewardedDistribution = prepareDistribution.filter(
+    (distribution) => !distribution.isRewardAddToMainContract
   );
-  isDistributed = currentTrafficLogs.isDistributed;
-  return !isDistributed;
+  if (!unRewardedDistribution.length) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 /**
  *
  */
 async function distribute() {
-  const task = "distributing reward";
-  const tx = await tools.distributeDailyRewards();
+  let input = {
+    function: "distributeReward"
+  };
+  const tx = await smartweave.interactWrite(
+    arweave,
+    tools.wallet,
+    "X06Z2le7ezTlf8elLpx9a9_wMDpYQLaoGOd8q53fH7c",
+    input
+  );
+  const task = "distributing reward to main Contract";
   if (await checkTxConfirmation(tx, task)) {
     isDistributed = true;
     console.log("Distributed");
@@ -490,8 +615,12 @@ async function distribute() {
  * @returns {boolean} Whether voting is possible
  */
 function checkForVote(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.open + OFFSET_BATCH_SUBMIT;
+  const task = state.task;
+  const votes = state.votes;
+  if (!votes.length) {
+    return false;
+  }
+  return block < task.open + OFFSET_BATCH_SUBMIT;
 }
 
 /**
@@ -499,18 +628,84 @@ function checkForVote(state, block) {
  * @param {*} state Current contract state data
  */
 async function tryVote(state) {
-  while (tools.totalVoted < state.votes.length - 1) {
-    const id = tools.totalVoted;
-    const voteId = id + 1;
-    const payload = {
-      voteId,
-      direct: this.direct
-    };
-    const { message } = await tools.vote(payload);
-    console.log(`VoteId ${voteId}: ${message}`);
+  await createFile();
+  const dataBuffer = await readTrackedVotes();
+  const dataString = dataBuffer.toString();
+  const voteIds = dataString.voteId;
+  const votes = state.votes;
+  const activeVotes = votes.filter((vote) => vote.status == "active");
+  await Promise.all(
+    activeVotes.map(async (vote) => {
+      // check if the node already voted for the activeVotes
+      if (!voteIds.includes(vote.id)) {
+        const receiptFrombundler = await validateAndVote(vote.id, state);
+        const receipt = dataString.receipt;
+        receipt.push(receiptFrombundler);
+        voteIds.push(vote.id);
+        await updateData({ voteId: voteIds, receipt: receipt });
+      }
+    })
+  );
+}
+async function createFile() {
+  const batchFileName = "newfile.txt";
+  try {
+    await namespace.fs("access", batchFileName, fsConstants.F_OK);
+    return;
+  } catch {
+    // If file doesn't exist
+
+    await namespace.fs(
+      "writeFile",
+      batchFileName,
+      JSON.stringify({ voteId: [], receipt: [] })
+    );
   }
 }
+async function readTrackedVotes() {
+  const batchFileName = "newfile.txt";
+  const data = await namespace.fs("readFile", batchFileName);
+  return data;
+}
+async function updateData(data) {
+  const batchFileName = "newfile.txt";
+  await namespace.fs("writeFile", batchFileName, JSON.stringify(data));
+}
+/**
+ *
+ * @param {string} voteId
+ * @param {*} state Current block height
+ * @returns {boolean} If can slash
+ */
 
+async function validateAndVote(id, state) {
+  const suspectedProposedData = state.task.proposedPaylods.proposedDatas.find(
+    (proposedData) => proposedData.id === id
+  );
+  const valid = audit(suspectedProposedData.txId);
+  // audit the suspectedProposedData
+  // if suspectedData is not Valid userVote = true, if userVote = false
+
+  if (valid) {
+    let input = {
+      voteId: id,
+      userVote: "true"
+    };
+    const signPayload = await tools.signPayload(input);
+    const receipt = axios.post("http://localhost:8887/submitVote", signPayload);
+    return receipt;
+  } else {
+    let input = {
+      voteId: id,
+      userVote: "true"
+    };
+    const signPayload = await tools.signPayload(input);
+    const receipt = axios.post("http://localhost:8887/submitVote", signPayload);
+    return receipt;
+  }
+
+  // save the receipt if the bundler did't submit the vote then the node use the receipt to slash
+}
 /**
  *
  * @param {*} state
