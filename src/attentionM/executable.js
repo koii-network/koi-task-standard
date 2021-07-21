@@ -423,6 +423,7 @@ async function audit(state) {
 }
 
 function canSubmitBatch(state, block) {
+  if (state.stateUpdate === undefined) return false;
   const trafficLogs = state.stateUpdate.trafficLogs;
   return (
     trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
