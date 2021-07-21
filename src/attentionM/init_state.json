@@ -24,12 +24,12 @@
   },
   "votes": [],
   "task": {
-    "open": 732410,
-    "close": 732440,
+    "open": 732440,
+    "close": 732490,
     "prepareDistribution": [],
     "proposedPaylods": [
       {
-        "block": 732410,
+        "block": 732440,
         "proposedDatas": [],
         "isRanked": false
       }
