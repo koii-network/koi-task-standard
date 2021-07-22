@@ -155,31 +155,35 @@ async function PublishPoRT() {
 }
 
 async function readRawLogs() {
-  return new Promise(async (resolve, reject) => {
-    let fullLogs = await namespace.fs("readFile", logsInfo.filename);
-    let logs = fullLogs.toString().split("\n");
-    // console.log('logs are', logs)
-    var prettyLogs = [];
-    for (var log of logs) {
-      // console.log('log is', log)
-      try {
-        if (log && !(log === " ") && !(log === "")) {
-          try {
-            var logJSON = JSON.parse(log);
-            prettyLogs.push(logJSON);
-          } catch (err) {
-            // console.error('error reading json in Koi log middleware', err)
-            // reject(err)
-          }
+  let fullLogs;
+  try {
+    fullLogs = await namespace.fs("readFile", logsInfo.filename);
+  } catch {
+    console.error("Error reading raw logs");
+    return [];
+  }
+  let logs = fullLogs.toString().split("\n");
+  // console.log('logs are', logs)
+  var prettyLogs = [];
+  for (var log of logs) {
+    // console.log('log is', log)
+    try {
+      if (log && !(log === " ") && !(log === "")) {
+        try {
+          var logJSON = JSON.parse(log);
+          prettyLogs.push(logJSON);
+        } catch (err) {
+          // console.error('error reading json in Koi log middleware', err)
+          // reject(err)
         }
-      } catch (err) {
-        // console.error('err', err)
-        // reject(err)
       }
+    } catch (err) {
+      // console.error('err', err)
+      // reject(err)
     }
-    // console.log('resolving some prettyLogs ('+ prettyLogs.length +') sample:', prettyLogs[prettyLogs.length - 1])
-    resolve(prettyLogs);
-  });
+  }
+  // console.log('resolving some prettyLogs ('+ prettyLogs.length +') sample:', prettyLogs[prettyLogs.length - 1])
+  return prettyLogs;
 }
 
 function getTodayDateAsString() {
@@ -340,10 +344,17 @@ function canSubmitData(state, block) {
 
 async function submitData() {
   const payload = await PublishPoRT();
+
+  if (Object.keys(payload).length === 0) {
+    isLogsSubmitted = true;
+    console.error("Payload empty, skipping submission");
+    return;
+  }
+
   const result = await bundleAndExport(payload);
   let task = "post payload";
   if (await checkTxConfirmation(result.id, task)) {
-    console.log("poyload posted");
+    console.log("payload posted");
   }
   let input = {
     function: "submitDistribution",

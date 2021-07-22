@@ -1,7 +1,10 @@
 require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
-const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
+const tools = new koiSdk.Node(
+  process.env.TRUSTED_SERVICE_URL,
+  "9BX6HQV5qkGiXV6hTglAuPdccKoEP_XI2NNbjHv5MMM"
+);
 
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
