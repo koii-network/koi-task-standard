@@ -35,9 +35,9 @@ const TIMEOUT_TX = 30 * MS_TO_MIN;
 
 var lastBlock = 0;
 var lastLogClose = 0;
-var isDistributed = false;
 var isLogsSubmitted = false;
 var isRanked = false;
+var isDistributed = false;
 
 const logsInfo = {
   filename: getTodayDateAsString(),
@@ -274,7 +274,7 @@ async function getAttentionStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Logs updated, resetting trackers");
-      isDistributed = false;
+      //isDistributed = false;
       isLogsSubmitted = false;
       isRanked = false;
     }
@@ -581,13 +581,12 @@ async function rankAndPerpareDistribution() {
  * @returns {boolean} Wether we can distribute
  */
 function canDistributeReward(subContractState) {
-  console.log(subContractState);
   const prepareDistribution = subContractState.task.prepareDistribution;
   // check if there is not rewarded distributions
   const unRewardedDistribution = prepareDistribution.filter(
     (distribution) => !distribution.isRewardAddToMainContract
   );
-  if (!unRewardedDistribution.length) {
+  if (!unRewardedDistribution.length || isDistributed) {
     return false;
   } else {
     return true;
