@@ -15,6 +15,8 @@ const { fsConstants } = require("fs");
 const Arweave = require("arweave");
 const smartweave = require("smartweave");
 const axios = require("axios");
+var crypto = require("crypto");
+
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
@@ -113,7 +115,20 @@ async function auditPort(txId) {
     decode: true,
     string: true
   });
-  return proposedData == JSON.stringify(finalLogs);
+  proposedData = JSON.parse(proposedData);
+
+  const proposedDataKeys = Object.keys(proposedData).sort();
+  const finalLogsKeys = Object.keys(finalLogs).sort();
+  if (proposedDataKeys.length !== finalLogsKeys.length) return false;
+  if (!proposedDataKeys.every((e, i) => e === finalLogsKeys[i])) return false;
+  for (const proposedNFT of proposedDataKeys) {
+    const proposedViewers = proposedData[proposedNFT].sort();
+    const cachedViewers = finalLogs[proposedNFT].sort();
+    if (cachedViewers.length !== cachedViewers.length) return false;
+    if (!proposedViewers.every((e, i) => e === cachedViewers[i])) return false;
+    return true;
+  }
+  // return proposedData == JSON.stringify(finalLogs);
 }
 
 /**
@@ -209,13 +224,12 @@ async function submitPort(req, res) {
       console.log("Signature verification failed");
     }
     console.log(valid);
-    console.log(
-      Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature)))
-    );
-    let signatureHash = await arweave.crypto.hash(
-      Buffer.from(dataAndSignature.signature)
-    );
+    let signatureHash = crypto
+      .createHash("sha256")
+      .update(JSON.stringify(dataAndSignature.signature))
+      .digest("hex");
     signatureHash = signatureHash.toString("hex");
+    // console.log(dataAndSignature.signature)
 
     if (!difficultyFunction(signatureHash)) {
       console.log("Signature hash incorrect");
@@ -334,6 +348,7 @@ async function submitData() {
   }
 
   const result = await bundleAndExport(payload);
+
   let task = "post payload";
   if (await checkTxConfirmation(result.id, task)) console.log("payload posted");
 
@@ -673,7 +688,9 @@ async function validateAndVote(id, state) {
       userVote: "true"
     };
     const signPayload = await tools.signPayload(input);
+
     const receipt = axios.post("http://localhost:8887/submitVote", signPayload);
+
     return receipt;
   } else {
     const input = {
