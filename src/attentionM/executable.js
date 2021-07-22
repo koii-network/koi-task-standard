@@ -83,8 +83,8 @@ async function servePortCache(req, res) {
   res.send(logs);
 }
 
-async function auditPort(txId) {
-  const response = await axios.get("http://localhost:8887/test/cache");
+async function auditPort(txId, url) {
+  const response = await axios.get(url);
   const fullLogs = response.data;
   const prettyLogs = [];
   const logs = fullLogs.toString().split("\n");
@@ -678,7 +678,10 @@ async function validateAndVote(id, state) {
   const suspectedProposedData = state.task.proposedPayloads.proposedData.find(
     (proposedData) => proposedData.id === id
   );
-  const valid = audit(suspectedProposedData.txId);
+  const valid = auditPort(
+    suspectedProposedData.txId,
+    suspectedProposedData.cacheUrl
+  );
   // audit the suspectedProposedData
   // if suspectedData is not Valid userVote = true, if userVote = false
 
@@ -695,7 +698,7 @@ async function validateAndVote(id, state) {
   } else {
     const input = {
       voteId: id,
-      userVote: "true"
+      userVote: "false"
     };
     const signPayload = await tools.signPayload(input);
     const receipt = axios.post("http://localhost:8887/submitVote", signPayload);

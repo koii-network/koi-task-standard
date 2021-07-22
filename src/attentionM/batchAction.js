@@ -34,7 +34,7 @@ export default async function batchAction(state, action) {
     if (
       isVoteValid &&
       voteObj.vote.voteId === voteId &&
-      !vote.voted.includes(voteObj.senderAddress)
+      !vote.votersList.includes(voteObj.senderAddress)
     ) {
       if (voteObj.vote.userVote === "true") {
         vote["yays"] += 1;
