@@ -27,10 +27,10 @@
     "open": 732440,
     "close": 732490,
     "prepareDistribution": [],
-    "proposedPaylods": [
+    "proposedPayloads": [
       {
         "block": 732440,
-        "proposedDatas": [],
+        "proposedData": [],
         "isRanked": false
       }
     ]

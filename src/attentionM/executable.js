@@ -23,21 +23,18 @@ const arweave = Arweave.init({
 
 const RESPONSE_ACTION_FAILED = 411;
 
-const OFFSET_SUBMIT_END = 300;
 const OFFSET_BATCH_SUBMIT = 470;
 const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
 
-const URL_GATEWAY_LOGS = "http://gateway.koi.rocks/logs";
-
 const MS_TO_MIN = 60000;
 const TIMEOUT_TX = 30 * MS_TO_MIN;
 
-var lastBlock = 0;
-var lastLogClose = 0;
-var isLogsSubmitted = false;
-var isRanked = false;
-var isDistributed = false;
+let lastBlock = 0;
+let lastLogClose = 0;
+let isLogsSubmitted = false;
+let isRanked = false;
+let isDistributed = false;
 
 const logsInfo = {
   filename: getTodayDateAsString(),
@@ -45,17 +42,14 @@ const logsInfo = {
 };
 
 function setup(_init_state) {
-  console.log(namespace.express);
-  if (namespace.app) namespace.express("post", "/submit-vote", submitVote);
-  if (namespace.app) namespace.express("post", "/submit-port", submitPort);
-  if (namespace.app) namespace.express("get", "/cache", servePortCache);
+  if (namespace.express) {
+    namespace.express("post", "/submit-vote", submitVote);
+    namespace.express("post", "/submit-port", submitPort);
+    namespace.express("get", "/cache", servePortCache);
+  }
 }
 
 async function execute(_init_state) {
-  await (namespace.app ? service() : witness());
-}
-
-async function service() {
   let state, block;
   for (;;) {
     try {
@@ -64,45 +58,39 @@ async function service() {
       console.error("Error", e.message);
       continue;
     }
-
-    if (canSubmitData(state, block)) await submitData();
-    // if (canAudit(state, block)) await audit(state);
-    // if (canSubmitBatch(state, block)) await submitBatch(state);
-    if (canRankAndPrepareDistribution(state, block))
-      await rankAndPerpareDistribution();
-    if (canDistributeReward(state)) await distribute();
+    await (namespace.express ? service : witness)(state, block);
   }
 }
 
-async function witness() {
-  let state, block;
-  for (;;) {
-    try {
-      [state, block] = await getAttentionStateAndBlock();
-    } catch (e) {
-      console.error(e.message);
-      continue;
-    }
-
-    if (checkForVote(state, block)) await tryVote(state);
-    if (checkProposeSlash(state, block)) await tools.proposeSlash();
-  }
+async function service(state, block) {
+  if (canSubmitData(state, block)) await submitData();
+  // if (canAudit(state, block)) await audit(state);
+  // if (canSubmitBatch(state, block)) await submitBatch(state);
+  if (canRankAndPrepareDistribution(state, block))
+    await rankAndPrepareDistribution();
+  if (canDistributeReward(state)) await distribute();
 }
+
+async function witness(state, block) {
+  if (checkForVote(state, block)) await tryVote(state);
+  if (checkProposeSlash(state, block)) await tools.proposeSlash();
+}
+
 async function servePortCache(req, res) {
-  let logs = await namespace.fs("readFile", logsInfo.filename, "utf8");
+  const logs = await namespace.fs("readFile", logsInfo.filename, "utf8");
   res.send(logs);
 }
 
 async function auditPort(txId) {
-  let response = await axios.get("http://localhost:8887/test/cache");
+  const response = await axios.get("http://localhost:8887/test/cache");
   const fullLogs = response.data;
-  var prettyLogs = [];
-  let logs = fullLogs.toString().split("\n");
-  for (let log of logs) {
+  const prettyLogs = [];
+  const logs = fullLogs.toString().split("\n");
+  for (const log of logs) {
     try {
       if (log && !(log === " ") && !(log === "")) {
         try {
-          var logJSON = JSON.parse(log);
+          const logJSON = JSON.parse(log);
           prettyLogs.push(logJSON);
         } catch (err) {
           // console.error('error reading json in Koi log middleware', err)
@@ -114,25 +102,18 @@ async function auditPort(txId) {
       // reject(err)
     }
   }
-  let finalLogs = {};
+  const finalLogs = {};
   for (let i = 0; i < prettyLogs.length; i++) {
     const e = prettyLogs[i];
-    let keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"])) {
-      finalLogs[e["trxId"]].push(e["wallet"]);
-    } else {
-      finalLogs[e["trxId"]] = [e["wallet"]];
-    }
+    const keys = Object.keys(finalLogs);
+    if (keys.includes(e["trxId"])) finalLogs[e["trxId"]].push(e["wallet"]);
+    else finalLogs[e["trxId"]] = [e["wallet"]];
   }
-  const str = JSON.stringify(finalLogs);
-  const parseCacheData = JSON.parse(str);
   const proposedData = await arweave.transactions.getData(txId, {
     decode: true,
     string: true
   });
-  const parseProposedData = JSON.parse(proposedData);
-
-  return parseProposedData == parseCacheData;
+  return proposedData == JSON.stringify(finalLogs);
 }
 
 /**
@@ -140,16 +121,13 @@ async function auditPort(txId) {
  * @param {*} fileName express.js request
  */
 async function PublishPoRT() {
-  let portLogs = await readRawLogs();
-  let finalLogs = {};
+  const portLogs = await readRawLogs();
+  const finalLogs = {};
   for (let i = 0; i < portLogs.length; i++) {
     const e = portLogs[i];
-    let keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"])) {
-      finalLogs[e["trxId"]].push(e["wallet"]);
-    } else {
-      finalLogs[e["trxId"]] = [e["wallet"]];
-    }
+    const keys = Object.keys(finalLogs);
+    if (keys.includes(e["trxId"])) finalLogs[e["trxId"]].push(e["wallet"]);
+    else finalLogs[e["trxId"]] = [e["wallet"]];
   }
   return finalLogs;
 }
@@ -162,15 +140,15 @@ async function readRawLogs() {
     console.error("Error reading raw logs");
     return [];
   }
-  let logs = fullLogs.toString().split("\n");
+  const logs = fullLogs.toString().split("\n");
   // console.log('logs are', logs)
-  var prettyLogs = [];
-  for (var log of logs) {
+  const prettyLogs = [];
+  for (const log of logs) {
     // console.log('log is', log)
     try {
       if (log && !(log === " ") && !(log === "")) {
         try {
-          var logJSON = JSON.parse(log);
+          const logJSON = JSON.parse(log);
           prettyLogs.push(logJSON);
         } catch (err) {
           // console.error('error reading json in Koi log middleware', err)
@@ -187,81 +165,85 @@ async function readRawLogs() {
 }
 
 function getTodayDateAsString() {
-  let date = new Date();
-  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(date);
-  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
-  let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
+  const date = new Date();
+  const year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(date);
+  const month = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
+  const day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
   return `${day}-${month}-${year}`;
 }
 function getYesterdayDateAsString() {
-  let date = new Date();
+  const date = new Date();
   const yesterday = new Date(date);
   yesterday.setDate(yesterday.getDate() - 1);
-  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
+  const year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
     yesterday
   );
-  let month = new Intl.DateTimeFormat("en", { month: "short" }).format(
+  const month = new Intl.DateTimeFormat("en", { month: "short" }).format(
     yesterday
   );
-  let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(yesterday);
+  const day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(
+    yesterday
+  );
   return `${day}-${month}-${year}`;
 }
 function difficultyFunction(hash) {
   return hash.startsWith("00") || hash.startsWith("01");
 }
-async function submitPort(_req, _res) {
+async function submitPort(req, res) {
   try {
-    const signature = _req.body["x-request-signature"];
-    const publicKey = _req.body["request-public-key"];
+    const signature = req.body["x-request-signature"];
+    const publicKey = req.body["request-public-key"];
 
-    if (signature) {
-      let dataAndSignature = JSON.parse(signature);
-      console.log(typeof dataAndSignature);
-      let valid = await tools.verifySignature({
-        ...dataAndSignature,
-        owner: publicKey
-      });
-      if (!valid) {
-        console.log("Signature verification failed");
-      }
-      console.log(valid);
-      console.log(
-        Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature)))
-      );
-      let signatureHash = await arweave.crypto.hash(
-        Buffer.from(dataAndSignature.signature)
-      );
-      signatureHash = signatureHash.toString("hex");
-
-      if (!difficultyFunction(signatureHash)) {
-        console.log("Signature hash incorrect");
-      }
-
-      let data = dataAndSignature.data;
-      var payload = {
-        date: new Date(),
-        timestamp: data.timeStamp,
-        trxId: data.resourceId,
-        wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
-        proof: {
-          signature, //req.headers['x-request-signature'],
-          public_key: publicKey
-        }
-      };
-      let fileName = getTodayDateAsString();
-      await namespace.fs(
-        "appendFile",
-        logsInfo.filename,
-        JSON.stringify(payload) + "\n"
-      );
-
-      _res.status(200).json({
-        message: "Port Received"
-      });
+    if (!signature) {
+      console.error("Port submitted without signature");
+      res.status(400).send({ error: "ERROR: No signature" });
     }
+
+    const dataAndSignature = JSON.parse(signature);
+    console.log(typeof dataAndSignature);
+    const valid = await tools.verifySignature({
+      ...dataAndSignature,
+      owner: publicKey
+    });
+    if (!valid) {
+      console.log("Signature verification failed");
+    }
+    console.log(valid);
+    console.log(
+      Buffer.from(JSON.stringify(JSON.stringify(dataAndSignature.signature)))
+    );
+    let signatureHash = await arweave.crypto.hash(
+      Buffer.from(dataAndSignature.signature)
+    );
+    signatureHash = signatureHash.toString("hex");
+
+    if (!difficultyFunction(signatureHash)) {
+      console.log("Signature hash incorrect");
+    }
+
+    const data = dataAndSignature.data;
+    const payload = {
+      date: new Date(),
+      timestamp: data.timeStamp,
+      trxId: data.resourceId,
+      wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
+      proof: {
+        signature, //req.headers['x-request-signature'],
+        public_key: publicKey
+      }
+    };
+    await namespace.fs(
+      "appendFile",
+      logsInfo.filename,
+      JSON.stringify(payload) + "\n"
+    );
+
+    res.status(200).json({
+      message: "Port Received"
+    });
   } catch (e) {
     console.error(e);
-    _res.status(500).send({ error: "ERROR: " + e });
+    res.status(500).send({ error: "ERROR: " + e });
   }
 }
 
@@ -274,7 +256,7 @@ async function getAttentionStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Logs updated, resetting trackers");
-      //isDistributed = false;
+      isDistributed = false;
       isLogsSubmitted = false;
       isRanked = false;
     }
@@ -353,10 +335,9 @@ async function submitData() {
 
   const result = await bundleAndExport(payload);
   let task = "post payload";
-  if (await checkTxConfirmation(result.id, task)) {
-    console.log("payload posted");
-  }
-  let input = {
+  if (await checkTxConfirmation(result.id, task)) console.log("payload posted");
+
+  const input = {
     function: "submitDistribution",
     distributionTxId: result.id, // it should be ressult.id
     cacheUrl: "http://localhost:8887/test/cache",
@@ -384,35 +365,32 @@ async function submitData() {
  */
 async function canAudit(state, block) {
   const task = state.task;
-  const activeProposedDatas = task.proposedPaylods.find(
-    (proposedDatas) => proposedDatas.block === task.open
+  if (block >= task.close) return false;
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
   );
 
-  const proposedDatas = activeProposedDatas.proposedDatas;
-  if (!proposedDatas.length) {
-    return false;
-  } else {
-    return true;
-  }
+  const proposedData = activeProposedData.proposedData;
+  return proposedData.length !== 0;
 }
 
 async function audit(state) {
   const task = state.task;
-  const activeProposedDatas = task.proposedPaylods.find(
-    (proposedDatas) => proposedDatas.block === task.open
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
   );
 
-  const proposedDatas = activeProposedDatas.proposedDatas;
+  const proposedData = activeProposedData.proposedData;
   await Promise.all(
-    proposedDatas.map(async (proposedData) => {
+    proposedData.map(async (proposedData) => {
       const valid = await auditPort(proposedData.txId);
       if (!valid) {
-        let input = {
+        const input = {
           function: "audit",
           id: proposedData.id,
-          descripition: "malicious_data"
+          description: "malicious_data"
         };
-        let task = "submit audit";
+        const task = "submit audit";
         const tx = await smartweave.interactWrite(
           arweave,
           tools.wallet,
@@ -441,11 +419,11 @@ function canSubmitBatch(state, block) {
 async function submitBatch(state) {
   const activeVotes = await activeVoteId(state);
   let task = "submitting votes";
-  for (let activeVoteId of activeVotes) {
+  for (const activeVoteId of activeVotes) {
     const state = await tools.getContractState();
     const vote = state.votes.find((vote) => vote.id == activeVoteId);
     const bundlers = vote.bundlers;
-    const bundlerAddress = await tools.getWalletAddress();
+    const bundlerAddress = await tools.getWalconstAddress();
     if (!(bundlerAddress in bundlers)) {
       const txId = (await batchUpdateContractState(activeVoteId)).id;
       if (!(await checkTxConfirmation(txId, task))) {
@@ -490,7 +468,7 @@ async function activeVoteId(state) {
 async function isVoteTracked(voteId) {
   const batchFileName = "/../app/bundles/" + voteId;
   try {
-    await fs("access", batchFileName, fsConstants.F_OK);
+    await namespace.fs("access", batchFileName, fsConstants.F_OK);
     return true;
   } catch (_e) {
     return false;
@@ -510,8 +488,8 @@ async function batchUpdateContractState(voteId) {
  */
 async function getVotesFile(fileId) {
   const batchFileName = "/../bundles/" + fileId;
-  await fs("access", batchFileName, fsConstants.F_OK);
-  return await fs("readFile", batchFileName, "utf8");
+  await namespace.fs("access", batchFileName, fsConstants.F_OK);
+  return await namespace.fs("readFile", batchFileName, "utf8");
 }
 
 /**
@@ -520,7 +498,7 @@ async function getVotesFile(fileId) {
  * @returns
  */
 async function bundleAndExport(bundle) {
-  let myTx = await arweave.createTransaction(
+  const myTx = await arweave.createTransaction(
     {
       data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
     },
@@ -544,11 +522,11 @@ function canRankAndPrepareDistribution(state, block) {
   if (
     block < task.close || // not time to rank and distribute or
     isRanked || // we've already rank and distribute or
-    !task.proposedPaylods.length // daily traffic log is empty
+    !task.proposedPayloads.length // daily traffic log is empty
   )
     return false;
 
-  const currentTrafficLogs = task.proposedPaylods.find(
+  const currentTrafficLogs = task.proposedPayloads.find(
     (proposedTask) => proposedTask.block === task.open
   );
   isRanked = currentTrafficLogs.isRanked;
@@ -558,8 +536,8 @@ function canRankAndPrepareDistribution(state, block) {
 /**
  *
  */
-async function rankAndPerpareDistribution() {
-  let input = {
+async function rankAndPrepareDistribution() {
+  const input = {
     function: "rankAndPrepareDistribution"
   };
   const tx = await smartweave.interactWrite(
@@ -581,23 +559,21 @@ async function rankAndPerpareDistribution() {
  * @returns {boolean} Wether we can distribute
  */
 function canDistributeReward(subContractState) {
+  if (isDistributed) return false;
+
   const prepareDistribution = subContractState.task.prepareDistribution;
   // check if there is not rewarded distributions
-  const unRewardedDistribution = prepareDistribution.filter(
+  const unrewardedDistribution = prepareDistribution.filter(
     (distribution) => !distribution.isRewardAddToMainContract
   );
-  if (!unRewardedDistribution.length || isDistributed) {
-    return false;
-  } else {
-    return true;
-  }
+  return unrewardedDistribution.length !== 0;
 }
 
 /**
  *
  */
 async function distribute() {
-  let input = {
+  const input = {
     function: "distributeReward"
   };
   const tx = await smartweave.interactWrite(
@@ -643,9 +619,9 @@ async function tryVote(state) {
     activeVotes.map(async (vote) => {
       // check if the node already voted for the activeVotes
       if (!voteIds.includes(vote.id)) {
-        const receiptFrombundler = await validateAndVote(vote.id, state);
+        const receiptFromBundler = await validateAndVote(vote.id, state);
         const receipt = dataString.receipt;
-        receipt.push(receiptFrombundler);
+        receipt.push(receiptFromBundler);
         voteIds.push(vote.id);
         await updateData({ voteId: voteIds, receipt: receipt });
       }
@@ -684,7 +660,7 @@ async function updateData(data) {
  */
 
 async function validateAndVote(id, state) {
-  const suspectedProposedData = state.task.proposedPaylods.proposedDatas.find(
+  const suspectedProposedData = state.task.proposedPayloads.proposedData.find(
     (proposedData) => proposedData.id === id
   );
   const valid = audit(suspectedProposedData.txId);
@@ -692,7 +668,7 @@ async function validateAndVote(id, state) {
   // if suspectedData is not Valid userVote = true, if userVote = false
 
   if (valid) {
-    let input = {
+    const input = {
       voteId: id,
       userVote: "true"
     };
@@ -700,7 +676,7 @@ async function validateAndVote(id, state) {
     const receipt = axios.post("http://localhost:8887/submitVote", signPayload);
     return receipt;
   } else {
-    let input = {
+    const input = {
       voteId: id,
       userVote: "true"
     };
@@ -709,7 +685,7 @@ async function validateAndVote(id, state) {
     return receipt;
   }
 
-  // save the receipt if the bundler did't submit the vote then the node use the receipt to slash
+  // save the receipt if the bundler didn't submit the vote then the node use the receipt to slash
 }
 /**
  *
