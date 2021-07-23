@@ -1,6 +1,5 @@
 export default function audit(state, action) {
   const votes = state.votes;
-  const task = state.task;
   const caller = action.caller;
   const input = action.input;
   const descripition = input.descripition;
@@ -17,9 +16,7 @@ export default function audit(state, action) {
     yays: 0,
     nays: 0,
     votersList: [],
-    bundlers: {},
-    open: task.open,
-    close: task.close
+    bundlers: {}
   };
   votes.push(vote);
   return { state };

@@ -17,11 +17,11 @@ export default async function submitDistribution(state, action) {
   if (contractTask !== undefined) {
     const rewardedBlock = contractTask.rewardedBlock;
     const prepareDistribution = task.prepareDistribution.filter(
-      (distribution) => !distribution.isRewardAddToMainContract
+      (distribution) => !distribution.isRewarded
     );
     prepareDistribution.map((distribution) => {
       if (rewardedBlock.includes(distribution.block)) {
-        distribution.isRewardAddToMainContract = true;
+        distribution.isRewarded = true;
       }
     });
   }

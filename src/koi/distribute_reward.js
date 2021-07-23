@@ -10,21 +10,21 @@ export default async function distributeReward(state) {
       const prepareDistribution = contractState.task.prepareDistribution;
       const rewardedBlock = task.rewardedBlock;
       const rewardedPrepareDistribution = prepareDistribution.filter(
-        (distribution) => distribution.isRewardAddToMainContract
+        (distribution) => distribution.isRewarded
       );
       // clean rewarded block
       rewardedPrepareDistribution.map((distribution) => {
-        if (distribution.isRewardAddToMainContract) {
+        if (distribution.isRewarded) {
           const index = rewardedBlock.indexOf(distribution.block);
           if (index > -1) {
             rewardedBlock.splice(index, 1);
           }
         }
       });
-      // filter isRewardAddToMainContract = false and if distribution unRewarded in Main Contract
+      // filter isRewarded = false and if distribution unRewarded in Main Contract
       const unRewardedPrepareDistribution = prepareDistribution.filter(
         (distribution) =>
-          !distribution.isRewardAddToMainContract &&
+          !distribution.isRewarded &&
           !rewardedBlock.includes(distribution.block)
       );
 
