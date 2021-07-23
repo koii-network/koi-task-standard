@@ -268,7 +268,7 @@ async function proposePorts() {
   const input = {
     function: "submitDistribution",
     distributionTxId: result.id,
-    cacheUrl: "http://localhost:8887/test/cache", // TODO FIXME
+    cacheUrl: "https://dev.koi.rocks/test/cache", // TODO FIXME
     mainContractId: tools.contractId,
     contractId: namespace.taskTxId
   };
@@ -676,7 +676,10 @@ async function validateAndVote(id, state) {
   };
 
   const signPayload = await tools.signPayload(input);
-  const receipt = axios.post("http://localhost:8887/submitVote", signPayload);
+  const receipt = axios.post(
+    "https://dev.koi.rocks/namespace.taskTxId/submitVote",
+    signPayload
+  );
   return receipt;
   // save the receipt if the bundler didn't submit the vote then the node use the receipt to slash
 }
