@@ -37,6 +37,7 @@ let lastLogClose = 0;
 let isLogsSubmitted = false;
 let isRanked = false;
 let isDistributed = false;
+let isProposeSlashed = false;
 
 const logsInfo = {
   filename: getTodayDateAsString(),
@@ -613,7 +614,13 @@ async function distribute() {
 function checkForVote(state, block) {
   const task = state.task;
   const votes = state.votes;
-  if (!votes.length) {
+  const activeVotes = votes.filter((vote) => vote.status === "active");
+  const dataBuffer = await readTrackedVotes();
+  const str = dataBuffer.toString();
+  const obj = JSON.parse(str);
+  const voteIds = obj.voteIds;
+  const 
+  if (!activeVotes.length || !votes.length) {
     return false;
   }
   return block < task.open + OFFSET_BATCH_SUBMIT;
@@ -626,8 +633,9 @@ function checkForVote(state, block) {
 async function tryVote(state) {
   await createFile();
   const dataBuffer = await readTrackedVotes();
-  const dataString = dataBuffer.toString();
-  const voteIds = dataString.voteId;
+  const str = dataBuffer.toString();
+  const obj = JSON.parse(str);
+  const voteIds = obj.voteIds;
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status == "active");
   await Promise.all(
@@ -635,10 +643,10 @@ async function tryVote(state) {
       // check if the node already voted for the activeVotes
       if (!voteIds.includes(vote.id)) {
         const receiptFromBundler = await validateAndVote(vote.id, state);
-        const receipt = dataString.receipt;
-        receipt.push(receiptFromBundler);
+        const receipts = obj.receipts;
+        receipts.push(receiptFromBundler);
         voteIds.push(vote.id);
-        await updateData({ voteId: voteIds, receipt: receipt });
+        await updateData({ voteIds, receipts });
       }
     })
   );
@@ -654,7 +662,7 @@ async function createFile() {
     await namespace.fs(
       "writeFile",
       batchFileName,
-      JSON.stringify({ voteId: [], receipt: [] })
+      JSON.stringify({ voteIds: [], receipts: [] })
     );
   }
 }
@@ -682,8 +690,6 @@ async function validateAndVote(id, state) {
     suspectedProposedData.txId,
     suspectedProposedData.cacheUrl
   );
-  // audit the suspectedProposedData
-  // if suspectedData is not Valid userVote = true, if userVote = false
 
   if (valid) {
     const input = {
@@ -716,8 +722,20 @@ async function validateAndVote(id, state) {
 function checkProposeSlash(state, block) {
   const trafficLogs = state.task;
   const activeVotes = state.votes.filter((vote) => vote.status === "active");
-  // check if a node voted for activeVotes
-  // read the file and check if a node vote is submitted to contract if not slash
+  const dataBuffer = await readTrackedVotes();
+  const str = dataBuffer.toString();
+  const obj = JSON.parse(str);
+  const voteIds = obj.voteIds;
+  const activeVoteVotedByNode = [];
+  const activeVotes = state.votes.filter((vote) => vote.status === "active");
+  activeVotes.map((activeVote) => {
+    if (voteIds.include(activeVote.id)) {
+      activeVoteVotedByNode.push(activeVote.id);
+    }
+  });
+  if (!activeVotes.length || !activeVoteVotedByNode || isProposeSlashed) {
+    return false;
+  }
   return (
     trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
     block < trafficLogs.open + OFFSET_RANK
@@ -730,13 +748,23 @@ function checkProposeSlash(state, block) {
  * @returns {boolean} If can slash
  */
 async function proposeSlash(state) {
-  const receipts = []; //get the receipts;
-  const voteIds = []; //get the tracked VoteIds for activeVotes.
-  const activeVotes = state.votes.filter((vote) => vote.status === "active");
+  const dataBuffer = await readTrackedVotes();
+  const str = dataBuffer.toString();
+  const obj = JSON.parse(str);
+  const voteIds = obj.voteIds; // get the voted ids
+  const receipts = obj.receipts; //get the receipts;
+
+  const activeVoteVotedByNode = []; //get the tracked VoteIds for activeVotes.
+  const activeVotes = state.votes.filter((vote) => vote.status === "active"); // active votes
+  activeVotes.map((activeVote) => {
+    if (voteIds.include(activeVote.id)) {
+      activeVoteVotedByNode.push(activeVote.id);
+    }
+  });
   const nodeAddress = await tools.getWalconstAddress();
   await Promise.all(
     activeVotes.map(async (activeVote) => {
-      for (const voteId of voteIds) {
+      for (const voteId of activeVoteVotedByNode) {
         if (activeVote.id === voteId) {
           if (!activeVote.voterList.include(nodeAddress)) {
             const receipt = receipts.find(
@@ -757,7 +785,10 @@ async function proposeSlash(state) {
               namespace.taskTxId,
               input
             );
-            if (await checkTxConfirmation(tx, task)) console.log("slashed");
+            if (await checkTxConfirmation(tx, task)) {
+              isProposeSlashed = true;
+              console.log("slashed");
+            }
           }
         }
       }
