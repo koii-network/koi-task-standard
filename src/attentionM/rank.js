@@ -75,7 +75,7 @@ export default async function rankAndPrepareDistribution(state) {
   prepareDistribution.push({
     block: task.open,
     distribution: distributionReward,
-    isRewardAddToMainContract: false
+    isRewarded: false
   });
   task.open = SmartWeave.block.height;
   task.close = SmartWeave.block.height + 720;

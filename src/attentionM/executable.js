@@ -615,11 +615,7 @@ function checkForVote(state, block) {
   const task = state.task;
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status === "active");
-  const dataBuffer = await readTrackedVotes();
-  const str = dataBuffer.toString();
-  const obj = JSON.parse(str);
-  const voteIds = obj.voteIds;
-  const 
+
   if (!activeVotes.length || !votes.length) {
     return false;
   }
@@ -719,7 +715,7 @@ async function validateAndVote(id, state) {
  * @param {number} block Current block height
  * @returns {boolean} If can slash
  */
-function checkProposeSlash(state, block) {
+async function checkProposeSlash(state, block) {
   const trafficLogs = state.task;
   const activeVotes = state.votes.filter((vote) => vote.status === "active");
   const dataBuffer = await readTrackedVotes();
@@ -727,7 +723,6 @@ function checkProposeSlash(state, block) {
   const obj = JSON.parse(str);
   const voteIds = obj.voteIds;
   const activeVoteVotedByNode = [];
-  const activeVotes = state.votes.filter((vote) => vote.status === "active");
   activeVotes.map((activeVote) => {
     if (voteIds.include(activeVote.id)) {
       activeVoteVotedByNode.push(activeVote.id);
@@ -754,17 +749,17 @@ async function proposeSlash(state) {
   const voteIds = obj.voteIds; // get the voted ids
   const receipts = obj.receipts; //get the receipts;
 
-  const activeVoteVotedByNode = []; //get the tracked VoteIds for activeVotes.
+  const ids = []; //get the tracked VoteIds for activeVotes.
   const activeVotes = state.votes.filter((vote) => vote.status === "active"); // active votes
   activeVotes.map((activeVote) => {
     if (voteIds.include(activeVote.id)) {
-      activeVoteVotedByNode.push(activeVote.id);
+      ids.push(activeVote.id);
     }
   });
   const nodeAddress = await tools.getWalconstAddress();
   await Promise.all(
     activeVotes.map(async (activeVote) => {
-      for (const voteId of activeVoteVotedByNode) {
+      for (const voteId of ids) {
         if (activeVote.id === voteId) {
           if (!activeVote.voterList.include(nodeAddress)) {
             const receipt = receipts.find(
