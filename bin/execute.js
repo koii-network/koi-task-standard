@@ -28,18 +28,23 @@ async function main() {
     expressApp.use(cookieParser());
   }
 
-  const taskStates = [null];
-  const taskSrcs = [
-    await fsPromises.readFile(`src/${executable}/executable.js`, "utf8")
-  ];
-  const executableTasks = taskSrcs.map((src) =>
-    loadTaskSource(src, new Namespace(taskTxId, expressApp))
+  // Load task
+  const taskSrc = await fsPromises.readFile(
+    `src/${executable}/executable.js`,
+    "utf8"
+  );
+  const loadedTask = new Function(`
+    const [tools, namespace, require] = arguments;
+    ${taskSrc};
+    return {setup, execute};`);
+  const executableTask = loadedTask(
+    tools,
+    new Namespace(taskTxId, expressApp),
+    require
   );
 
   // Initialize tasks then start express app
-  await Promise.all(
-    executableTasks.map((task, i) => task.setup(taskStates[i]))
-  );
+  await executableTask.setup(null);
   const port = process.env.SERVER_PORT || 8887;
   if (operationMode === "bundler") {
     expressApp.listen(port, () => {
@@ -53,24 +58,8 @@ async function main() {
   }
 
   // Execute tasks
-  await Promise.all(
-    executableTasks.map((task, i) => task.execute(taskStates[i]))
-  );
+  await executableTask.execute(null);
   console.log("All tasks complete");
-}
-
-/**
- * @param {string} taskSrc // Source of contract
- * @param {Namespace} namespace // Wrapper object for redis, express, and filesystem
- * @returns // Executable task
- */
-function loadTaskSource(taskSrc, namespace) {
-  const loadedTask = new Function(`
-      const [tools, namespace, require] = arguments;
-      ${taskSrc};
-      return {setup, execute};
-  `);
-  return loadedTask(tools, namespace, require);
 }
 
 class Namespace {
