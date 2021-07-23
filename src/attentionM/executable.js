@@ -23,24 +23,21 @@ const arweave = Arweave.init({
   port: 443
 });
 
-const OFFSET_PROPOSE_PORTS_END = 13; // 300;
-const OFFSET_BATCH_VOTE_SUBMIT = 25; // 600;
-const OFFSET_PROPOSE_SLASH = 28; // 660
+const OFFSET_PROPOSE_PORTS_END = 12; // 300;
+const OFFSET_BATCH_VOTE_SUBMIT = 24; // 600;
+const OFFSET_PROPOSE_SLASH = 27; // 660
 
+const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
-const RESPONSE_OK = 200;
-
-const MS_TO_MIN = 60000;
-const TIMEOUT_TX = 30 * MS_TO_MIN;
 
 let lastBlock = 0;
 let lastLogClose = 0;
 
 let hasSubmittedPorts = false;
+let hasProposedSlash = false;
 let hasRanked = false;
 let hasDistributed = false;
-let hasProposedSlash = false;
 
 const logsInfo = {
   filename: "ports.log",
@@ -76,11 +73,11 @@ async function getAttentionStateAndBlock() {
   const logClose = state.task.close;
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
-      console.log("Logs updated, resetting trackers");
-      hasDistributed = false;
+      console.log("Task updated, resetting trackers");
       hasSubmittedPorts = false;
-      hasRanked = false;
       hasProposedSlash = false;
+      hasRanked = false;
+      hasDistributed = false;
     }
 
     lastLogClose = logClose;
@@ -100,8 +97,8 @@ async function getAttentionStateAndBlock() {
 
 async function service(state, block) {
   if (canProposePorts(state, block)) await proposePorts();
-  // if (canAudit(state, block)) await audit(state);
-  // if (canSubmitBatch(state, block)) await submitBatch(state);
+  if (canAudit(state, block)) await audit(state);
+  if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
 }
@@ -384,6 +381,9 @@ async function lockPorts() {
  * @returns {bool} Whether transaction was found (true) or timedout (false)
  */
 async function checkTxConfirmation(txId, task) {
+  const MS_TO_MIN = 60000;
+  const TIMEOUT_TX = 30 * MS_TO_MIN;
+
   const start = new Date().getTime() - 1;
   const update_period = MS_TO_MIN * 5;
   const timeout = start + TIMEOUT_TX;
@@ -424,6 +424,47 @@ async function bundleAndExport(bundle) {
   return result;
 }
 
+async function canAudit(state, block) {
+  const task = state.task;
+  if (block >= task.close) return false;
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
+  );
+
+  const proposedData = activeProposedData.proposedData;
+  return proposedData.length !== 0;
+}
+
+async function audit(state) {
+  const task = state.task;
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
+  );
+
+  const proposedData = activeProposedData.proposedData;
+  await Promise.all(
+    proposedData.map(async (proposedData) => {
+      const valid = await auditPort(proposedData.txId);
+      if (!valid) {
+        const input = {
+          function: "audit",
+          id: proposedData.id,
+          description: "malicious_data"
+        };
+        const task = "submit audit";
+        const tx = await smartweave.interactWrite(
+          arweave,
+          tools.wallet,
+          namespace.taskTxId,
+          input
+        );
+
+        if (await checkTxConfirmation(tx, task)) console.log("audit submitted");
+      }
+    })
+  );
+}
+
 function canRankPrepDistribution(state, block) {
   const task = state.task;
   if (
@@ -440,6 +481,80 @@ function canRankPrepDistribution(state, block) {
   );
   hasRanked = currentTrafficLogs.isRanked;
   return !hasRanked;
+}
+
+function canSubmitBatch(state, block) {
+  const open = state.task.open;
+  return (
+    open + OFFSET_BATCH_VOTE_SUBMIT < block &&
+    block < open + OFFSET_PROPOSE_SLASH
+  );
+}
+
+async function submitBatch(state) {
+  const activeVotes = await activeVoteId(state);
+  let task = "submitting votes";
+  for (const activeVoteId of activeVotes) {
+    const state = await tools.getContractState();
+    const vote = state.votes.find((vote) => vote.id == activeVoteId);
+    const bundlers = vote.bundlers;
+    const bundlerAddress = await tools.getWalletAddress();
+    if (!(bundlerAddress in bundlers)) {
+      const txId = (await batchUpdateContractState(activeVoteId)).id;
+      if (!(await checkTxConfirmation(txId, task))) {
+        console.log("Vote submission failed");
+        return;
+      }
+      const arg = {
+        batchFile: activeVoteId,
+        voteId: voteId,
+        bundlerAddress: bundlerAddress
+      };
+      const resultTx = await tools.batchAction(arg);
+      task = "batch";
+      if (!(await checkTxConfirmation(resultTx, task))) {
+        console.log("Batch failed");
+        return;
+      }
+    }
+  }
+}
+
+async function activeVoteId(state) {
+  // Check if votes are tracked simultaneously
+  const votes = state.votes;
+  const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
+  const areVotesTracked = await Promise.all(areVotesTrackedProms);
+
+  // Get active votes
+  const close = state.task.close;
+  const activeVotes = [];
+  for (let i = 0; i < votes.length; i++)
+    if (votes[i].end === close && areVotesTracked[i])
+      activeVotes.push(votes[i].id);
+  return activeVotes;
+}
+
+async function isVoteTracked(voteId) {
+  const batchFileName = "/../app/bundles/" + voteId;
+  try {
+    await namespace.fs("access", batchFileName, fsConstants.F_OK);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+async function batchUpdateContractState(voteId) {
+  const batchStr = await getVotesFile(voteId);
+  const batch = batchStr.split("\r\n").map(JSON.parse);
+  return await bundleAndExport(batch);
+}
+
+async function getVotesFile(fileId) {
+  const batchFileName = "/../bundles/" + fileId;
+  await namespace.fs("access", batchFileName, fsConstants.F_OK);
+  return await namespace.fs("readFile", batchFileName, "utf8");
 }
 
 async function rankPrepDistribution() {
@@ -682,125 +797,3 @@ async function proposeSlash(state) {
     })
   );
 }
-
-// ################# Dead Code #################
-/* 
-async function canAudit(state, block) {
-  const task = state.task;
-  if (block >= task.close) return false;
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-
-  const proposedData = activeProposedData.proposedData;
-  return proposedData.length !== 0;
-}
-
-async function audit(state) {
-  const task = state.task;
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-
-  const proposedData = activeProposedData.proposedData;
-  await Promise.all(
-    proposedData.map(async (proposedData) => {
-      const valid = await auditPort(proposedData.txId);
-      if (!valid) {
-        const input = {
-          function: "audit",
-          id: proposedData.id,
-          description: "malicious_data"
-        };
-        const task = "submit audit";
-        const tx = await smartweave.interactWrite(
-          arweave,
-          tools.wallet,
-          namespace.taskTxId,
-          input
-        );
-
-        if (await checkTxConfirmation(tx, task)) {
-          isPortsSubmitted = true;
-          console.log("audit submitted");
-        }
-      }
-    })
-  );
-}
-
-function canSubmitBatch(state, block) {
-  if (state.task === undefined) return false;
-  const trafficLogs = state.task;
-  return (
-    trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
-    block < trafficLogs.open + OFFSET_PROPOSE_SLASH
-  );
-}
-
-async function submitBatch(state) {
-  const activeVotes = await activeVoteId(state);
-  let task = "submitting votes";
-  for (const activeVoteId of activeVotes) {
-    const state = await tools.getContractState();
-    const vote = state.votes.find((vote) => vote.id == activeVoteId);
-    const bundlers = vote.bundlers;
-    const bundlerAddress = await tools.getWalconstAddress();
-    if (!(bundlerAddress in bundlers)) {
-      const txId = (await batchUpdateContractState(activeVoteId)).id;
-      if (!(await checkTxConfirmation(txId, task))) {
-        console.log("Vote submission failed");
-        return;
-      }
-      const arg = {
-        batchFile: activeVoteId,
-        voteId: voteId,
-        bundlerAddress: bundlerAddress
-      };
-      const resultTx = await tools.batchAction(arg);
-      task = "batch";
-      if (!(await checkTxConfirmation(resultTx, task))) {
-        console.log("Batch failed");
-        return;
-      }
-    }
-  }
-}
-
-async function activeVoteId(state) {
-  // Check if votes are tracked simultaneously
-  const votes = state.votes;
-  const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
-  const areVotesTracked = await Promise.all(areVotesTrackedProms);
-
-  // Get active votes
-  const close = state.task.close;
-  const activeVotes = [];
-  for (let i = 0; i < votes.length; i++)
-    if (votes[i].end === close && areVotesTracked[i])
-      activeVotes.push(votes[i].id);
-  return activeVotes;
-}
-
-async function isVoteTracked(voteId) {
-  const batchFileName = "/../app/bundles/" + voteId;
-  try {
-    await namespace.fs("access", batchFileName, fsConstants.F_OK);
-    return true;
-  } catch (_e) {
-    return false;
-  }
-}
-
-async function batchUpdateContractState(voteId) {
-  const batchStr = await getVotesFile(voteId);
-  const batch = batchStr.split("\r\n").map(JSON.parse);
-  return await bundleAndExport(batch);
-}
-
-async function getVotesFile(fileId) {
-  const batchFileName = "/../bundles/" + fileId;
-  await namespace.fs("access", batchFileName, fsConstants.F_OK);
-  return await namespace.fs("readFile", batchFileName, "utf8");
-}
-*/
