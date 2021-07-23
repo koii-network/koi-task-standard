@@ -44,7 +44,7 @@ const logsInfo = {
 };
 
 function setup(_init_state) {
-  if (namespace.express) {
+  if (namespace.app) {
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
@@ -60,7 +60,7 @@ async function execute(_init_state) {
       console.error("Error", e.message);
       continue;
     }
-    await (namespace.express ? service : witness)(state, block);
+    await (namespace.app ? service : witness)(state, block);
   }
 }
 
