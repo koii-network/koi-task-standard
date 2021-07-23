@@ -22,7 +22,6 @@ const arweave = Arweave.init({
   protocol: "https",
   port: 443
 });
-
 const RESPONSE_ACTION_FAILED = 411;
 
 const OFFSET_BATCH_SUBMIT = 470;
@@ -39,9 +38,29 @@ let isRanked = false;
 let isDistributed = false;
 
 const logsInfo = {
-  filename: getTodayDateAsString(),
-  oldFileName: getYesterdayDateAsString()
+  filename: "ports.log",
+  oldFilename: "old-ports.log"
 };
+async function lockPorts() {
+  try {
+    console.log("herellll")
+    try {
+      await namespace.fs("rm", logsInfo.oldFilename);
+    } catch (e) {
+      console.log(e.message);
+    }
+    const data = await namespace.fs("readFile", logsInfo.filename);
+    await namespace.fs("writeFile", logsInfo.oldFilename,data);
+    // await namespace.fs("rename", logsInfo.filename, logsInfo.oldFilename);
+    await namespace.fs("writeFile", logsInfo.filename, "");
+  } catch (e) {
+    console.log(e);
+  }
+}
+// setTimeout(()=>{
+//   lockPorts();
+// },10);
+
 
 function setup(_init_state) {
   if (namespace.express) {
@@ -79,7 +98,8 @@ async function witness(state, block) {
 }
 
 async function servePortCache(req, res) {
-  const logs = await namespace.fs("readFile", logsInfo.filename, "utf8");
+  await namespace.fs("appendFile", logsInfo.oldFilename,"");
+  const logs = await namespace.fs("readFile", logsInfo.oldFilename, "utf8");
   res.send(logs);
 }
 
@@ -93,6 +113,7 @@ async function auditPort(txId, url) {
       if (log && !(log === " ") && !(log === "")) {
         try {
           const logJSON = JSON.parse(log);
+          if (!verifySignature(logJSON)) continue;
           prettyLogs.push(logJSON);
         } catch (err) {
           // console.error('error reading json in Koi log middleware', err)
@@ -146,7 +167,38 @@ async function PublishPoRT() {
   }
   return finalLogs;
 }
+async function verifySignature(log) {
+  let signature = log.proof.signature;
+  const publicKey = log.proof.public_key;
 
+  if (!signature) {
+    console.error("Port submitted without signature");
+    return false;
+  }
+
+  const dataAndSignature = JSON.parse(signature);
+  console.log(typeof dataAndSignature);
+  const valid = await tools.verifySignature({
+    ...dataAndSignature,
+    owner: publicKey
+  });
+  if (!valid) {
+    console.log("Signature verification failed");
+    return false;
+  }
+  console.log(valid);
+  let signatureHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(dataAndSignature.signature))
+    .digest("hex");
+  signatureHash = signatureHash.toString("hex");
+  // console.log(dataAndSignature.signature)
+
+  if (!difficultyFunction(signatureHash)) {
+    console.log("Signature hash incorrect");
+    return false;
+  }
+}
 async function readRawLogs() {
   let fullLogs;
   try {
@@ -164,6 +216,8 @@ async function readRawLogs() {
       if (log && !(log === " ") && !(log === "")) {
         try {
           const logJSON = JSON.parse(log);
+          if (!verifySignature(logJson)) return;
+
           prettyLogs.push(logJSON);
         } catch (err) {
           // console.error('error reading json in Koi log middleware', err)
@@ -177,6 +231,9 @@ async function readRawLogs() {
   }
   // console.log('resolving some prettyLogs ('+ prettyLogs.length +') sample:', prettyLogs[prettyLogs.length - 1])
   return prettyLogs;
+}
+function generateRandomString() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 function getTodayDateAsString() {
@@ -211,7 +268,7 @@ async function submitPort(req, res) {
 
     if (!signature) {
       console.error("Port submitted without signature");
-      res.status(400).send({ error: "ERROR: No signature" });
+      return res.status(400).send({ error: "ERROR: No signature" });
     }
 
     const dataAndSignature = JSON.parse(signature);
@@ -222,6 +279,9 @@ async function submitPort(req, res) {
     });
     if (!valid) {
       console.log("Signature verification failed");
+      return res
+        .status(400)
+        .send({ error: "ERROR: PoRT verification failed " });
     }
     console.log(valid);
     let signatureHash = crypto
@@ -233,6 +293,9 @@ async function submitPort(req, res) {
 
     if (!difficultyFunction(signatureHash)) {
       console.log("Signature hash incorrect");
+      return res
+        .status(400)
+        .send({ error: "ERROR: PoRT verification failed " });
     }
 
     const data = dataAndSignature.data;
