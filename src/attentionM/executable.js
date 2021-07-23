@@ -75,7 +75,7 @@ async function service(state, block) {
 
 async function witness(state, block) {
   if (checkForVote(state, block)) await tryVote(state);
-  if (checkProposeSlash(state, block)) await tools.proposeSlash();
+  if (checkProposeSlash(state, block)) await proposeSlash();
 }
 
 async function servePortCache(req, res) {
@@ -671,7 +671,7 @@ async function updateData(data) {
  *
  * @param {string} voteId
  * @param {*} state Current block height
- * @returns {boolean} If can slash
+ * @returns {object} receipt received from service node
  */
 
 async function validateAndVote(id, state) {
@@ -715,9 +715,53 @@ async function validateAndVote(id, state) {
  */
 function checkProposeSlash(state, block) {
   const trafficLogs = state.task;
+  const activeVotes = state.votes.filter((vote) => vote.status === "active");
+  // check if a node voted for activeVotes
+  // read the file and check if a node vote is submitted to contract if not slash
   return (
     trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
     block < trafficLogs.open + OFFSET_RANK
+  );
+}
+/**
+ *
+ * @param {*} state
+ * @param {number} block Current block height
+ * @returns {boolean} If can slash
+ */
+async function proposeSlash(state) {
+  const receipts = []; //get the receipts;
+  const voteIds = []; //get the tracked VoteIds for activeVotes.
+  const activeVotes = state.votes.filter((vote) => vote.status === "active");
+  const nodeAddress = await tools.getWalconstAddress();
+  await Promise.all(
+    activeVotes.map(async (activeVote) => {
+      for (const voteId of voteIds) {
+        if (activeVote.id === voteId) {
+          if (!activeVote.voterList.include(nodeAddress)) {
+            const receipt = receipts.find(
+              (receipt) => receipt.vote.vote.voteId == voteId
+            );
+            let task = "posting receipt data";
+            const receiptTx = await bundleAndExport(receipt);
+            if (await checkTxConfirmation(receiptTx.id, task))
+              console.log("receipt posted");
+            const input = {
+              function: "proposeSlash",
+              receiptTxId: receiptTx.id
+            };
+            task = "slash";
+            const tx = await smartweave.interactWrite(
+              arweave,
+              tools.wallet,
+              namespace.taskTxId,
+              input
+            );
+            if (await checkTxConfirmation(tx, task)) console.log("slashed");
+          }
+        }
+      }
+    })
   );
 }
 
