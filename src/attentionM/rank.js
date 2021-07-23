@@ -3,7 +3,7 @@ export default async function rankAndPrepareDistribution(state) {
   const task = state.task;
   const prepareDistribution = task.prepareDistribution;
   const registeredRecords = state.registeredRecords;
-  const currentProposed = task.proposedPaylods.find(
+  const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
   if (currentProposed.isRanked) {
@@ -84,6 +84,6 @@ export default async function rankAndPrepareDistribution(state) {
     proposedDatas: [],
     isRanked: false
   };
-  task.proposedPaylods.push(newTask);
+  task.proposedPayloads.push(newTask);
   return { state };
 }

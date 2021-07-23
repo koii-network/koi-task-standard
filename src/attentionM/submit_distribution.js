@@ -6,7 +6,7 @@ export default async function submitDistribution(state, action) {
   const url = input.cacheUrl;
   const mainContractId = input.mainContractId;
   const contractId = input.contractId;
-  const currentTask = task.proposedPaylods.find(
+  const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );
   const mainContractState = await SmartWeave.contracts.readContractState(
@@ -25,7 +25,9 @@ export default async function submitDistribution(state, action) {
       }
     });
   }
-
+  task.prepareDistribution = task.prepareDistribution.filter(
+    (distribution) => !distribution.isRewarded
+  );
   const payload = {
     id: SmartWeave.transaction.id,
     txId: distributionTxId,
