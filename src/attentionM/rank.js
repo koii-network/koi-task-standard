@@ -9,7 +9,7 @@ export default async function rankAndPrepareDistribution(state) {
   if (currentProposed.isRanked) {
     throw new ContractError("It is Ranked");
   }
-  const proposeDatas = currentProposed.proposedDatas;
+  const proposeDatas = currentProposed.proposedData;
   let acceptedProposedTxIds = [];
   proposeDatas.map((proposeData) => {
     if (votes.length !== 0) {
@@ -77,11 +77,12 @@ export default async function rankAndPrepareDistribution(state) {
     distribution: distributionReward,
     isRewarded: false
   });
-  task.open = SmartWeave.block.height;
-  task.close = SmartWeave.block.height + 720;
+  task.open = SmartWeave.block.heigh;
+  //task.close = SmartWeave.block.height + 720;
+  task.close = SmartWeave.block.height + 30;
   const newTask = {
     block: task.open,
-    proposedDatas: [],
+    proposedData: [],
     isRanked: false
   };
   task.proposedPayloads.push(newTask);
