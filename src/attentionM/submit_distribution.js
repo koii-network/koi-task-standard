@@ -28,6 +28,14 @@ export default async function submitDistribution(state, action) {
   task.prepareDistribution = task.prepareDistribution.filter(
     (distribution) => !distribution.isRewarded
   );
+  const proposedPayload = currentTask.proposedDatas.find(
+    (payload) => payload.distributer === caller
+  );
+  if (proposedPayload !== undefined) {
+    throw new ContractError(
+      `Payload from this${caller} address is already proposed`
+    );
+  }
   const payload = {
     id: SmartWeave.transaction.id,
     txId: distributionTxId,

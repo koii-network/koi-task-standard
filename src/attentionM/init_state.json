@@ -2,34 +2,34 @@
   "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
   "name": "Attention_Game",
   "registeredRecords": {
-    "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ": "sQTWslyCdKF6oeQ7xXUYUV1bluP0_5-483FXH_RVZKU",
-    "PzNLuVRTpV1tdcS8K9ADCIG6944kka431ShtJYJMZQI": "MqKaTw9bV2p6bnkZCKXOF7Rt8TTqU740saOILALB-Q0",
-    "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-    "1UDe0Wqh51-O03efPzoc_HhsUPrmgBR2ziUfaI7CpZk": "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc",
-    "OsrHVoEQot03wQfSzxHmMhZMwtYbanUZx5cjtdJcfk0": "cf3iB51tJrVSQ-j-TmcRuMYeuvho6y-7IrQm9O7QKIk",
-    "PJS-kIJYdSkML2kmxJl6PSp9gqU8_xZJWHZawxQOTsw": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
-    "cfhKMEd_pCZHHIKeVGZAilnITonqllwkA_yhiF2PaOw": "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ",
-    "HEcP1vyyHXjLVZ8ote2rphHq7wsvcVPr7RnMyAh2ZJE": "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ",
-    "_gk1ZNumV6a0vuqhVr5v6w1RYfoi-pArn-JKpU5eWZU": "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ",
-    "kpaWOQ6Uv8EdgG3acRwyijjTpRXDGF-w_VORPzG-3bQ": "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ",
-    "k0yTc6j2dpvInkPbCchosKgSTjweC50zyY7W6yvOYLA": "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ",
-    "EpbbtviT8nqC3aCflyfM5sWf0lAq6YsFW6K48T1tAbU": "zFGpdtH0tpXAvG7PDMhq-ExCR_w7c4PYuwmoRZKmMpA",
-    "IBIaFENxRe7oS_Tzq_dLblNRtcHKkrF1FkbcRYOmDjc": "EMVdEaeEy7IkWSIA9MjAcramDclaumlVJKHoHd06JC8",
-    "-je3T3r6_70-WytZjkvjEtyUxSjPTHnU_m7zZqk2U_k": "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc",
-    "2E3mq8y4gicRFXaAkcHuIvD-4vER2YrwFUgdLGDKxXM": "MZN_kcDMHpGKP7JjgJxUuFsxF5l3dd9jOP6HYHChWoI",
-    "VkSIo7yXZf9KrohEt_XkMk92RJVKqieiD-cap232ON4": "hJIadW2b6-eaW6B0gJLqZqmE2sGfaxkGCpGxkpmKj1Q",
-    "NI9OY-Rzj4TjS5s4W-DFyRoY2Vz4884OhSYdjFDl1uY": "oXPkFpvvpI0EDdbBUVz1sOEf8LAcx7pZqTduB70jEvo",
-    "qZcd6X49o8zIKBV7S3gT0KA9bvXuk-JpfQAKGm-hmx8": "oXPkFpvvpI0EDdbBUVz1sOEf8LAcx7pZqTduB70jEvo",
-    "_-9TDSVSwC40JXnmn3bk7Ygr0vRdlhACKgqo7siJx2A": "oXPkFpvvpI0EDdbBUVz1sOEf8LAcx7pZqTduB70jEvo"
+    "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo": [
+      "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0"
+    ],
+    "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc": [
+      "1UDe0Wqh51-O03efPzoc_HhsUPrmgBR2ziUfaI7CpZk",
+      "-je3T3r6_70-WytZjkvjEtyUxSjPTHnU_m7zZqk2U_k"
+    ],
+    "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ": [
+      "cfhKMEd_pCZHHIKeVGZAilnITonqllwkA_yhiF2PaOw",
+      "HEcP1vyyHXjLVZ8ote2rphHq7wsvcVPr7RnMyAh2ZJE",
+      "_gk1ZNumV6a0vuqhVr5v6w1RYfoi-pArn-JKpU5eWZU",
+      "kpaWOQ6Uv8EdgG3acRwyijjTpRXDGF-w_VORPzG-3bQ",
+      "k0yTc6j2dpvInkPbCchosKgSTjweC50zyY7W6yvOYLA"
+    ],
+    "oXPkFpvvpI0EDdbBUVz1sOEf8LAcx7pZqTduB70jEvo": [
+      "NI9OY-Rzj4TjS5s4W-DFyRoY2Vz4884OhSYdjFDl1uY",
+      "qZcd6X49o8zIKBV7S3gT0KA9bvXuk-JpfQAKGm-hmx8",
+      "_-9TDSVSwC40JXnmn3bk7Ygr0vRdlhACKgqo7siJx2A"
+    ]
   },
   "votes": [],
   "task": {
     "open": 734226,
-    "close": 734226,
+    "close": 734726,
     "prepareDistribution": [],
     "proposedPayloads": [
       {
-        "block": 733848,
+        "block": 734226,
         "proposedData": [],
         "isRanked": false
       }

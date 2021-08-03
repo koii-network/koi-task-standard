@@ -40,8 +40,9 @@ export default async function rankAndPrepareDistribution(state) {
       const splitData = data.split();
       const parseData = JSON.parse(splitData);
       const parseDataKeys = Object.keys(parseData);
+      const registeredNfts = Object.values(registeredRecords);
       parseDataKeys.forEach((key) => {
-        if (key in registeredRecords) {
+        if (registeredNfts.some((nfts) => nfts.includes(key))) {
           if (!(key in distribution)) {
             distribution[key] = parseData[key];
           } else {
@@ -65,11 +66,15 @@ export default async function rankAndPrepareDistribution(state) {
     rewardPerAttention = 1000 / totalAttention;
   }
   let distributionReward = {};
-  const keys = Object.keys(distribution);
-
-  keys.forEach((key) => {
-    distributionReward[registeredRecords[key]] =
-      distribution[key].length * rewardPerAttention;
+  const nftIds = Object.keys(distribution);
+  const nftOwners = Object.keys(registeredRecords);
+  nftOwners.map((nftOwner) => {
+    nftIds.forEach((nftId) => {
+      if (registeredRecords[nftOwner].includes(nftId)) {
+        distributionReward[nftOwner] =
+          distribution[nftId].length * rewardPerAttention;
+      }
+    });
   });
   currentProposed.isRanked = true;
   prepareDistribution.push({
