@@ -6,7 +6,7 @@ export default async function submitDistribution(state, action) {
   const url = input.cacheUrl;
   const mainContractId = input.mainContractId;
   const contractId = input.contractId;
-  const currentTask = task.proposedPaylods.find(
+  const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );
   const mainContractState = await SmartWeave.contracts.readContractState(
@@ -17,15 +17,25 @@ export default async function submitDistribution(state, action) {
   if (contractTask !== undefined) {
     const rewardedBlock = contractTask.rewardedBlock;
     const prepareDistribution = task.prepareDistribution.filter(
-      (distribution) => !distribution.isRewardAddToMainContract
+      (distribution) => !distribution.isRewarded
     );
     prepareDistribution.map((distribution) => {
       if (rewardedBlock.includes(distribution.block)) {
-        distribution.isRewardAddToMainContract = true;
+        distribution.isRewarded = true;
       }
     });
   }
-
+  task.prepareDistribution = task.prepareDistribution.filter(
+    (distribution) => !distribution.isRewarded
+  );
+  const proposedPayload = currentTask.proposedDatas.find(
+    (payload) => payload.distributer === caller
+  );
+  if (proposedPayload !== undefined) {
+    throw new ContractError(
+      `Payload from this${caller} address is already proposed`
+    );
+  }
   const payload = {
     id: SmartWeave.transaction.id,
     txId: distributionTxId,

@@ -3,13 +3,13 @@ export default async function rankAndPrepareDistribution(state) {
   const task = state.task;
   const prepareDistribution = task.prepareDistribution;
   const registeredRecords = state.registeredRecords;
-  const currentProposed = task.proposedPaylods.find(
+  const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
   if (currentProposed.isRanked) {
     throw new ContractError("It is Ranked");
   }
-  const proposeDatas = currentProposed.proposedDatas;
+  const proposeDatas = currentProposed.proposedData;
   let acceptedProposedTxIds = [];
   proposeDatas.map((proposeData) => {
     if (votes.length !== 0) {
@@ -40,8 +40,9 @@ export default async function rankAndPrepareDistribution(state) {
       const splitData = data.split();
       const parseData = JSON.parse(splitData);
       const parseDataKeys = Object.keys(parseData);
+      const registeredNfts = Object.values(registeredRecords);
       parseDataKeys.forEach((key) => {
-        if (key in registeredRecords) {
+        if (registeredNfts.some((nfts) => nfts.includes(key))) {
           if (!(key in distribution)) {
             distribution[key] = parseData[key];
           } else {
@@ -65,25 +66,30 @@ export default async function rankAndPrepareDistribution(state) {
     rewardPerAttention = 1000 / totalAttention;
   }
   let distributionReward = {};
-  const keys = Object.keys(distribution);
-
-  keys.forEach((key) => {
-    distributionReward[registeredRecords[key]] =
-      distribution[key].length * rewardPerAttention;
+  const nftIds = Object.keys(distribution);
+  const nftOwners = Object.keys(registeredRecords);
+  nftOwners.map((nftOwner) => {
+    nftIds.forEach((nftId) => {
+      if (registeredRecords[nftOwner].includes(nftId)) {
+        distributionReward[nftOwner] =
+          distribution[nftId].length * rewardPerAttention;
+      }
+    });
   });
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,
     distribution: distributionReward,
-    isRewardAddToMainContract: false
+    isRewarded: false
   });
-  task.open = SmartWeave.block.height;
-  task.close = SmartWeave.block.height + 720;
+  task.open = SmartWeave.block.heigh;
+  //task.close = SmartWeave.block.height + 720;
+  task.close = SmartWeave.block.height + 30;
   const newTask = {
     block: task.open,
-    proposedDatas: [],
+    proposedData: [],
     isRanked: false
   };
-  task.proposedPaylods.push(newTask);
+  task.proposedPayloads.push(newTask);
   return { state };
 }

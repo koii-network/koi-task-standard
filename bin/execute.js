@@ -1,10 +1,14 @@
 require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
-const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
+const tools = new koiSdk.Node(
+  process.env.TRUSTED_SERVICE_URL,
+  "9BX6HQV5qkGiXV6hTglAuPdccKoEP_XI2NNbjHv5MMM"
+);
 
 const executable = process.argv[2];
-const operationMode = process.argv[3];
+const taskTxId = process.argv[3];
+const operationMode = process.argv[4];
 
 async function main() {
   await tools.nodeLoadWallet(process.env.WALLET_LOCATION);
@@ -24,18 +28,23 @@ async function main() {
     expressApp.use(cookieParser());
   }
 
-  const taskStates = [null];
-  const taskSrcs = [
-    await fsPromises.readFile(`src/${executable}/executable.js`, "utf8")
-  ];
-  const executableTasks = taskSrcs.map((src) =>
-    loadTaskSource(src, new Namespace("test", expressApp))
+  // Load task
+  const taskSrc = await fsPromises.readFile(
+    `src/${executable}/executable.js`,
+    "utf8"
+  );
+  const loadedTask = new Function(`
+    const [tools, namespace, require] = arguments;
+    ${taskSrc};
+    return {setup, execute};`);
+  const executableTask = loadedTask(
+    tools,
+    new Namespace(taskTxId, expressApp),
+    require
   );
 
   // Initialize tasks then start express app
-  await Promise.all(
-    executableTasks.map((task, i) => task.setup(taskStates[i]))
-  );
+  await executableTask.setup(null);
   const port = process.env.SERVER_PORT || 8887;
   if (operationMode === "bundler") {
     expressApp.listen(port, () => {
@@ -49,24 +58,8 @@ async function main() {
   }
 
   // Execute tasks
-  await Promise.all(
-    executableTasks.map((task, i) => task.execute(taskStates[i]))
-  );
+  await executableTask.execute(null);
   console.log("All tasks complete");
-}
-
-/**
- * @param {string} taskSrc // Source of contract
- * @param {Namespace} namespace // Wrapper object for redis, express, and filesystem
- * @returns // Executable task
- */
-function loadTaskSource(taskSrc, namespace) {
-  const loadedTask = new Function(`
-      const [tools, namespace, require] = arguments;
-      ${taskSrc};
-      return {setup, execute};
-  `);
-  return loadedTask(tools, namespace, require);
 }
 
 class Namespace {
@@ -83,6 +76,11 @@ class Namespace {
   async fs(method, path, ...args) {
     const basePath = "namespace/" + this.taskTxId;
     try {
+      try {
+        await fsPromises.access("namespace");
+      } catch {
+        await fsPromises.mkdir("namespace");
+      }
       await fsPromises.access(basePath);
     } catch {
       await fsPromises.mkdir(basePath);

@@ -30,74 +30,74 @@ async function main() {
   );
   smartest.writeContractState(attentionContractId, attentionInitState);
 
-  const attentionInput = {
-    function: "submitDistribution",
-    distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
-    cacheUrl: "http/bundler/cache",
-    mainContractId: koiContractId,
-    contractId: attentionContractId
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput = {
+  //   function: "submitDistribution",
+  //   distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
+  //   cacheUrl: "http/bundler/cache",
+  //   mainContractId: koiContractId,
+  //   contractId: attentionContractId
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
-  const attentionInput0 = {
-    function: "submitDistribution",
-    distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
-    cacheUrl: "http/bundler/cache",
-    mainContractId: koiContractId,
-    contractId: attentionContractId
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput0,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput0 = {
+  //   function: "submitDistribution",
+  //   distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
+  //   cacheUrl: "http/bundler/cache",
+  //   mainContractId: koiContractId,
+  //   contractId: attentionContractId
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput0,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
-  const state = smartest.readContractState(attentionContractId);
-  const proposedPaylods = state.task.proposedPaylods.find(
-    (proposedPaylod) => proposedPaylod.block === state.task.open
-  );
-  const proposedDataId = proposedPaylods.proposedDatas[0].id;
-  const attentionInput1 = {
-    function: "audit",
-    id: proposedDataId,
-    descripition: "malicious_data"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput1,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const state = smartest.readContractState(attentionContractId);
+  // const proposedPaylods = state.task.proposedPaylods.find(
+  //   (proposedPaylod) => proposedPaylod.block === state.task.open
+  // );
+  // const proposedDataId = proposedPaylods.proposedDatas[0].id;
+  // const attentionInput1 = {
+  //   function: "audit",
+  //   id: proposedDataId,
+  //   descripition: "malicious_data"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput1,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
-  const attentionInput2 = {
-    function: "vote",
-    voteId: proposedDataId,
-    userVote: true
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput2,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput2 = {
+  //   function: "vote",
+  //   voteId: proposedDataId,
+  //   userVote: true
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput2,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   const attentionInput3 = {
     function: "rankAndPrepareDistribution"
@@ -139,6 +139,35 @@ async function main() {
     walletAddress,
     koiContractId
   );
+  // const koiInput0 = {
+  //   function: "burnKoi",
+  //   contractId: attentionContractId,
+  //   contentType: "nftId",
+  //   contentTxId: "rQ03lvHzD8xiM5Ry6VmhnA870MECRQdu9eRLn0ZLu6A"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput0,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
+  // const attentionInput3 = {
+  //   function: "migratePreRegister",
+  //   contractId: attentionContractId,
+  //   mainContactId: koiContractId
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   console.log(
     "Koi final state: ",
@@ -146,6 +175,10 @@ async function main() {
     "Attention final state:",
     smartest.readContractState(attentionContractId)
   );
+  const state = smartest.readContractState(koiContractId);
+  console.log(state.tasks);
+  const stateA = smartest.readContractState(attentionContractId);
+  console.log(stateA.task.prepareDistribution);
 }
 
 main().then(() => {
