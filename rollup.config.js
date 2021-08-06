@@ -11,38 +11,7 @@ export default [
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   },
-  {
-    input: "src/attention/index.js",
-    output: {
-      file: "dist/attention.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
-  {
-    input: "src/nft/index.js",
-    output: {
-      file: "dist/nft.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
-  {
-    input: "src/vault/index.js",
-    output: {
-      file: "dist/vault.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
-  {
-    input: "src/KID/index.js",
-    output: {
-      file: "dist/KID.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
+
   {
     input: "src/koi_task/index.js",
     output: {
@@ -55,14 +24,6 @@ export default [
     input: "src/attentionM/index.js",
     output: {
       file: "dist/attentionM.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
-  {
-    input: "src/decaying_nft/index.js",
-    output: {
-      file: "dist/decaying_nft.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]

@@ -14,8 +14,12 @@ export default async function cleanPreRegister(state) {
         contractId
       );
       const registerRecords = contractState.registeredRecords;
+      const registeredContent = Object.values(registerRecords);
       state.preRegisterDatas = state.preRegisterDatas.filter(
-        (preRegisterData) => !(preRegisterData.content.nftId in registerRecords)
+        (preRegisterData) =>
+          !registeredContent.some((nfts) =>
+            nfts.includes(preRegisterData.content.nftId)
+          )
       );
     })
   );

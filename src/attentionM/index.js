@@ -1,7 +1,6 @@
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
 import rankAndPrepareDistribution from "./rank";
-import vote from "./vote";
 import batch from "./batchAction";
 import proposeSlash from "./propose_slash";
 import registerBundler from "./register_bundler";
@@ -12,7 +11,6 @@ const handlers = [
   submitDistribution,
   audit,
   rankAndPrepareDistribution,
-  vote,
   batch,
   proposeSlash,
   registerBundler,

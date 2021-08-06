@@ -24,16 +24,16 @@
   },
   "votes": [],
   "task": {
-    "open": 734226,
-    "close": 734726,
+    "open": 742575,
+    "close": 742605,
     "prepareDistribution": [],
     "proposedPayloads": [
       {
-        "block": 734226,
+        "block": 742575,
         "proposedData": [],
         "isRanked": false
       }
     ]
   },
-  "executableId": "WPdD16BfnXRk2fz6r56ijsw4rRgvpxZKZWStJU6MdXo"
+  "executableId": "90IZRvdlQVB7JklCh8T8dgye6mwtbvol5QqciVzD-JQ"
 }

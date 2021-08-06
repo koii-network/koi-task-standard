@@ -37,7 +37,6 @@ export default async function submitDistribution(state, action) {
     );
   }
   const payload = {
-    id: SmartWeave.transaction.id,
     txId: distributionTxId,
     distributer: caller,
     cacheUrl: url,
