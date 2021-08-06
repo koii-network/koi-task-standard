@@ -444,11 +444,11 @@ async function audit(state) {
   const proposedData = activeProposedData.proposedData;
   await Promise.all(
     proposedData.map(async (proposedData) => {
-      const valid = await auditPort(proposedData.txId);
+      const valid = await auditPort(proposedData.txId, proposeData.cacheUrl);
       if (!valid) {
         const input = {
           function: "audit",
-          id: proposedData.id,
+          id: proposedData.txId,
           description: "malicious_data"
         };
         const task = "submit audit";
@@ -664,7 +664,7 @@ async function readTrackedVotes() {
 
 async function validateAndVote(id, state) {
   const suspectedProposedData = state.task.proposedPayloads.proposedData.find(
-    (proposedData) => proposedData.id === id
+    (proposedData) => proposedData.txId === id
   );
   const valid = auditPort(
     suspectedProposedData.txId,
