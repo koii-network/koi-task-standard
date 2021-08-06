@@ -1,4 +1,10 @@
-# Contracts
+# KOII Tasks
+ 
+### Introduction
+KOII task a way to create tasks that solve some computational problem and earn KOII as your reward by submitting you data payloads. KOII tasks are created as an executable bundle that can be run on bundler nodes.
+
+## Description
+KOII tasks is a piece of code that is deployed on arweave blockchain and runs on the KOII nodes and perform some task like **Attention Game, Web scraping etc**. 
 
 ## Deployment
 
@@ -20,12 +26,34 @@ Examples:
 
 `yarn build`
 
-- `yarn execute taskName taskTxId`
-- `yarn execute taskName taskTxId bundler` to test bundler mode
+- `yarn execute attentionM`
+- `yarn execute attentionM bundler` to test bundler mode
 
-for example
 
-`yarn execute attentionM IpEKWpnCCa09-fALeXsQmVD_UYHCuyblVpgPOrsMXEM bundler`
+## Testing TestWeave
 
-If your executable does not make use of `namespace.taskTxId`, you can set `taskTxId` to `"test"` or any random value.
+1. Ensure docker is running (after installing docker and docker-compose)
+    ```
+    sudo groupadd docker
+    sudo usermod -aG docker
+    sudo systemctl start docker
+    docker run --rm hello-world
+    ```
+2. Follow install instructions for [TestWeave Docker](https://github.com/ArweaveTeam/testweave-docker)
+    ```
+    git clone --depth 1 https://github.com/ArweaveTeam/testweave-docker.git
+    cd testweave-docker
+    docker-compose up -d
+    ```
+3. Follow install instructions for [TestWeave SDK](https://github.com/ArweaveTeam/testweave-sdk)
+    ```
+    yarn add testweave-sdk
+    ```
+
+ 
+
+ 
+
+ 
+ 
 
