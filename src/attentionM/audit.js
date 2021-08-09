@@ -9,7 +9,7 @@ export default function audit(state, action) {
     throw new ContractError(`Vote is triggered with ${id} id`);
   }
   const vote = {
-    id: txId,
+    id: id,
     status: "active",
     descripition: descripition,
     voteTrigger: caller,

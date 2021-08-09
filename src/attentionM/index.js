@@ -5,7 +5,7 @@ import batch from "./batchAction";
 import proposeSlash from "./propose_slash";
 import registerBundler from "./register_bundler";
 import registerExecutableId from "./register_excutableId";
-import cleanInvalidTransations from "./clean_invalidTrasanctions";
+import cleanInvalidTransactions from "./clean_invalidTrasanctions";
 import migratePreRegister from "./migratePreRegister";
 const handlers = [
   submitDistribution,
@@ -15,7 +15,7 @@ const handlers = [
   proposeSlash,
   registerBundler,
   registerExecutableId,
-  cleanInvalidTransations,
+  cleanInvalidTransactions,
   migratePreRegister
 ];
 
