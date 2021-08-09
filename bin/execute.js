@@ -49,8 +49,8 @@ async function main() {
   );
 
   // Init swicw
+  console.log("Initializing Koii contract for swicw")
   await swicw.readContract(arweave, KOII_CONTRACT_ID);
-  console.log("swicw initialized");
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
