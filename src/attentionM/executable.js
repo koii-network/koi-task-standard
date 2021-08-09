@@ -13,7 +13,7 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
-const smartweave = require("smartweave");
+const smartweave = require("swicw");;
 const axios = require("axios");
 const crypto = require("crypto");
 

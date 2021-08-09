@@ -11,11 +11,11 @@
     "execute": "node ./bin/execute.js"
   },
   "dependencies": {
+    "@_koi/sdk": "^2.2.0-beta.2",
     "@weavery/clarity": "^0.1.5",
     "arweave": "^1.10.14",
     "bignumber.js": "^9.0.1",
-    "dotenv": "^10.0.0",
-    "smartweave": "^0.4.31"
+    "dotenv": "^10.0.0"
   },
   "devDependencies": {
     "@_koi/sdk": "^2.1.33",

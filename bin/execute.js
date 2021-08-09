@@ -1,9 +1,14 @@
 require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
+const { arweave } = require("@_koi/sdk/common");
+const swicw = require("swicw");
+
+const KOII_CONTRACT_ID = "9BX6HQV5qkGiXV6hTglAuPdccKoEP_XI2NNbjHv5MMM";
+
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
-  "9BX6HQV5qkGiXV6hTglAuPdccKoEP_XI2NNbjHv5MMM"
+  KOII_CONTRACT_ID
 );
 
 const executable = process.argv[2];
@@ -42,6 +47,10 @@ async function main() {
     new Namespace(taskTxId, expressApp),
     require
   );
+
+  // Init swicw
+  await swicw.readContract(arweave, KOII_CONTRACT_ID);
+  console.log("swicw initialized");
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
