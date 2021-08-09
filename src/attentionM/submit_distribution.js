@@ -1,10 +1,10 @@
 export default async function submitDistribution(state, action) {
   const task = state.task;
   const caller = action.caller;
+  const mainContractId = state.koiiContract;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
-  const mainContractId = input.mainContractId;
   const contractId = input.contractId;
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
