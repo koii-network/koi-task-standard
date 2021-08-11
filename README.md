@@ -19,15 +19,15 @@ Examples:
 
 `yarn build`
 
-- `node test/attentionM.test.js path/to/wallet.json`
+- `node test/attention.test.js path/to/wallet.json`
 - `node test/koi.test.js path/to/wallet.json`
 
 ## Testing Executable
 
 `yarn build`
 
-- `yarn execute attentionM`
-- `yarn execute attentionM service` to test service mode
+- `yarn execute attention`
+- `yarn execute attention service` to test service mode
 
 
 ## Testing TestWeave

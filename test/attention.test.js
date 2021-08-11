@@ -23,10 +23,10 @@ async function main() {
   smartest.writeContractState(koiContractId, koiInitState);
 
   // Load attention contract
-  const attentionSrc = fs.readFileSync(`dist/attentionM.js`, "utf8");
+  const attentionSrc = fs.readFileSync(`dist/attention.js`, "utf8");
   const attentionContractId = "q5w6e7r8";
   const attentionInitState = JSON.parse(
-    fs.readFileSync(`src/attentionM/init_state.json`)
+    fs.readFileSync(`src/attention/init_state.json`)
   );
   smartest.writeContractState(attentionContractId, attentionInitState);
 

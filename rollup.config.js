@@ -21,9 +21,9 @@ export default [
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   },
   {
-    input: "src/attentionM/index.js",
+    input: "src/attention/index.js",
     output: {
-      file: "dist/attentionM.js",
+      file: "dist/attention.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
