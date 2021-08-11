@@ -1,5 +1,6 @@
 my-db.db
 namespace
+.vscode
 
 package-lock.json
 dist
