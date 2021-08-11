@@ -1,4 +1,4 @@
-export default function registerTask(state, action) {
+export default async function registerTask(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;
@@ -8,6 +8,7 @@ export default function registerTask(state, action) {
   if (!taskTxId) throw new ContractError("No txid specified");
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you need min 1 KOI to register data");
+  await SmartWeave.contracts.readContractState(taskTxId);
   if (koiReward) {
     state.tasks.push({
       owner: caller,
