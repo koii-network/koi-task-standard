@@ -19,7 +19,7 @@ async function main() {
   await tools.nodeLoadWallet(process.env.WALLET_LOCATION);
 
   let expressApp;
-  if (operationMode === "bundler") {
+  if (operationMode === "service") {
     tools.loadRedisClient();
 
     // Setup middleware and routes then start server
@@ -49,13 +49,13 @@ async function main() {
   );
 
   // Init swicw
-  console.log("Initializing Koii contract for swicw")
+  console.log("Initializing Koii contract for swicw");
   await swicw.readContract(arweave, KOII_CONTRACT_ID);
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
   const port = process.env.SERVER_PORT || 8887;
-  if (operationMode === "bundler") {
+  if (operationMode === "service") {
     expressApp.listen(port, () => {
       console.log(`Open http://localhost:${port} to view in browser`);
     });

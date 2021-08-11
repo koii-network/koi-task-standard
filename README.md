@@ -27,7 +27,7 @@ Examples:
 `yarn build`
 
 - `yarn execute attentionM`
-- `yarn execute attentionM bundler` to test bundler mode
+- `yarn execute attentionM service` to test service mode
 
 
 ## Testing TestWeave

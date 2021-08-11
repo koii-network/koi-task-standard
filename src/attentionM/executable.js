@@ -13,7 +13,7 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
-const smartweave = require("swicw");;
+const smartweave = require("swicw");
 const axios = require("axios");
 const crypto = require("crypto");
 
@@ -58,7 +58,7 @@ async function execute(_init_state) {
     try {
       [state, block] = await getAttentionStateAndBlock();
     } catch (e) {
-      console.error("Error", e.message);
+      console.error("Error", e);
       continue;
     }
     await (namespace.app ? service : witness)(state, block);
