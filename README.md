@@ -31,6 +31,6 @@ Examples:
 
 for example
 
-`yarn execute attention SIIS17_lN78YARwpYfPLTLXEPRpR3BD-nkbCYrmaBss bundler`
+`yarn execute attention SIIS17_lN78YARwpYfPLTLXEPRpR3BD-nkbCYrmaBss service`
 
 If your executable does not make use of `namespace.taskTxId`, you can set `taskTxId` to `"test"` or any random value.
