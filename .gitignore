@@ -1,6 +1,7 @@
 my-db.db
 namespace
 .vscode
+.DS_Store
 
 package-lock.json
 dist
