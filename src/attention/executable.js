@@ -365,16 +365,21 @@ async function verifySignature(log) {
 
 async function lockPorts() {
   try {
-    try {
-      await namespace.fs("rm", logsInfo.oldFilename);
-    } catch (e) {
-      console.log(e.message);
-    }
-    const data = await namespace.fs("readFile", logsInfo.filename);
+    await namespace.fs("rm", logsInfo.oldFilename);
+  } catch (e) {
+    console.log("Unable to remove old ports file");
+  }
+  let data = "";
+  try {
+    data = await namespace.fs("readFile", logsInfo.filename);
+  } catch (e) {
+    console.log("Unable to read previous port file");
+  }
+  try {
     await namespace.fs("writeFile", logsInfo.oldFilename, data);
     await namespace.fs("writeFile", logsInfo.filename, "");
   } catch (e) {
-    console.log(e);
+    console.error("Error writing ports files");
   }
 }
 
