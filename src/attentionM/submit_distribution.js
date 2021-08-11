@@ -28,7 +28,7 @@ export default async function submitDistribution(state, action) {
   task.prepareDistribution = task.prepareDistribution.filter(
     (distribution) => !distribution.isRewarded
   );
-  const proposedPayload = currentTask.proposedDatas.find(
+  const proposedPayload = currentTask.proposedData.find(
     (payload) => payload.distributer === caller
   );
   if (proposedPayload !== undefined) {
@@ -43,6 +43,6 @@ export default async function submitDistribution(state, action) {
     blockHeight: SmartWeave.block.height,
     status: "pending"
   };
-  currentTask.proposedDatas.push(payload);
+  currentTask.proposedData.push(payload);
   return { state };
 }
