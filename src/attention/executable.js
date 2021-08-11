@@ -66,9 +66,13 @@ async function execute(_init_state) {
 }
 
 async function getAttentionStateAndBlock() {
-  const state = await smartweave.readContract(arweave, namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
+  const state = await smartweave.readContract(
+    arweave,
+    namespace.taskTxId,
+    block
+  );
 
   const logClose = state.task.close;
   if (logClose > lastLogClose) {
@@ -97,7 +101,7 @@ async function getAttentionStateAndBlock() {
 
 async function service(state, block) {
   if (canProposePorts(state, block)) await proposePorts();
-  if (canAudit(state, block)) await audit(state);
+  //if (canAudit(state, block)) await audit(state);
   if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
@@ -444,7 +448,7 @@ async function audit(state) {
   const proposedData = activeProposedData.proposedData;
   await Promise.all(
     proposedData.map(async (proposedData) => {
-      const valid = await auditPort(proposedData.txId, proposeData.cacheUrl);
+      const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
       if (!valid) {
         const input = {
           function: "audit",
@@ -685,6 +689,7 @@ async function validateAndVote(id, state) {
 }
 
 async function auditPort(txId, url) {
+  console.error("Trying to fetch:", url); // TODO FIX ME, NOT USING PROPER URL
   const response = await axios.get(url);
   const fullLogs = response.data;
   const prettyLogs = [];
