@@ -26,34 +26,11 @@ Examples:
 
 `yarn build`
 
-- `yarn execute attention`
-- `yarn execute attention service` to test service mode
+- `yarn execute taskName taskTxId`
+- `yarn execute taskName taskTxId service` to test service mode
 
+for example
 
-## Testing TestWeave
+`yarn execute attention SIIS17_lN78YARwpYfPLTLXEPRpR3BD-nkbCYrmaBss bundler`
 
-1. Ensure docker is running (after installing docker and docker-compose)
-    ```
-    sudo groupadd docker
-    sudo usermod -aG docker
-    sudo systemctl start docker
-    docker run --rm hello-world
-    ```
-2. Follow install instructions for [TestWeave Docker](https://github.com/ArweaveTeam/testweave-docker)
-    ```
-    git clone --depth 1 https://github.com/ArweaveTeam/testweave-docker.git
-    cd testweave-docker
-    docker-compose up -d
-    ```
-3. Follow install instructions for [TestWeave SDK](https://github.com/ArweaveTeam/testweave-sdk)
-    ```
-    yarn add testweave-sdk
-    ```
-
- 
-
- 
-
- 
- 
-
+If your executable does not make use of `namespace.taskTxId`, you can set `taskTxId` to `"test"` or any random value.
