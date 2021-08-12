@@ -2,7 +2,7 @@ require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const { arweave } = require("@_koi/sdk/common");
-const swicw = require("swicw");
+const kohaku = require("kohaku");
 
 const KOII_CONTRACT_ID = "54hi0oYJ2kNwezFmaGqXDbS3gb6ohdoZYL354ShyeNs";
 
@@ -48,9 +48,9 @@ async function main() {
     require
   );
 
-  // Init swicw
-  console.log("Initializing Koii contract for swicw");
-  await swicw.readContract(arweave, KOII_CONTRACT_ID);
+  // Init kohaku
+  console.log("Initializing Koii contract for Kohaku");
+  await kohaku.readContract(arweave, KOII_CONTRACT_ID);
 
   // Initialize tasks then start express app
   await executableTask.setup(null);

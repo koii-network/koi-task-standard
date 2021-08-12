@@ -13,7 +13,7 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
-const smartweave = require("swicw");
+const kohaku = require("kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
 
@@ -66,13 +66,9 @@ async function execute(_init_state) {
 }
 
 async function getAttentionStateAndBlock() {
-  let block = await tools.getBlockHeight();
+  let block = (await tools.getBlockHeight()) - 2; // Add delay to reduce chance of null block and actions happening ahead of nodes
   if (block < lastBlock) block = lastBlock;
-  const state = await smartweave.readContract(
-    arweave,
-    namespace.taskTxId,
-    block
-  );
+  const state = await kohaku.readContract(arweave, namespace.taskTxId, block);
 
   const logClose = state.task.close;
   if (logClose > lastLogClose) {
@@ -277,7 +273,7 @@ async function proposePorts() {
     contractId: namespace.taskTxId
   };
   task = "proposePorts";
-  const tx = await smartweave.interactWrite(
+  const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
     namespace.taskTxId,
@@ -461,7 +457,7 @@ async function audit(state) {
           description: "malicious_data"
         };
         const task = "submit audit";
-        const tx = await smartweave.interactWrite(
+        const tx = await kohaku.interactWrite(
           arweave,
           tools.wallet,
           namespace.taskTxId,
@@ -570,7 +566,7 @@ async function rankPrepDistribution() {
   const input = {
     function: "rankAndPrepareDistribution"
   };
-  const tx = await smartweave.interactWrite(
+  const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
     namespace.taskTxId,
@@ -598,7 +594,7 @@ async function distribute() {
   const input = {
     function: "distributeReward"
   };
-  const tx = await smartweave.interactWrite(
+  const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
     tools.contractId,
@@ -794,7 +790,7 @@ async function proposeSlash(state) {
               receiptTxId: receiptTx.id
             };
             task = "slash";
-            const tx = await smartweave.interactWrite(
+            const tx = await kohaku.interactWrite(
               arweave,
               tools.wallet,
               namespace.taskTxId,
