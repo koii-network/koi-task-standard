@@ -16,7 +16,9 @@ const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
 
 async function main() {
-  await tools.nodeLoadWallet(process.env.WALLET_LOCATION);
+  await tools.loadWallet(
+    await fsPromises.readFile(process.env.WALLET_LOCATION, "utf8")
+  );
 
   let expressApp;
   if (operationMode === "service") {
