@@ -5,6 +5,38 @@ KOII task a way to create tasks that solve some computational problem and earn K
 
 ## Description
 KOII tasks is a piece of code that is deployed on arweave blockchain and runs on the KOII nodes and perform some task like **Attention Game, Web scraping etc**. 
+## How to create KOII tasks:
+KOII tasks consists of two vital parts 
+1. A smart contract
+2. `Executable.js`
+
+
+
+#### Smart Contract
+
+***This smart contract is different from KOII  main contract***. This smart contract will have all the state data related to that particular KOII task. The smart contract consist of an
+1. ***initial state*** which acts  a starting point to your KOII tasks state.
+2. ***index.js*** Provides all necessary handles for you smart contract
+
+***For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)***
+
+#### Actual KOII Task
+
+The code for KOII task should be written inside `executable.js`. 
+This file has access to a `namespace` object via ***dependency injection*** which has several useful API including:
+
+1. `koi-sdk`
+2. `smartWeave`
+3. `redis`
+4. `filesystem(fs)`
+5. `express`
+   
+This file consist of two important methods `setup()` and `execute()` which are called by the node while running the KOII task.
+
+1. The `setup()` method should be used to register endpoints on express app `
+2. The `execute()` method is the main function which is also called by the node executing the Task
+
+
 
 ## Deployment
 
@@ -19,18 +51,38 @@ Examples:
 
 `yarn build`
 
-- `node test/attention.test.js path/to/wallet.json`
+- `node test/attentionM.test.js path/to/wallet.json`
 - `node test/koi.test.js path/to/wallet.json`
 
 ## Testing Executable
 
 `yarn build`
 
-- `yarn execute taskName taskTxId`
-- `yarn execute taskName taskTxId service` to test service mode
+- `yarn execute attentionM`
+- `yarn execute attentionM bundler` to test bundler mode
 
-for example
 
-`yarn execute attention SIIS17_lN78YARwpYfPLTLXEPRpR3BD-nkbCYrmaBss service`
+## Testing TestWeave
 
-If your executable does not make use of `namespace.taskTxId`, you can set `taskTxId` to `"test"` or any random value.
+1. Ensure docker is running (after installing docker and docker-compose)
+    ```
+    sudo groupadd docker
+    sudo usermod -aG docker
+    sudo systemctl start docker
+    docker run --rm hello-world
+    ```
+2. Follow install instructions for [TestWeave Docker](https://github.com/ArweaveTeam/testweave-docker)
+    ```
+    git clone --depth 1 https://github.com/ArweaveTeam/testweave-docker.git
+    cd testweave-docker
+    docker-compose up -d
+    ```
+3. Follow install instructions for [TestWeave SDK](https://github.com/ArweaveTeam/testweave-sdk)
+    ```
+    yarn add testweave-sdk
+    ```
+
+ 
+
+ 
+
