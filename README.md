@@ -31,10 +31,27 @@ This file has access to a `namespace` object via ***dependency injection*** whic
 4. `filesystem(fs)`
 5. `express`
    
+Here are the detail of each component of namespace:
+
+##### ***KOII-SDK***
+
+KOII-SDK is accessible via `tools` object, Please refer to  [KOII_SDK](https://github.com/koii-network/tools) for  documentation and usage details.
+
+##### ***Smart Weave***
+SmartWeave is used to interact with smart contract on arweave and is accessible via `smartWeave` object .
+***For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)***
+
+
+
+
+
+
 This file consist of two important methods `setup()` and `execute()` which are called by the node while running the KOII task.
 
 1. The `setup()` method should be used to register endpoints on express app `
 2. The `execute()` method is the main function which is also called by the node executing the Task
+
+
 
 
 
