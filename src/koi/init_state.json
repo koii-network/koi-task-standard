@@ -20,20 +20,6 @@
     "zFGpdtH0tpXAvG7PDMhq-ExCR_w7c4PYuwmoRZKmMpA": 677545,
     "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo": 680811
   },
-  "tasks": [
-    {
-      "owner": "ownerAddress",
-      "name": "taskName",
-      "txId": "q5w6e7r8",
-      "rewardedBlock": []
-    }
-  ],
-  "preRegisterDatas": [
-    {
-      "contractId": "q5w6e7r8",
-      "insertBlock": 67894,
-      "content": { "nftId": "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0" },
-      "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo"
-    }
-  ]
+  "tasks": [],
+  "preRegisterDatas": []
 }

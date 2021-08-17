@@ -26,25 +26,17 @@
   "validBundlers": [],
   "votes": [],
   "task": {
-    "open": 749882,
-    "close": 749912,
+    "open": 750699,
+    "close": 750729,
     "prepareDistribution": [],
     "proposedPayloads": [
       {
-        "block": 749882,
-        "proposedData": [
-          {
-            "txId": "FjCwk82SZNTBGgd5pssEocxtC8xLvQ7VZqFRWfCqyuw",
-            "distributer": "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc",
-            "cacheUrl": "url",
-            "blockHeight": 745000,
-            "status": "pending"
-          }
-        ],
+        "block": 750699,
+        "proposedData": [],
         "isRanked": false
       }
     ]
   },
   "executableId": "RG6U0qmdNQYqvAwnXHKIW2VgIorXPwflCCTHQ3YjKCw",
-  "koiiContract": "a1s2d3f4"
+  "koiiContract": "lAOw0B_9_9XC1UNW7oKpruNDAADkPDMqEXKIEgTgE5s"
 }

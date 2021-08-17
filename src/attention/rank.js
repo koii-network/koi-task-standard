@@ -3,6 +3,11 @@ export default async function rankAndPrepareDistribution(state) {
   const task = state.task;
   const prepareDistribution = task.prepareDistribution;
   const registeredRecords = state.registeredRecords;
+  if (SmartWeave.block.height < task.close) {
+    throw new ContractError(
+      `Ranking is in ${task.close - SmartWeave.block.height} blocks`
+    );
+  }
   const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );

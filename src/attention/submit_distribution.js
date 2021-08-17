@@ -6,6 +6,9 @@ export default async function submitDistribution(state, action) {
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const contractId = input.contractId;
+  if (SmartWeave.block.height > task.open + 12) {
+    throw new ContractError("proposing is closed. wait for another round");
+  }
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );

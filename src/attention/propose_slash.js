@@ -3,7 +3,12 @@ export default async function proposeSlash(state, action) {
   const validBundlers = state.validBundlers;
   const blackList = state.blackList;
   const receiptTxId = action.input.receiptTxId;
-
+  if (
+    SmartWeave.block.height > state.task.close ||
+    SmartWeave.block.height < state.task.open + 27
+  ) {
+    throw new ContractError(" slash time have passed or not reached yet");
+  }
   if (!receiptTxId) throw new ContractError("No receipt specified");
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
