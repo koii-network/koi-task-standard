@@ -41,6 +41,43 @@ KOII-SDK is accessible via `tools` object, Please refer to  [KOII_SDK](https://g
 SmartWeave is used to interact with smart contract on arweave and is accessible via `smartWeave` object .
 ***For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)***
 
+#### redis
+
+KOII task namespace also has a redis wrapper to interact with redis. Redis must be installed in order to use this wrapper. Each Task has its own `namespaceId`  prepended to all the keys in redis.
+
+This API exposes two methods in order to communicate with Redis.
+1. `redisGet(key,value)`
+2. `redisSet(key)`
+
+For example if you call `redisSet("Hello","world)` you can get it by calling  `redisGet("Hello")` but behind the scenes it is actually adding namespace prefix with the key like so 
+
+> `hello` will be stored as `09ea3bcd43hello` 
+This is done to isolate the KOII tasks data from others.
+
+
+#### filesystem(fs)  
+
+The KOII task namespace also have a fs module exposed in it.
+this module can be called as
+```js 
+await namespace.fs("readFile",filename,options);
+```
+ The first parameter to `namespace.fs` is the function name from [fs.promise module](https://nodejs.org/api/fs.html) followed by the parameters that the function expects and returns a promise.
+
+#### Express:
+
+In some types of KOII task you want to expose some endpoint in order to receive data from outside world, like for example in case of attention game we need to receive the PoRT(proof of real Traffic) from the end user, so to serve this purpose express API comes to the play.
+
+So in order to serve an endpoint via express app.
+
+```js
+namespace.express(method, path, callback)
+```
+in setup function
+
+
+
+
 
 
 
