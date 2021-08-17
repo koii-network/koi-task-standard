@@ -28,6 +28,7 @@ export default async function rankAndPrepareDistribution(state) {
     }
   });
   let distribution = {};
+
   await Promise.all(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -41,16 +42,16 @@ export default async function rankAndPrepareDistribution(state) {
       const parseData = JSON.parse(splitData);
       const parseDataKeys = Object.keys(parseData);
       const registeredNfts = Object.values(registeredRecords);
-      parseDataKeys.forEach((key) => {
+      parseDataKeys.map((key) => {
         if (registeredNfts.some((nfts) => nfts.includes(key))) {
           if (!(key in distribution)) {
-            distribution[key] = parseData[key];
-          } else {
-            parseData[key].forEach((address) => {
-              if (!distribution[key].includes(address)) {
-                distribution[key].push(address);
-              }
+            distribution[key] = parseData[key].filter((c, index) => {
+              parseData[key].indexOf(c) === index;
             });
+          } else {
+            distribution[key] = [
+              ...new Set(distribution[key].concat(parseData[key]))
+            ];
           }
         }
       });
@@ -65,16 +66,23 @@ export default async function rankAndPrepareDistribution(state) {
   if (totalAttention !== 0) {
     rewardPerAttention = 1000 / totalAttention;
   }
+  // Distributing Reward to owners
   let distributionReward = {};
   const nftIds = Object.keys(distribution);
-  const nftOwners = Object.keys(registeredRecords);
-  nftOwners.map((nftOwner) => {
-    nftIds.forEach((nftId) => {
-      if (registeredRecords[nftOwner].includes(nftId)) {
-        distributionReward[nftOwner] =
-          distribution[nftId].length * rewardPerAttention;
+  nftIds.map(async (nftId) => {
+    const state = await SmartWeave.contracts.readContractState(nftId);
+    const balances = Object.values(state.balances).reduce(
+      (preValue, curValue) => {
+        return preValue + curValue;
       }
-    });
+    );
+    for (let key in state.balances) {
+      let rewardPer = state.balances[key] / balances;
+      if (rewardPer !== 0) {
+        distributionReward[key] =
+          distribution[nftId].length * rewardPerAttention * rewardPer;
+      }
+    }
   });
   currentProposed.isRanked = true;
   prepareDistribution.push({

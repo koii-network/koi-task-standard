@@ -32,11 +32,19 @@
     "proposedPayloads": [
       {
         "block": 749882,
-        "proposedData": [],
+        "proposedData": [
+          {
+            "txId": "FjCwk82SZNTBGgd5pssEocxtC8xLvQ7VZqFRWfCqyuw",
+            "distributer": "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc",
+            "cacheUrl": "url",
+            "blockHeight": 745000,
+            "status": "pending"
+          }
+        ],
         "isRanked": false
       }
     ]
   },
   "executableId": "RG6U0qmdNQYqvAwnXHKIW2VgIorXPwflCCTHQ3YjKCw",
-  "koiiContract": "54hi0oYJ2kNwezFmaGqXDbS3gb6ohdoZYL354ShyeNs"
+  "koiiContract": "a1s2d3f4"
 }

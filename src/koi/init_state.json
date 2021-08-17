@@ -24,8 +24,8 @@
     {
       "owner": "ownerAddress",
       "name": "taskName",
-      "txId": "taskTxId",
-      "bounty": "koiReward"
+      "txId": "q5w6e7r8",
+      "rewardedBlock": []
     }
   ],
   "preRegisterDatas": [
