@@ -255,7 +255,7 @@ function canProposePorts(state, block) {
 
 async function proposePorts() {
   const payload = await PublishPoRT();
-   await lockPorts();
+  await lockPorts();
   if (Object.keys(payload).length === 0) {
     hasSubmittedPorts = true;
     console.error("Payload empty, skipping submission");
@@ -279,8 +279,6 @@ async function proposePorts() {
     namespace.taskTxId,
     input
   );
-
- 
 
   if (await checkTxConfirmation(tx, task)) {
     hasSubmittedPorts = true;
@@ -412,7 +410,7 @@ async function checkTxConfirmation(txId, task) {
     } catch (e) {
       if (e.type === "TX_FAILED") {
         console.error("Error while checking tx confirmation", e.type);
-        return false;
+        //return false;
       }
     }
   }

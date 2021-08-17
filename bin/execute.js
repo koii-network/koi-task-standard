@@ -17,7 +17,7 @@ const operationMode = process.argv[4];
 
 async function main() {
   await tools.loadWallet(
-    await fsPromises.readFile(process.env.WALLET_LOCATION, "utf8")
+    JSON.parse(await fsPromises.readFile(process.env.WALLET_LOCATION, "utf8"))
   );
   console.log("Executing with wallet", await tools.getWalletAddress());
 
