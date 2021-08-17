@@ -410,7 +410,7 @@ async function checkTxConfirmation(txId, task) {
     } catch (e) {
       if (e.type === "TX_FAILED") {
         console.error("Error while checking tx confirmation", e.type);
-        //return false;
+        return false;
       }
     }
   }
