@@ -86,7 +86,7 @@ async function getAttentionStateAndBlock() {
   if (block > lastBlock)
     console.log(
       block,
-      "Searching for a task, distribution in",
+      "Searching for a task, ranking and prepare distribution in",
       logClose - block,
       "blocks"
     );
@@ -409,8 +409,11 @@ async function checkTxConfirmation(txId, task) {
       await tools.getTransaction(txId);
       console.log(`Transaction found in ${elapsed_mins}m`);
       return true;
-    } catch (_err) {
-      // Silently catch error, might be dangerous
+    } catch (e) {
+      if (e.type === "TX_FAILED") {
+        console.error("Error while checking tx confirmation", e.type);
+        return false;
+      }
     }
   }
 }

@@ -19,6 +19,7 @@ async function main() {
   await tools.loadWallet(
     await fsPromises.readFile(process.env.WALLET_LOCATION, "utf8")
   );
+  console.log("Executing with wallet", await tools.getWalletAddress());
 
   let expressApp;
   if (operationMode === "service") {
