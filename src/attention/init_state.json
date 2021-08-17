@@ -26,17 +26,17 @@
   "validBundlers": [],
   "votes": [],
   "task": {
-    "open": 742575,
-    "close": 742605,
+    "open": 749882,
+    "close": 749912,
     "prepareDistribution": [],
     "proposedPayloads": [
       {
-        "block": 742575,
+        "block": 749882,
         "proposedData": [],
         "isRanked": false
       }
     ]
   },
-  "executableId": "90IZRvdlQVB7JklCh8T8dgye6mwtbvol5QqciVzD-JQ",
-  "koiiContract": ""
+  "executableId": "RG6U0qmdNQYqvAwnXHKIW2VgIorXPwflCCTHQ3YjKCw",
+  "koiiContract": "54hi0oYJ2kNwezFmaGqXDbS3gb6ohdoZYL354ShyeNs"
 }

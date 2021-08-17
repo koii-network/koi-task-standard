@@ -82,7 +82,7 @@ export default async function rankAndPrepareDistribution(state) {
     distribution: distributionReward,
     isRewarded: false
   });
-  task.open = SmartWeave.block.heigh;
+  task.open = SmartWeave.block.height;
   //task.close = SmartWeave.block.height + 720;
   task.close = SmartWeave.block.height + 30;
   const newTask = {
