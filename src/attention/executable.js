@@ -49,9 +49,15 @@ function setup(_init_state) {
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
+    namespace.express("get","/",heartBeat);
   }
 }
+function heartBeat(req,res){
+  return res.json({
+    message:"Running Attention game"
+  });
 
+}
 async function execute(_init_state) {
   let state, block;
   for (;;) {
