@@ -213,7 +213,7 @@ async function submitPort(req, res) {
     const payload = {
       date: new Date(),
       timestamp: data.timeStamp,
-      trxId: data.resourceId,
+      trxId: data.payload,
       wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
       proof: {
         signature, //req.headers['x-request-signature'],
