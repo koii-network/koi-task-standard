@@ -562,7 +562,7 @@ async function getVotesFile(fileId) {
 
 async function rankPrepDistribution() {
   const input = {
-    function: "rankAndPrepareDistribution"
+    function: "rankPrepDistribution"
   };
   const tx = await kohaku.interactWrite(
     arweave,

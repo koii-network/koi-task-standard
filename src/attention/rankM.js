@@ -1,13 +1,8 @@
-export default async function rankPrepDistribution(state) {
+export default async function rankAndPrepareDistribution(state) {
   const votes = state.votes;
   const task = state.task;
   const prepareDistribution = task.prepareDistribution;
   const registeredRecords = state.registeredRecords;
-  if (SmartWeave.block.height < task.close) {
-    throw new ContractError(
-      `Ranking is in ${task.close - SmartWeave.block.height} blocks`
-    );
-  }
   const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
@@ -33,7 +28,6 @@ export default async function rankPrepDistribution(state) {
     }
   });
   let distribution = {};
-
   await Promise.all(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -47,16 +41,16 @@ export default async function rankPrepDistribution(state) {
       const parseData = JSON.parse(splitData);
       const parseDataKeys = Object.keys(parseData);
       const registeredNfts = Object.values(registeredRecords);
-      parseDataKeys.map((key) => {
+      parseDataKeys.forEach((key) => {
         if (registeredNfts.some((nfts) => nfts.includes(key))) {
           if (!(key in distribution)) {
-            distribution[key] = parseData[key].filter((c, index) => {
-              parseData[key].indexOf(c) === index;
-            });
+            distribution[key] = parseData[key];
           } else {
-            distribution[key] = [
-              ...new Set(distribution[key].concat(parseData[key]))
-            ];
+            parseData[key].forEach((address) => {
+              if (!distribution[key].includes(address)) {
+                distribution[key].push(address);
+              }
+            });
           }
         }
       });
@@ -71,26 +65,17 @@ export default async function rankPrepDistribution(state) {
   if (totalAttention !== 0) {
     rewardPerAttention = 1000 / totalAttention;
   }
-  // Distributing Reward to owners
   let distributionReward = {};
   const nftIds = Object.keys(distribution);
-  await Promise.all(
-    nftIds.map(async (nftId) => {
-      const state = await SmartWeave.contracts.readContractState(nftId);
-      const balances = Object.values(state.balances).reduce(
-        (preValue, curValue) => {
-          return preValue + curValue;
-        }
-      );
-      for (let key in state.balances) {
-        let rewardPer = state.balances[key] / balances;
-        if (rewardPer !== 0) {
-          distributionReward[key] =
-            distribution[nftId].length * rewardPerAttention * rewardPer;
-        }
+  const nftOwners = Object.keys(registeredRecords);
+  nftOwners.map((nftOwner) => {
+    nftIds.forEach((nftId) => {
+      if (registeredRecords[nftOwner].includes(nftId)) {
+        distributionReward[nftOwner] =
+          distribution[nftId].length * rewardPerAttention;
       }
-    })
-  );
+    });
+  });
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,

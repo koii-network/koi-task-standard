@@ -21,5 +21,12 @@
     "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo": 680811
   },
   "tasks": [],
-  "preRegisterDatas": []
+  "preRegisterDatas": [
+    {
+      "contractId": "eFLwNij-qpmrRe6WZAA_lVE-C2lbNIP55P-zI69yUaY",
+      "insertBlock": 750791,
+      "content": { "nftId": "dCUpRW0ERnbxhg7zYgI1lVSzgHePN4qU6OhLMZqGzgE" },
+      "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo"
+    }
+  ]
 }

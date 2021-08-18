@@ -1,8 +1,15 @@
-export default async function migratePreRegister(state, action) {
+export default async function migratePreRegister(state) {
   const registeredRecords = state.registeredRecords;
-  const input = action.input;
-  const contractId = input.contractId;
-  const mainContactId = input.mainContactId;
+  const mainContactId = state.koiiContract;
+  const transaction = await SmartWeave.unsafeClient.transactions.get(
+    SmartWeave.transaction.id
+  );
+  let contractId;
+  transaction.get("tags").forEach((tag) => {
+    if (tag.get("name", { decode: true, string: true }) == "Contract") {
+      contractId = tag.get("value", { decode: true, string: true });
+    }
+  });
 
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
