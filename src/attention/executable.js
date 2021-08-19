@@ -49,9 +49,15 @@ function setup(_init_state) {
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
+    namespace.express("get","/",heartBeat);
   }
 }
+function heartBeat(req,res){
+  return res.json({
+    message:"Running Attention game"
+  });
 
+}
 async function execute(_init_state) {
   let state, block;
   for (;;) {
@@ -213,7 +219,7 @@ async function submitPort(req, res) {
     const payload = {
       date: new Date(),
       timestamp: data.timeStamp,
-      trxId: data.resourceId,
+      trxId: data.payload,
       wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
       proof: {
         signature, //req.headers['x-request-signature'],

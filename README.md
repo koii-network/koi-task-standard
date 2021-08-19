@@ -76,13 +76,6 @@ namespace.express(method, path, callback)
 in setup function
 
 
-
-
-
-
-
-
-
 This file consist of two important methods `setup()` and `execute()` which are called by the node while running the KOII task.
 
 1. The `setup()` method should be used to register endpoints on express app `
