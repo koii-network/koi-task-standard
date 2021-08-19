@@ -32,7 +32,15 @@
     "proposedPayloads": [
       {
         "block": 750699,
-        "proposedData": [],
+        "proposedData": [
+          {
+            "txId": "oH2XaHh0vMaJTBraw2USfOwptd3aEfBz2SQRDf5lAyo",
+            "distributer": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
+            "cacheUrl": "url",
+            "blockHeight": 750709,
+            "status": "pending"
+          }
+        ],
         "isRanked": false
       }
     ]

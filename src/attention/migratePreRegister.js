@@ -24,26 +24,17 @@ export default async function migratePreRegister(state) {
   preRegisterNfts.map((preRegisterNft) => {
     if (preRegisterNft.owner in registeredRecords) {
       if (
-        registeredRecords[preRegisterNft.owner].includes(
+        !registeredRecords[preRegisterNft.owner].includes(
           preRegisterNft.content.nftId
-        )
-      ) {
-        throw new ContractError(
-          `${preRegisterNft.content.nftId} is already registered`
-        );
-      }
-      if (
-        registeredNfts.some((nfts) =>
+        ) &&
+        !registeredNfts.some((nfts) =>
           nfts.includes(preRegisterNft.content.nftId)
         )
       ) {
-        throw new ContractError(
-          `${preRegisterNft.content.nftId} is already registered under another owner`
+        registeredRecords[preRegisterNft.owner].push(
+          preRegisterNft.content.nftId
         );
       }
-      registeredRecords[preRegisterNft.owner].push(
-        preRegisterNft.content.nftId
-      );
     } else {
       registeredRecords[preRegisterNft.owner] = [preRegisterNft.content.nftId];
     }

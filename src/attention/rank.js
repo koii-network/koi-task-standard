@@ -50,9 +50,7 @@ export default async function rankPrepDistribution(state) {
       parseDataKeys.map((key) => {
         if (registeredNfts.some((nfts) => nfts.includes(key))) {
           if (!(key in distribution)) {
-            distribution[key] = parseData[key].filter((c, index) => {
-              parseData[key].indexOf(c) === index;
-            });
+            distribution[key] = [...new Set(parseData[key])];
           } else {
             distribution[key] = [
               ...new Set(distribution[key].concat(parseData[key]))
@@ -74,19 +72,19 @@ export default async function rankPrepDistribution(state) {
   // Distributing Reward to owners
   let distributionReward = {};
   const nftIds = Object.keys(distribution);
-  await Promise.all(
+  await Promise.allSettled(
     nftIds.map(async (nftId) => {
       const state = await SmartWeave.contracts.readContractState(nftId);
       const balances = Object.values(state.balances).reduce(
-        (preValue, curValue) => {
-          return preValue + curValue;
-        }
+        (preValue, curValue) => preValue + curValue
       );
-      for (let key in state.balances) {
-        let rewardPer = state.balances[key] / balances;
-        if (rewardPer !== 0) {
-          distributionReward[key] =
-            distribution[nftId].length * rewardPerAttention * rewardPer;
+      if (balances !== 0) {
+        for (let key in state.balances) {
+          let rewardPer = state.balances[key] / balances;
+          if (rewardPer !== 0) {
+            distributionReward[key] =
+              distribution[nftId].length * rewardPerAttention * rewardPer;
+          }
         }
       }
     })
