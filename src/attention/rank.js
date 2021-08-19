@@ -1,6 +1,7 @@
 export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
+  const score = state.score;
   const prepareDistribution = task.prepareDistribution;
   const registeredRecords = state.registeredRecords;
   if (SmartWeave.block.height < task.close) {
@@ -32,6 +33,7 @@ export default async function rankPrepDistribution(state) {
       acceptedProposedTxIds.push(proposeData.txId);
     }
   });
+
   let distribution = {};
 
   await Promise.all(
@@ -43,12 +45,19 @@ export default async function rankPrepDistribution(state) {
           string: true
         }
       );
+      const proposedPayload = proposeDatas.find(
+        (proposeData) => proposeData.txId === acceptedProposedTxId
+      );
+      const distributer = proposedPayload.distributer;
+      let scoreSum = 0;
       const splitData = data.split();
       const parseData = JSON.parse(splitData);
       const parseDataKeys = Object.keys(parseData);
       const registeredNfts = Object.values(registeredRecords);
       parseDataKeys.map((key) => {
+        scoreSum += [...new Set(parseData[key])].length;
         if (registeredNfts.some((nfts) => nfts.includes(key))) {
+          scoreSum += [...new Set(parseData[key])].length;
           if (!(key in distribution)) {
             distribution[key] = [...new Set(parseData[key])];
           } else {
@@ -58,6 +67,7 @@ export default async function rankPrepDistribution(state) {
           }
         }
       });
+      score[distributer] = scoreSum;
     })
   );
   let totalAttention = 0;

@@ -8,6 +8,10 @@ export default async function registerTask(state, action) {
   if (!taskTxId) throw new ContractError("No txid specified");
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you need min 1 KOI to register data");
+  const txId = state.tasks.find((task) => task.txId === taskTxId);
+  if (txId !== undefined) {
+    throw new ContractError(`task with ${txId}id is already registered `);
+  }
   // Required to start caching this task state in kohaku
   await SmartWeave.contracts.readContractState(taskTxId);
   if (koiReward) {
