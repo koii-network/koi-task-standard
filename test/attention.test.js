@@ -30,6 +30,11 @@ async function main() {
   );
   smartest.writeContractState(attentionContractId, attentionInitState);
 
+  // Load nft contract
+  const nftSrc = fs.readFileSync(`dist/nft.js`, "utf8");
+  const nftContractId = "d4k5a8m9";
+  const nftInitState = JSON.parse(fs.readFileSync(`src/nft/init_state.json`));
+  smartest.writeContractState(nftContractId, nftInitState);
   // const attentionInput = {
   //   function: "submitDistribution",
   //   distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
@@ -112,18 +117,18 @@ async function main() {
   //   attentionContractId
   // );
 
-  const attentionInput3 = {
-    function: "cleanInvalidTransactions"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput3,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput3 = {
+  //   function: "cleanInvalidTransactions"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   // const koiInput = {
   //   function: "registerTask",
@@ -179,24 +184,22 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
-  // const attentionInput3 = {
-  //   function: "migratePreRegister",
-  //   contractId: attentionContractId,
-  //   mainContactId: koiContractId
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   attentionSrc,
-  //   wallet,
-  //   attentionInput3,
-  //   smartest.readContractState(attentionContractId),
-  //   walletAddress,
-  //   attentionContractId
-  // );
+  const attentionInput3 = {
+    function: "migratePreRegister"
+  };
+  await smartest.interactWrite(
+    arweave,
+    attentionSrc,
+    wallet,
+    attentionInput3,
+    smartest.readContractState(attentionContractId),
+    walletAddress,
+    attentionContractId
+  );
 
   console.log(
-    // "Koi final state: ",
-    // smartest.readContractState(koiContractId),
+    "Koi final state: ",
+    smartest.readContractState(koiContractId),
     "Attention final state:",
     smartest.readContractState(attentionContractId)
   );
