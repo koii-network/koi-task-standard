@@ -79,11 +79,16 @@ export default async function rankPrepDistribution(state) {
         (preValue, curValue) => preValue + curValue
       );
       if (balances !== 0) {
-        for (let key in state.balances) {
-          let rewardPer = state.balances[key] / balances;
+        for (let address in state.balances) {
+          let rewardPer = state.balances[address] / balances;
           if (rewardPer !== 0) {
-            distributionReward[key] =
-              distribution[nftId].length * rewardPerAttention * rewardPer;
+            if (address in distributionReward) {
+              distributionReward[address] +=
+                distribution[nftId].length * rewardPerAttention * rewardPer;
+            } else {
+              distributionReward[address] =
+                distribution[nftId].length * rewardPerAttention * rewardPer;
+            }
           }
         }
       }
