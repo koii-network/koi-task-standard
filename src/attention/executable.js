@@ -49,14 +49,13 @@ function setup(_init_state) {
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
-    namespace.express("get","/",heartBeat);
+    namespace.express("get", "/", heartBeat);
   }
 }
-function heartBeat(req,res){
+function heartBeat(req, res) {
   return res.json({
-    message:"Running Attention game"
+    message: "Running Attention game"
   });
-
 }
 async function execute(_init_state) {
   let state, block;
@@ -415,7 +414,7 @@ async function checkTxConfirmation(txId, task) {
       return true;
     } catch (e) {
       if (e.type === "TX_FAILED") {
-        console.error("Error while checking tx confirmation", e.type);
+        console.error(e.type, "while checking tx confirmation");
         return false;
       }
     }
@@ -607,7 +606,7 @@ async function distribute() {
     tools.contractId,
     input
   );
-  const task = "distributing reward to main Contract";
+  const task = "distributing reward to main contract";
   if (await checkTxConfirmation(tx, task)) {
     hasDistributed = true;
     console.log("Distributed");

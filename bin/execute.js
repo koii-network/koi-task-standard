@@ -59,6 +59,9 @@ async function main() {
   await executableTask.setup(null);
   const port = process.env.SERVER_PORT || 8887;
   if (operationMode === "service") {
+    expressApp.get("/tasks", (_req, res) => {
+      res.send([taskTxId]);
+    });
     expressApp.listen(port, () => {
       console.log(`Open http://localhost:${port} to view in browser`);
     });
