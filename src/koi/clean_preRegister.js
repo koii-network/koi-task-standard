@@ -3,12 +3,14 @@ export default async function cleanPreRegister(state) {
 
   const contractIds = [];
   preRegisterDatas.forEach((preRegisterData) => {
-    if (!contractIds.includes(preRegisterData.contractId)) {
-      contractIds.push(preRegisterData.contractId);
+    if ("nft" in preRegisterData.content) {
+      if (!contractIds.includes(preRegisterData.contractId)) {
+        contractIds.push(preRegisterData.contractId);
+      }
     }
   });
 
-  await Promise.all(
+  await Promise.allSettled(
     contractIds.map(async (contractId) => {
       const contractState = await SmartWeave.contracts.readContractState(
         contractId
@@ -18,7 +20,7 @@ export default async function cleanPreRegister(state) {
       state.preRegisterDatas = state.preRegisterDatas.filter(
         (preRegisterData) =>
           !registeredContent.some((nfts) =>
-            nfts.includes(preRegisterData.content.nftId)
+            nfts.includes(preRegisterData.content.nft)
           )
       );
     })

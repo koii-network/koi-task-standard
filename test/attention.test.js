@@ -35,6 +35,13 @@ async function main() {
   const nftContractId = "d4k5a8m9";
   const nftInitState = JSON.parse(fs.readFileSync(`src/nft/init_state.json`));
   smartest.writeContractState(nftContractId, nftInitState);
+  // Load koii contract
+  const taskSrc = fs.readFileSync(`dist/koi_task.js`, "utf8");
+  const taskContractId = "f4l5s8n9";
+  const taskInitState = JSON.parse(
+    fs.readFileSync(`src/koi_task/init_state.json`)
+  );
+  smartest.writeContractState(taskContractId, taskInitState);
   // const attentionInput = {
   //   function: "submitDistribution",
   //   distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
@@ -130,33 +137,33 @@ async function main() {
   //   attentionContractId
   // );
 
-  // const koiInput = {
-  //   function: "registerTask",
-  //   taskTxId: attentionContractId,
-  //   taskName: "Attention_Game"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
+  const koiInput = {
+    function: "registerTask",
+    taskTxId: taskContractId,
+    taskName: "Store_Cat"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
 
-  // const koiInput0 = {
-  //   function: "distributeReward"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput0,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
+  const koiInput0 = {
+    function: "distributeReward"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput0,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
   // const koiInput0 = {
   //   function: "burnKoi",
   //   contractId: attentionContractId,
@@ -184,29 +191,29 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
-  const attentionInput3 = {
-    function: "migratePreRegister"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput3,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput3 = {
+  //   function: "migratePreRegister"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   console.log(
     "Koi final state: ",
-    smartest.readContractState(koiContractId),
-    "Attention final state:",
-    smartest.readContractState(attentionContractId)
+    smartest.readContractState(koiContractId)
+    // "Attention final state:",
+    // smartest.readContractState(attentionContractId)
   );
-  const state = smartest.readContractState(attentionContractId);
-  console.log(state.registeredRecords);
-  // const stateA = smartest.readContractState(attentionContractId);
-  // console.log(stateA.task.prepareDistribution);
+
+  const stateA = smartest.readContractState(koiContractId);
+  console.log(stateA.balances);
+  console.log(stateA.tasks);
 }
 
 main().then(() => {

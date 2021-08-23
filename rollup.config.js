@@ -28,10 +28,11 @@ export default [
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   },
+
   {
-    input: "src/nft/index.js",
+    input: "src/koi_task/index.js",
     output: {
-      file: "dist/nft.js",
+      file: "dist/koi_task.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]

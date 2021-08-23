@@ -9,6 +9,12 @@ export default function burnKoi(state, action) {
 
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
+  if (contentType === "nft") {
+    const state = SmartWeave.contracts.readContractState(contentTxId);
+    if (state.owner !== caller) {
+      throw new ContractError("Only owner can register");
+    }
+  }
   --balances[caller]; // burn 1 koi per registration
   preRegisterDatas.push({
     contractId: contractId,

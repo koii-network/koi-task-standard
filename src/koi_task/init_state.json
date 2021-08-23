@@ -6,7 +6,16 @@
   "task": {
     "open": 730823,
     "close": 731543,
-    "prepareDistribution": [],
+    "prepareDistribution": [
+      {
+        "block": 730823,
+        "distribution": {
+          "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc": 100,
+          "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss": 100
+        },
+        "isRewarded": false
+      }
+    ],
     "proposedPaylods": [
       {
         "block": 730823,
