@@ -6,34 +6,38 @@ export default async function registerTask(state, action) {
   const taskTxId = input.taskTxId;
   const koiReward = input.koiReward;
   if (!taskTxId) throw new ContractError("No txid specified");
+  if (koiReward && balances[caller] < koiReward + 1)
+    throw new ContractError("Your Balance is not enough");
+  if (!koiReward && caller !== state.owner) {
+    throw new ContractError("Owner only can register special task");
+  }
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you need min 1 KOI to register data");
+
   const txId = state.tasks.find((task) => task.txId === taskTxId);
   if (txId !== undefined) {
     throw new ContractError(`task with ${txId}id is already registered `);
   }
   // Required to start caching this task state in kohaku
   await SmartWeave.contracts.readContractState(taskTxId);
-  if (koiReward) {
-    state.tasks.push({
-      owner: caller,
-      name: taskName,
-      txId: taskTxId,
-      bounty: koiReward,
-      rewardedBlock: [],
-      lockBounty: {
-        [caller]: koiReward
-      }
-    });
-    balances[caller] -= koiReward;
-  } else {
-    state.tasks.push({
-      owner: caller,
-      name: taskName,
-      txId: taskTxId,
-      rewardedBlock: []
-    });
-  }
+  koiReward
+    ? (state.tasks.push({
+        owner: caller,
+        name: taskName,
+        txId: taskTxId,
+        bounty: koiReward,
+        rewardedBlock: [],
+        lockBounty: {
+          [caller]: koiReward
+        }
+      }),
+      (balances[caller] -= koiReward))
+    : state.tasks.push({
+        owner: caller,
+        name: taskName,
+        txId: taskTxId,
+        rewardedBlock: []
+      });
 
   --balances[caller]; // burn 1 koi per registration
   return { state };
