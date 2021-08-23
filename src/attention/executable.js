@@ -297,8 +297,10 @@ async function PublishPoRT() {
   for (let i = 0; i < portLogs.length; i++) {
     const e = portLogs[i];
     const keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"])) finalLogs[e["trxId"]].push(e["wallet"]);
-    else finalLogs[e["trxId"]] = [e["wallet"]];
+    if (keys.includes(e["trxId"])) {
+      if (!finalLogs[e["trxId"]].includes(e["wallet"]))
+        finalLogs[e["trxId"]].push(e["wallet"]);
+    } else finalLogs[e["trxId"]] = [e["wallet"]];
   }
   return finalLogs;
 }
@@ -717,8 +719,10 @@ async function auditPort(txId, url) {
   for (let i = 0; i < prettyLogs.length; i++) {
     const e = prettyLogs[i];
     const keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"])) finalLogs[e["trxId"]].push(e["wallet"]);
-    else finalLogs[e["trxId"]] = [e["wallet"]];
+    if (keys.includes(e["trxId"]))
+      if (!finalLogs[e["trxId"]].includes(e["wallet"]))
+        finalLogs[e["trxId"]].push(e["wallet"]);
+      else finalLogs[e["trxId"]] = [e["wallet"]];
   }
   let proposedData = await arweave.transactions.getData(txId, {
     decode: true,
