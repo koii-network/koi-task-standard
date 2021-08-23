@@ -49,14 +49,14 @@ function setup(_init_state) {
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
-    namespace.express("get", "/", heartBeat);
+    namespace.express("get", "/", root);
   }
 }
-function heartBeat(req, res) {
-  return res.json({
-    message: "Running Attention game"
-  });
+
+async function root(_req, res) {
+  return res.json(await kohaku.readContract(arweave, namespace.taskTxId));
 }
+
 async function execute(_init_state) {
   let state, block;
   for (;;) {
