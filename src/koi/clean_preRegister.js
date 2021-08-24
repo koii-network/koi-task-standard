@@ -15,8 +15,7 @@ export default async function cleanPreRegister(state) {
       const contractState = await SmartWeave.contracts.readContractState(
         contractId
       );
-      const registerRecords = contractState.registeredRecords;
-      const registeredContent = Object.values(registerRecords);
+      const registeredContent = Object.values(contractState.registeredRecords);
       state.preRegisterDatas = state.preRegisterDatas.filter(
         (preRegisterData) =>
           !registeredContent.some((nfts) =>
