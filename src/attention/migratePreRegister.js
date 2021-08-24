@@ -10,6 +10,7 @@ export default async function migratePreRegister(state) {
       contractId = tag.get("value", { decode: true, string: true });
     }
   });
+
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );

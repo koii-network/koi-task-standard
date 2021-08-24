@@ -9,7 +9,7 @@ export default function withdraw(state, action) {
   if (!Number.isInteger(qty))
     throw new ContractError('Invalid value for "qty". Must be an integer');
   if (qty <= 0) throw new ContractError("Invalid stake withdrawal amount");
-  if (stakeReleaseBlock[caller] < SmartWeave.block.height)
+  if (stakeReleaseBlock[caller] > SmartWeave.block.height)
     throw new ContractError("Stake is not ready to be released");
   if (stakes[caller] < qty) {
     throw new ContractError(

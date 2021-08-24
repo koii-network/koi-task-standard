@@ -30,11 +30,6 @@ async function main() {
   );
   smartest.writeContractState(attentionContractId, attentionInitState);
 
-  // Load nft contract
-  const nftSrc = fs.readFileSync(`dist/nft.js`, "utf8");
-  const nftContractId = "d4k5a8m9";
-  const nftInitState = JSON.parse(fs.readFileSync(`src/nft/init_state.json`));
-  smartest.writeContractState(nftContractId, nftInitState);
   // Load koii contract
   const taskSrc = fs.readFileSync(`dist/koi_task.js`, "utf8");
   const taskContractId = "f4l5s8n9";
@@ -137,33 +132,60 @@ async function main() {
   //   attentionContractId
   // );
 
-  const koiInput = {
-    function: "registerTask",
-    taskTxId: taskContractId,
-    taskName: "Store_Cat"
-  };
-  await smartest.interactWrite(
-    arweave,
-    koiSrc,
-    wallet,
-    koiInput,
-    smartest.readContractState(koiContractId),
-    walletAddress,
-    koiContractId
-  );
+  // const koiInput = {
+  //   function: "registerTask",
+  //   taskTxId: taskContractId,
+  //   taskName: "Store_Cat"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
 
-  const koiInput0 = {
-    function: "distributeReward"
-  };
-  await smartest.interactWrite(
-    arweave,
-    koiSrc,
-    wallet,
-    koiInput0,
-    smartest.readContractState(koiContractId),
-    walletAddress,
-    koiContractId
-  );
+  // const koiInput0 = {
+  //   function: "distributeReward"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput0,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
+  // const koiInput0 = {
+  //   function: "stake",
+  //   qty: 100
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput0,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
+
+  // const koiInput0 = {
+  //   function: "withdraw",
+  //   qty: 100
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput0,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
   // const koiInput0 = {
   //   function: "burnKoi",
   //   contractId: attentionContractId,
@@ -179,41 +201,39 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
-  // const koiInput0 = {
-  //   function: "cleanPreRegister"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput0,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
-  // const attentionInput3 = {
-  //   function: "migratePreRegister"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   attentionSrc,
-  //   wallet,
-  //   attentionInput3,
-  //   smartest.readContractState(attentionContractId),
-  //   walletAddress,
-  //   attentionContractId
-  // );
+  const attentionInput3 = {
+    function: "migratePreRegister"
+  };
+  await smartest.interactWrite(
+    arweave,
+    attentionSrc,
+    wallet,
+    attentionInput3,
+    smartest.readContractState(attentionContractId),
+    walletAddress,
+    attentionContractId
+  );
+  const koiInput0 = {
+    function: "cleanPreRegister"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput0,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
 
   console.log(
     "Koi final state: ",
-    smartest.readContractState(koiContractId)
-    // "Attention final state:",
-    // smartest.readContractState(attentionContractId)
+    smartest.readContractState(koiContractId),
+    "Attention final state:",
+    smartest.readContractState(attentionContractId)
   );
 
-  const stateA = smartest.readContractState(koiContractId);
-  console.log(stateA.balances);
-  console.log(stateA.tasks);
+  //const stateA = smartest.readContractState(koiContractId);
 }
 
 main().then(() => {
