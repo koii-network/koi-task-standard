@@ -186,35 +186,11 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
-  // const koiInput0 = {
-  //   function: "burnKoi",
-  //   contractId: attentionContractId,
-  //   contentType: "nftId",
-  //   contentTxId: "rQ03lvHzD8xiM5Ry6VmhnA870MECRQdu9eRLn0ZLu6A"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput0,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
-  const attentionInput3 = {
-    function: "migratePreRegister"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput3,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
   const koiInput0 = {
-    function: "cleanPreRegister"
+    function: "burnKoi",
+    contractId: attentionContractId,
+    contentType: "nft",
+    contentTxId: "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0"
   };
   await smartest.interactWrite(
     arweave,
@@ -225,6 +201,30 @@ async function main() {
     walletAddress,
     koiContractId
   );
+  // const attentionInput3 = {
+  //   function: "migratePreRegister"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
+  // const koiInput2 = {
+  //   function: "cleanPreRegister"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput2,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
 
   console.log(
     "Koi final state: ",

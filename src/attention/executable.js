@@ -626,7 +626,6 @@ function checkForVote(state, block) {
   const task = state.task;
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status === "active");
-
   if (!activeVotes.length || !votes.length) {
     return false;
   }
@@ -671,8 +670,12 @@ async function createFile() {
 
 async function readTrackedVotes() {
   const batchFileName = "newfile.txt";
-  const data = await namespace.fs("readFile", batchFileName);
-  return data;
+  try {
+    const data = await namespace.fs("readFile", batchFileName);
+    return data;
+  } catch (e) {
+    return null;
+  }
 }
 
 async function validateAndVote(id, state) {
@@ -752,7 +755,13 @@ async function updateData(data) {
 async function checkProposeSlash(state, block) {
   const task = state.task;
   const activeVotes = state.votes.filter((vote) => vote.status === "active");
+  if (!activeVotes.length) {
+    return false;
+  }
   const dataBuffer = await readTrackedVotes();
+  if (dataBuffer === null) {
+    return false;
+  }
   const str = dataBuffer.toString();
   const obj = JSON.parse(str);
   const voteIds = obj.voteIds;
@@ -762,14 +771,19 @@ async function checkProposeSlash(state, block) {
       activeVoteVotedByNode.push(activeVote.id);
     }
   });
+
   if (!activeVotes.length || !activeVoteVotedByNode || hasProposedSlash) {
     return false;
   }
+
   return task.open + OFFSET_PROPOSE_SLASH < block && block < task.close;
 }
 
 async function proposeSlash(state) {
   const dataBuffer = await readTrackedVotes();
+  if (dataBuffer === null) {
+    return;
+  }
   const str = dataBuffer.toString();
   const obj = JSON.parse(str);
   const voteIds = obj.voteIds; // get the voted ids

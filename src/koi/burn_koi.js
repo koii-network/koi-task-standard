@@ -1,4 +1,4 @@
-export default function burnKoi(state, action) {
+export default async function burnKoi(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const preRegisterDatas = state.preRegisterDatas;
@@ -10,7 +10,7 @@ export default function burnKoi(state, action) {
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
   if (contentType === "nft") {
-    const nftState = SmartWeave.contracts.readContractState(contentTxId);
+    const nftState = await SmartWeave.contracts.readContractState(contentTxId);
     if (nftState.owner !== caller) {
       throw new ContractError("Only owner can register");
     }

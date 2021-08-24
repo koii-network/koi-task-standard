@@ -23,18 +23,18 @@
   "validBundlers": [],
   "votes": [],
   "task": {
-    "open": 750699,
-    "close": 750729,
+    "open": 755310,
+    "close": 755340,
     "prepareDistribution": [],
     "proposedPayloads": [
       {
-        "block": 750699,
+        "block": 755310,
         "proposedData": [],
         "isRanked": false
       }
     ]
   },
   "reputation": {},
-  "executableId": "RG6U0qmdNQYqvAwnXHKIW2VgIorXPwflCCTHQ3YjKCw",
-  "koiiContract": "0Ya1gHV5u00G-7mAepJKBY_j1fXRWrH-6XjjBAfFsCM"
+  "executableId": "UmNepiCkrJwJXA26KU_iDbgV-MtsvixXUrGGLhl9uy8",
+  "koiiContract": "LppT1p3wri4FCKzW5buohsjWxpJHC58_rgIO-rYTMB8"
 }
