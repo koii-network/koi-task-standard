@@ -53,7 +53,7 @@ async function main() {
 
   // Init kohaku
   console.log("Initializing Koii contract for Kohaku");
-  await kohaku.readContract(arweave, KOII_CONTRACT_ID);
+  await tools.getContractStateAwait();
 
   // Initialize tasks then start express app
   await executableTask.setup(null);

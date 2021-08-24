@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.12":
-  version "2.2.0-beta.12"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.12.tgz#fe1ab378fc9490a40f512fd1be73c20adc657f84"
-  integrity sha512-RypvsDaN3cE5JPw5NbSbpXQU2yUzaqWiykH31BWhHgZEl3QO/+VygWyz35nGUDfC/OuK0If2RwEQ76zK15S4mA==
+"@_koi/sdk@^2.2.0-beta.13":
+  version "2.2.0-beta.13"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.13.tgz#367c26212faba05e6737d3f716e8683bebd4620f"
+  integrity sha512-W05ebpPafl8xmLdnkfwCoGBBNF2mIvvZhh8C44Yq/4tqHrVwfxAZWju987RCpix1Gl3JeBRNtEBoyZqEuNT/0w==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
