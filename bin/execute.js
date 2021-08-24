@@ -4,7 +4,7 @@ const koiSdk = require("@_koi/sdk/node");
 const { arweave } = require("@_koi/sdk/common");
 const kohaku = require("kohaku");
 
-const KOII_CONTRACT_ID = "54hi0oYJ2kNwezFmaGqXDbS3gb6ohdoZYL354ShyeNs";
+const KOII_CONTRACT_ID = "LppT1p3wri4FCKzW5buohsjWxpJHC58_rgIO-rYTMB8";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
