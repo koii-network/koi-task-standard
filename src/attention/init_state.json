@@ -20,7 +20,10 @@
       "_-9TDSVSwC40JXnmn3bk7Ygr0vRdlhACKgqo7siJx2A"
     ]
   },
-  "validBundlers": [],
+  "validBundlers": [
+    "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
+    "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc"
+  ],
   "votes": [],
   "task": {
     "open": 755310,
