@@ -38,6 +38,8 @@ let hasSubmittedPorts = false;
 let hasProposedSlash = false;
 let hasRanked = false;
 let hasDistributed = false;
+let hasVoted = false;
+let hasSubmitBatch = false;
 
 const logsInfo = {
   filename: "ports.log",
@@ -145,25 +147,30 @@ async function checkVote(payload) {
 }
 
 async function appendToBatch(submission) {
-  const batchFileName = "/bundles/" + submission.vote.voteId;
+  const batchFileName = "batches/" + submission.vote.voteId;
+  try {
+    await namespace.fs("access", "batches");
+  } catch {
+    await namespace.fs("mkdir", "batches");
+  }
   try {
     await namespace.fs("access", batchFileName, fsConstants.F_OK);
-  } catch {
+  } catch (e) {
     // If file doesn't exist
-    // Check for duplicate otherwise append file
-    const data = await namespace.fs("readFile", batchFileName);
-    if (data.includes(submission.senderAddress)) return "duplicate";
-    await namespace.fs(
-      "appendFile",
-      batchFileName,
-      "\r\n" + JSON.stringify(submission)
-    );
+    // Write to file and generate receipt if no error
+    await namespace.fs("writeFile", batchFileName, JSON.stringify(submission));
     return generateReceipt(submission);
   }
 
   // If file does exist
-  // Write to file and generate receipt if no error
-  await namespace.fs("writeFile", batchFileName, JSON.stringify(submission));
+  // Check for duplicate otherwise append file
+  const data = await namespace.fs("readFile", batchFileName);
+  if (data.includes(submission.senderAddress)) return "duplicate";
+  await namespace.fs(
+    "appendFile",
+    batchFileName,
+    "\r\n" + JSON.stringify(submission)
+  );
   return generateReceipt(submission);
 }
 
@@ -188,7 +195,6 @@ async function submitPort(req, res) {
     }
 
     const dataAndSignature = JSON.parse(signature);
-    console.log(typeof dataAndSignature);
     const valid = await tools.verifySignature({
       ...dataAndSignature,
       owner: publicKey
@@ -497,6 +503,7 @@ function canRankPrepDistribution(state, block) {
 }
 
 function canSubmitBatch(state, block) {
+  if (hasSubmitBatch) return false;
   const open = state.task.open;
   return (
     open + OFFSET_BATCH_VOTE_SUBMIT < block &&
@@ -508,7 +515,6 @@ async function submitBatch(state) {
   const activeVotes = await activeVoteId(state);
   let task = "submitting votes";
   for (const activeVoteId of activeVotes) {
-    const state = await tools.getContractState();
     const vote = state.votes.find((vote) => vote.id == activeVoteId);
     const bundlers = vote.bundlers;
     const bundlerAddress = await tools.getWalletAddress();
@@ -518,12 +524,17 @@ async function submitBatch(state) {
         console.log("Vote submission failed");
         return;
       }
-      const arg = {
-        batchFile: activeVoteId,
-        voteId: voteId,
-        bundlerAddress: bundlerAddress
+      const input = {
+        function: "batchAction",
+        batchFile: txId,
+        voteId: activeVoteId
       };
-      const resultTx = await tools.batchAction(arg);
+      const resultTx = await kohaku.interactWrite(
+        arweave,
+        tools.wallet,
+        namespace.taskTxId,
+        input
+      );
       task = "batch";
       if (!(await checkTxConfirmation(resultTx, task))) {
         console.log("Batch failed");
@@ -531,29 +542,30 @@ async function submitBatch(state) {
       }
     }
   }
+  hasSubmitBatch = true;
 }
 
 async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
   const votes = state.votes;
-  const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
-  const areVotesTracked = await Promise.all(areVotesTrackedProms);
+  const activeVotesTracked = [];
+  const activeVotes = votes.filter((vote) => vote.status === "active");
+  activeVotes.map((vote) => {
+    if (isVoteTracked(vote.id)) {
+      activeVotesTracked.push(vote.id);
+    }
+  });
 
-  // Get active votes
-  const close = state.task.close;
-  const activeVotes = [];
-  for (let i = 0; i < votes.length; i++)
-    if (votes[i].end === close && areVotesTracked[i])
-      activeVotes.push(votes[i].id);
-  return activeVotes;
+  return activeVotesTracked;
 }
 
 async function isVoteTracked(voteId) {
-  const batchFileName = "/../app/bundles/" + voteId;
+  const batchFileName = "batches/" + voteId;
   try {
-    await namespace.fs("access", batchFileName, fsConstants.F_OK);
+    await namespace.fs("access", batchFileName);
     return true;
   } catch (_e) {
+    console.log("error", _e);
     return false;
   }
 }
@@ -565,8 +577,8 @@ async function batchUpdateContractState(voteId) {
 }
 
 async function getVotesFile(fileId) {
-  const batchFileName = "/../bundles/" + fileId;
-  await namespace.fs("access", batchFileName, fsConstants.F_OK);
+  const batchFileName = "batches/" + fileId;
+  await namespace.fs("access", batchFileName);
   return await namespace.fs("readFile", batchFileName, "utf8");
 }
 
@@ -619,25 +631,21 @@ async function distribute() {
 
 async function witness(state, block) {
   if (checkForVote(state, block)) await tryVote(state);
-  if (checkProposeSlash(state, block)) await proposeSlash();
+  if (checkProposeSlash(state, block)) await proposeSlash(state);
 }
 
 function checkForVote(state, block) {
   const task = state.task;
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status === "active");
-  if (!activeVotes.length || !votes.length) {
+  if (!activeVotes.length || !votes.length || hasVoted) {
     return false;
   }
   return block < task.open + OFFSET_BATCH_VOTE_SUBMIT;
 }
 
 async function tryVote(state) {
-  await createFile();
-  const dataBuffer = await readTrackedVotes();
-  const str = dataBuffer.toString();
-  const obj = JSON.parse(str);
-  const voteIds = obj.voteIds;
+  const { voteIds, receipts } = await createReadVotRec();
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status == "active");
   await Promise.all(
@@ -645,41 +653,36 @@ async function tryVote(state) {
       // check if the node already voted for the activeVotes
       if (!voteIds.includes(vote.id)) {
         const receiptFromBundler = await validateAndVote(vote.id, state);
-        const receipts = obj.receipts;
-        receipts.push(receiptFromBundler);
+        const receiptsTracked = receipts;
+        receiptsTracked.push(receiptFromBundler);
         voteIds.push(vote.id);
         await updateData({ voteIds, receipts });
       }
     })
   );
+  hasVoted = true;
 }
 
-async function createFile() {
+async function createReadVotRec() {
   const batchFileName = "newfile.txt";
   try {
-    await namespace.fs("access", batchFileName, fsConstants.F_OK);
-    return;
-  } catch {
+    const data = await namespace.fs("readFile", batchFileName, "utf8");
+    return JSON.parse(data);
+  } catch (e) {
     await namespace.fs(
       "writeFile",
       batchFileName,
       JSON.stringify({ voteIds: [], receipts: [] })
     );
-  }
-}
-
-async function readTrackedVotes() {
-  const batchFileName = "newfile.txt";
-  try {
-    const data = await namespace.fs("readFile", batchFileName);
-    return data;
-  } catch (e) {
-    return null;
+    return { voteIds: [], receipts: [] };
   }
 }
 
 async function validateAndVote(id, state) {
-  const suspectedProposedData = state.task.proposedPayloads.proposedData.find(
+  const currentPayload = state.task.proposedPayloads.find(
+    (payload) => payload.block === state.task.open
+  );
+  const suspectedProposedData = currentPayload.proposedData.find(
     (proposedData) => proposedData.txId === id
   );
   const valid = auditPort(
@@ -687,16 +690,22 @@ async function validateAndVote(id, state) {
     suspectedProposedData.cacheUrl
   );
   const input = {
+    function: "vote",
     voteId: id,
     userVote: String(valid)
   };
-
-  const signPayload = await tools.signPayload(input);
-  const receipt = axios.post(
-    "https://dev.koi.rocks/namespace.taskTxId/submitVote",
+  const nodeAddress = await tools.getWalletAddress();
+  const payload = {
+    vote: input,
+    senderAddress: nodeAddress
+  };
+  const signPayload = await tools.signPayload(payload);
+  const receipt = await axios.post(
+    "http://localhost:8887/BM-ljPOCelhOyb2meJLaeofDYPRyYdwFXSurchZXeiQ/submit-vote",
     signPayload
   );
-  return receipt;
+
+  return receipt.data.receipt;
   // save the receipt if the bundler didn't submit the vote then the node use the receipt to slash
 }
 
@@ -751,57 +760,35 @@ async function updateData(data) {
   const batchFileName = "newfile.txt";
   await namespace.fs("writeFile", batchFileName, JSON.stringify(data));
 }
-
-async function checkProposeSlash(state, block) {
-  const task = state.task;
-  const activeVotes = state.votes.filter((vote) => vote.status === "active");
-  if (!activeVotes.length) {
-    return false;
-  }
-  const dataBuffer = await readTrackedVotes();
-  if (dataBuffer === null) {
-    return false;
-  }
-  const str = dataBuffer.toString();
-  const obj = JSON.parse(str);
-  const voteIds = obj.voteIds;
-  const activeVoteVotedByNode = [];
-  activeVotes.map((activeVote) => {
-    if (voteIds.include(activeVote.id)) {
-      activeVoteVotedByNode.push(activeVote.id);
-    }
-  });
-
-  if (!activeVotes.length || !activeVoteVotedByNode || hasProposedSlash) {
-    return false;
-  }
-
-  return task.open + OFFSET_PROPOSE_SLASH < block && block < task.close;
-}
-
-async function proposeSlash(state) {
-  const dataBuffer = await readTrackedVotes();
-  if (dataBuffer === null) {
-    return;
-  }
-  const str = dataBuffer.toString();
-  const obj = JSON.parse(str);
-  const voteIds = obj.voteIds; // get the voted ids
-  const receipts = obj.receipts; //get the receipts;
-
+async function activeVotesVoted(state) {
+  const { voteIds, receipts } = await createReadVotRec();
   const ids = []; //get the tracked VoteIds for activeVotes.
   const activeVotes = state.votes.filter((vote) => vote.status === "active"); // active votes
   activeVotes.map((activeVote) => {
-    if (voteIds.include(activeVote.id)) {
+    if (voteIds.includes(activeVote.id)) {
       ids.push(activeVote.id);
     }
   });
+  return { receipts: receipts, activeVotes: activeVotes, ids: ids };
+}
+async function checkProposeSlash(state, block) {
+  const task = state.task;
+  const { receipts, activeVotes, ids } = await activeVotesVoted(state);
+  if (!activeVotes.length || !ids || hasProposedSlash || !receipts.length) {
+    return false;
+  }
+  return true;
+  //return task.open + OFFSET_PROPOSE_SLASH < block && block < task.close;
+}
+
+async function proposeSlash(state) {
+  const { receipts, activeVotes, ids } = await activeVotesVoted(state);
   const nodeAddress = await tools.getWalletAddress();
   await Promise.all(
     activeVotes.map(async (activeVote) => {
       for (const voteId of ids) {
         if (activeVote.id === voteId) {
-          if (!activeVote.voterList.include(nodeAddress)) {
+          if (!activeVote.votersList.includes(nodeAddress)) {
             const receipt = receipts.find(
               (receipt) => receipt.vote.vote.voteId == voteId
             );
