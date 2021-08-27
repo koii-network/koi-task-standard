@@ -4,22 +4,14 @@
 
 "@_koi/kohaku@^1.0.1":
   version "1.0.1"
-<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@_koi/kohaku/-/kohaku-1.0.1.tgz#faa9c43cf8c03bba9096e5292e1eabd659e12092"
-=======
-  resolved "https://registry.yarnpkg.com/@_koi/kohaku/-/kohaku-1.0.1.tgz#faa9c43cf8c03bba9096e5292e1eabd659e12092"
->>>>>>> 4dcf134a3b3085053aa2616bb3f1e33cabed8225
   integrity sha512-mBtlQk4yk2zKyHRzrx0AvFWKBFYU/eUINxAReK12V1QrHBUbf+0/pEhx/Z9mg9Visp5Mz/YxjuSqxPewcRHusg==
   dependencies:
     smartweave "^0.4.41"
 
 "@_koi/sdk@^2.2.0-beta.16":
   version "2.2.0-beta.16"
-<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.16.tgz#0f4f5e28da701237227b7d401c7ac5dfea236ff3"
-=======
-  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.2.0-beta.16.tgz#0f4f5e28da701237227b7d401c7ac5dfea236ff3"
->>>>>>> 4dcf134a3b3085053aa2616bb3f1e33cabed8225
   integrity sha512-6H8KTeu8/ZV4lDNB8xQOnb9+l1MiRFw32Woiw2cuGxX2L3KWJ9iN3gkG/4bBGBkV++fHBVUhW87GkWpXMkBAsw==
   dependencies:
     "@_koi/kohaku" "^1.0.1"
