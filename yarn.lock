@@ -2,16 +2,23 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.13":
-  version "2.2.0-beta.13"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.13.tgz#367c26212faba05e6737d3f716e8683bebd4620f"
-  integrity sha512-W05ebpPafl8xmLdnkfwCoGBBNF2mIvvZhh8C44Yq/4tqHrVwfxAZWju987RCpix1Gl3JeBRNtEBoyZqEuNT/0w==
+"@_koi/kohaku@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@_koi/kohaku/-/kohaku-1.0.1.tgz#faa9c43cf8c03bba9096e5292e1eabd659e12092"
+  integrity sha512-mBtlQk4yk2zKyHRzrx0AvFWKBFYU/eUINxAReK12V1QrHBUbf+0/pEhx/Z9mg9Visp5Mz/YxjuSqxPewcRHusg==
   dependencies:
+    smartweave "^0.4.41"
+
+"@_koi/sdk@^2.2.0-beta.16":
+  version "2.2.0-beta.16"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.2.0-beta.16.tgz#0f4f5e28da701237227b7d401c7ac5dfea236ff3"
+  integrity sha512-6H8KTeu8/ZV4lDNB8xQOnb9+l1MiRFw32Woiw2cuGxX2L3KWJ9iN3gkG/4bBGBkV++fHBVUhW87GkWpXMkBAsw==
+  dependencies:
+    "@_koi/kohaku" "^1.0.1"
     arweave "^1.10.13"
     axios "^0.21.1"
     dotenv "^9.0.2"
     human-crypto-keys "^0.1.4"
-    kohaku koii-network/kohaku
     nedb-promises "^4.1.5"
     node-polyfill-webpack-plugin "^1.1.1"
     pem-jwk "^2.0.0"
@@ -3677,12 +3684,6 @@ koa@2.13.1, koa@^2.13.1:
     statuses "^1.5.0"
     type-is "^1.6.16"
     vary "^1.1.2"
-
-kohaku@koii-network/kohaku:
-  version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/2aa16340594408a0f64ac5820d219c0ec5352fb2"
-  dependencies:
-    smartweave "^0.4.41"
 
 levn@^0.4.1:
   version "0.4.1"

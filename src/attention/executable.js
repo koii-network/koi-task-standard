@@ -13,7 +13,7 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
 

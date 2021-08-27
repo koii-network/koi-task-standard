@@ -2,9 +2,9 @@ require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const { arweave } = require("@_koi/sdk/common");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 
-const KOII_CONTRACT_ID = "WRRDj_jNqQrMlr6_m9zIjW_XvbD3OORyW8eFpl5afO8";
+const KOII_CONTRACT_ID = "LppT1p3wri4FCKzW5buohsjWxpJHC58_rgIO-rYTMB8";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
