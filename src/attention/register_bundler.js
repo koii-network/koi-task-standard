@@ -12,9 +12,9 @@ export default async function registerBundler(state, action) {
     mainContractId
   );
   const stakes = tokenContractState.stakes;
-  if (!(caller in stakes) || stakes[caller] < 1000) {
+  if (!(caller in stakes) || stakes[caller] < 10) {
     throw new Contract(
-      "You should stake minimum 1000 stake to register as valid bundler"
+      "You should stake minimum 10 stake to register as valid bundler"
     );
   }
   validBundlers.push(caller);
