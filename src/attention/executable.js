@@ -13,7 +13,7 @@ namespace {
 
 const { fsConstants } = require("fs");
 const Arweave = require("arweave");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
 
@@ -50,11 +50,37 @@ function setup(_init_state) {
     namespace.express("post", "/submit-port", submitPort);
     namespace.express("get", "/cache", servePortCache);
     namespace.express("get", "/", root);
+
+    namespace.express("get", "/nft", getNft);
+    namespace.express("get", "/top-content-predicted", getTopContentPredicted);
+  }
+}
+
+async function getNft(req, res) {
+  try {
+    const state = await tools.getContractState();
+    // let content = await contentView(req.query.id, state);
+    // content.timestamp = moment().unix() * 1000;
+    // if (content && content.tx) delete content.tx;
+    //res.status(200).send(content);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ error: e });
+  }
+}
+
+function getTopContentPredicted(req, res) {
+  try {
+    const peroid = req.query.peroid;
+    //res.status(200).send(data);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ error: e });
   }
 }
 
 async function root(_req, res) {
-  return res.json(await kohaku.readContract(arweave, namespace.taskTxId));
+  return res.json(await tools.readState(namespace.taskTxId));
 }
 
 async function execute(_init_state) {
@@ -71,9 +97,8 @@ async function execute(_init_state) {
 }
 
 async function getAttentionStateAndBlock() {
-  let block = (await tools.getBlockHeight()) - 2; // Add delay to reduce chance of null block and actions happening ahead of nodes
-  if (block < lastBlock) block = lastBlock;
-  const state = await kohaku.readContract(arweave, namespace.taskTxId, block);
+  const state = await kohaku.readContract(arweave, namespace.taskTxId);
+  let block = kohaku.getCacheHeight();
 
   const logClose = state.task.close;
   if (logClose > lastLogClose) {

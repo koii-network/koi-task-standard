@@ -1,8 +1,7 @@
 require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
-const { arweave } = require("@_koi/sdk/common");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 
 const KOII_CONTRACT_ID = "LppT1p3wri4FCKzW5buohsjWxpJHC58_rgIO-rYTMB8";
 
@@ -16,9 +15,7 @@ const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
 
 async function main() {
-  await tools.loadWallet(
-    JSON.parse(await fsPromises.readFile(process.env.WALLET_LOCATION, "utf8"))
-  );
+  await tools.loadWallet(await tools.loadFile(process.env.WALLET_LOCATION));
   console.log("Executing with wallet", await tools.getWalletAddress());
 
   let expressApp;
@@ -51,9 +48,12 @@ async function main() {
     require
   );
 
-  // Init kohaku
+  // Init Kohaku
   console.log("Initializing Koii contract for Kohaku");
   await tools.getContractStateAwait();
+  const initialHeight = kohaku.getCacheHeight();
+  console.log("Kohaku initialized to height", kohaku.getCacheHeight());
+  if (initialHeight < 1) throw new Error("Failed to initialize");
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
