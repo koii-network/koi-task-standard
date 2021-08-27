@@ -101,8 +101,9 @@ async function execute(_init_state) {
 }
 
 async function getAttentionStateAndBlock() {
-  const state = await kohaku.readContract(arweave, namespace.taskTxId);
-  let block = kohaku.getCacheHeight();
+  let block = (await tools.getBlockHeight()) - 1; // Add delay to reduce chance of null block and actions happening ahead of nodes
+  if (block < lastBlock) block = lastBlock;
+  const state = await kohaku.readContract(arweave, namespace.taskTxId, block);
 
   const logClose = state.task.close;
   if (logClose > lastLogClose) {
