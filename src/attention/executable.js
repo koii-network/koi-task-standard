@@ -31,7 +31,7 @@ const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
 
-const ARWEAVE_RATE_LIMIT = 30000; // Reduce arweave load
+const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 
 let lastBlock = 0;
 let lastLogClose = 0;
