@@ -31,6 +31,8 @@ const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
 
+const ARWEAVE_RATE_LIMIT = 30000; // Reduce arweave load
+
 let lastBlock = 0;
 let lastLogClose = 0;
 
@@ -123,7 +125,7 @@ async function getAttentionStateAndBlock() {
       "blocks"
     );
   lastBlock = block;
-
+  await rateLimit();
   return [state, block];
 }
 
@@ -451,7 +453,16 @@ async function checkTxConfirmation(txId, task) {
         return false;
       }
     }
+    await rateLimit();
   }
+}
+
+/**
+ * Awaitable rate limit
+ * @returns
+ */
+function rateLimit() {
+  return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
 }
 
 async function bundleAndExport(bundle) {
