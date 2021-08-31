@@ -29,12 +29,11 @@ export default async function distributeReward(state) {
       );
       if (koiiTask.includes(task)) {
         unRewardedPrepareDistribution.forEach((prepareDistribution) => {
-          const lockBounty = task.bounty;
+          const lockBounty = task.lockBounty[task.owner];
           const taskDistribution = Object.values(
             prepareDistribution.distribution
           ).reduce((preValue, curValue) => preValue + curValue);
-          console.log(taskDistribution);
-          if (lockBounty === taskDistribution) {
+          if (lockBounty >= taskDistribution) {
             for (let address in prepareDistribution.distribution) {
               address in balances
                 ? (balances[address] +=
@@ -43,8 +42,7 @@ export default async function distributeReward(state) {
                     prepareDistribution.distribution[address]);
             }
             rewardedBlock.push(prepareDistribution.block);
-            task.bounty = 0;
-            delete task.lockBounty;
+            task.lockBounty[task.owner] -= taskDistribution;
           }
         });
       } else {

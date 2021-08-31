@@ -3,16 +3,19 @@
   "name": "Attention_Game",
   "registeredRecords": {
     "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo": [
+      "KXFrIJ1828MpW8IKsuruH2r5Vp-nBKyX25uXLFdzOq0",
       "t1a_AEjePkxi65k0A1r6MS9TtkIzWauJ0pOnnWq29VY"
     ],
     "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc": [
-      "1UDe0Wqh51-O03efPzoc_HhsUPrmgBR2ziUfaI7CpZk"
+      "1UDe0Wqh51-O03efPzoc_HhsUPrmgBR2ziUfaI7CpZk",
+      "-je3T3r6_70-WytZjkvjEtyUxSjPTHnU_m7zZqk2U_k"
     ],
     "IsAUH6ruDQgbhr7SvfYUFzQJO-6MGXaRFfJ0FIyHvOQ": [
       "cfhKMEd_pCZHHIKeVGZAilnITonqllwkA_yhiF2PaOw",
       "HEcP1vyyHXjLVZ8ote2rphHq7wsvcVPr7RnMyAh2ZJE",
       "_gk1ZNumV6a0vuqhVr5v6w1RYfoi-pArn-JKpU5eWZU",
-      "kpaWOQ6Uv8EdgG3acRwyijjTpRXDGF-w_VORPzG-3bQ"
+      "kpaWOQ6Uv8EdgG3acRwyijjTpRXDGF-w_VORPzG-3bQ",
+      "k0yTc6j2dpvInkPbCchosKgSTjweC50zyY7W6yvOYLA"
     ],
     "oXPkFpvvpI0EDdbBUVz1sOEf8LAcx7pZqTduB70jEvo": [
       "NI9OY-Rzj4TjS5s4W-DFyRoY2Vz4884OhSYdjFDl1uY",
@@ -20,19 +23,33 @@
       "_-9TDSVSwC40JXnmn3bk7Ygr0vRdlhACKgqo7siJx2A"
     ]
   },
-  "validBundlers": [
-    "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-    "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc"
-  ],
+
   "votes": [],
   "task": {
     "open": 755310,
     "close": 755340,
     "prepareDistribution": [],
+    "attentionReport": [],
+    "rewardReport": [],
     "proposedPayloads": [
       {
         "block": 755310,
-        "proposedData": [],
+        "proposedData": [
+          {
+            "txId": "oH2XaHh0vMaJTBraw2USfOwptd3aEfBz2SQRDf5lAyo",
+            "distributer": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
+            "cacheUrl": "url",
+            "blockHeight": 750709,
+            "status": "pending"
+          },
+          {
+            "txId": "pHWRlaZYO-IELtALVf6oc6sSWG00XbGPD6TnmERHnzo",
+            "distributer": "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc",
+            "cacheUrl": "url",
+            "blockHeight": 750709,
+            "status": "pending"
+          }
+        ],
         "isRanked": false
       }
     ]
