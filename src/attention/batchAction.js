@@ -15,8 +15,8 @@ export default async function batchAction(state, action) {
   if (!batchTxId) throw new ContractError("No txId specified");
   if (!(typeof batchTxId === "string"))
     throw new ContractError("batchTxId should be string");
-  if (!validBundlers.includes(action.caller))
-    throw new ContractError("Only selected bundlers can write batch actions.");
+  // if (!validBundlers.includes(action.caller))
+  //   throw new ContractError("Only selected bundlers can write batch actions.");
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
     string: true
