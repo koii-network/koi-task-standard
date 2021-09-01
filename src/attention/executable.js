@@ -11,7 +11,6 @@ namespace {
 }
 */
 
-const { fsConstants } = require("fs");
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
@@ -62,7 +61,7 @@ function setup(_init_state) {
 
 async function getNft(req, res) {
   try {
-    const state = await tools.getContractState();
+    const state = await tools.getKoiiState();
     // let content = await contentView(req.query.id, state);
     // content.timestamp = moment().unix() * 1000;
     // if (content && content.tx) delete content.tx;
@@ -84,7 +83,10 @@ function getTopContentPredicted(req, res) {
 }
 
 async function root(_req, res) {
-  return res.json(await tools.readState(namespace.taskTxId));
+  return res
+    .status(200)
+    .type("application/json")
+    .send(kohaku.readContractCache(namespace.taskTxId));
 }
 
 async function execute(_init_state) {
@@ -103,7 +105,7 @@ async function execute(_init_state) {
 async function getAttentionStateAndBlock() {
   let block = (await tools.getBlockHeight()) - 1; // Add delay to reduce chance of null block and actions happening ahead of nodes
   if (block < lastBlock) block = lastBlock;
-  const state = await kohaku.readContract(arweave, namespace.taskTxId, block);
+  const state = await tools.getState(namespace.taskTxId, block);
 
   const logClose = state.task.close;
   if (logClose > lastLogClose) {

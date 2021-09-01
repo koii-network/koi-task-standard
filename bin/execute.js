@@ -50,7 +50,7 @@ async function main() {
 
   // Init Kohaku
   console.log("Initializing Koii contract for Kohaku");
-  await tools.getContractStateAwait();
+  await tools.getKoiiStateAwait();
   const initialHeight = kohaku.getCacheHeight();
   console.log("Kohaku initialized to height", kohaku.getCacheHeight());
   if (initialHeight < 1) throw new Error("Failed to initialize");
