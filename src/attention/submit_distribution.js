@@ -5,10 +5,19 @@ export default async function submitDistribution(state, action) {
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
-  const contractId = input.contractId;
+  //const contractId = input.contractId;
   if (SmartWeave.block.height > task.open + 12) {
     throw new ContractError("proposing is closed. wait for another round");
   }
+  const transaction = await SmartWeave.unsafeClient.transactions.get(
+    SmartWeave.transaction.id
+  );
+  let contractId;
+  transaction.get("tags").forEach((tag) => {
+    if (tag.get("name", { decode: true, string: true }) == "Contract") {
+      contractId = tag.get("value", { decode: true, string: true });
+    }
+  });
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );

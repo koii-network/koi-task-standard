@@ -65,29 +65,21 @@ export default async function rankPrepDistribution(state) {
     })
   );
   let totalAttention = 0;
-  const cheDistirbution = {};
   const attentionScore = {};
-  await Promise.allSettled(
-    Object.keys(distribution).map(async (key) => {
-      const keyStatus = await SmartWeave.unsafeClient.transactions.getStatus(
-        key
-      );
-      if (keyStatus.status === 200) {
-        cheDistirbution[key] = distribution[key];
-        attentionScore[key] = distribution[key].length;
-        let attention = distribution[key].length;
-        totalAttention += attention;
-      }
-    })
-  );
+
+  Object.keys(distribution).map((key) => {
+    attentionScore[key] = distribution[key].length;
+    let attention = distribution[key].length;
+    totalAttention += attention;
+  });
+
   let rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
 
   // Distributing Reward to owners
   let distributionReward = {};
-  const nftIds = Object.keys(cheDistirbution);
 
   await Promise.allSettled(
-    nftIds.map(async (nftId) => {
+    Object.keys(distribution).map(async (nftId) => {
       const state = await SmartWeave.contracts.readContractState(nftId);
       const balances = Object.values(state.balances).reduce(
         (preValue, curValue) => preValue + curValue
@@ -112,11 +104,7 @@ export default async function rankPrepDistribution(state) {
     distribution: distributionReward,
     isRewarded: false
   });
-  attentionReport.push({
-    block: task.open,
-    attentionScore,
-    rewardPerAttention
-  });
+  attentionReport.push(attentionScore);
   task.open = SmartWeave.block.height;
   //task.close = SmartWeave.block.height + 720;
   task.close = SmartWeave.block.height + 30;
