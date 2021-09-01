@@ -131,11 +131,11 @@ async function getAttentionStateAndBlock() {
 }
 
 async function service(state, block) {
-  if (canProposePorts(state, block)) await proposePorts();
-  //if (canAudit(state, block)) await audit(state);
-  if (canSubmitBatch(state, block)) await submitBatch(state);
-  if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
-  if (canDistributeReward(state)) await distribute();
+  // if (canProposePorts(state, block)) await proposePorts();
+  // //if (canAudit(state, block)) await audit(state);
+  //if (canSubmitBatch(state, block)) await submitBatch(state);
+  // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
+  // if (canDistributeReward(state)) await distribute();
 }
 
 async function submitVote(req, res) {
@@ -158,15 +158,19 @@ async function submitVote(req, res) {
         message: "success",
         receipt: receipt
       })
-    : res.status(RESPONSE_ACTION_FAILED).json({
-        message: "Invalid signature or insufficient stake."
+    : res.json({
+        message: "duplicate Vote or Invalid Signature"
       });
 }
 
 async function checkVote(payload) {
   if (!(await tools.verifySignature(payload))) return { accepted: false };
   const receipt = await appendToBatch(payload); // Since it's valid, append it to the vote list
-
+  if (receipt == undefined) {
+    return {
+      accepted: false
+    };
+  }
   // NOTE: we piggy back the receipt on this function because
   //   this ensures that the receipt cannot be returned if the
   //   item was not added to the vote bundle
@@ -182,7 +186,7 @@ async function appendToBatch(submission) {
     await namespace.fs("mkdir", "batches");
   }
   try {
-    await namespace.fs("access", batchFileName, fsConstants.F_OK);
+    await namespace.fs("access", batchFileName);
   } catch (e) {
     // If file doesn't exist
     // Write to file and generate receipt if no error
@@ -193,7 +197,7 @@ async function appendToBatch(submission) {
   // If file does exist
   // Check for duplicate otherwise append file
   const data = await namespace.fs("readFile", batchFileName);
-  if (data.includes(submission.senderAddress)) return "duplicate";
+  if (data.includes(submission.senderAddress)) return;
   await namespace.fs(
     "appendFile",
     batchFileName,
@@ -233,7 +237,6 @@ async function submitPort(req, res) {
         .status(RESPONSE_ACTION_FAILED)
         .send({ error: "ERROR: PoRT verification failed " });
     }
-    console.log(valid);
     let signatureHash = crypto
       .createHash("sha256")
       .update(JSON.stringify(dataAndSignature.signature))
@@ -308,8 +311,7 @@ async function proposePorts() {
   const input = {
     function: "submitDistribution",
     distributionTxId: result.id,
-    cacheUrl: "https://dev.koi.rocks/test/cache", // TODO FIXME
-    contractId: namespace.taskTxId
+    cacheUrl: process.env.SERVICE_URL
   };
   task = "proposePorts";
   const tx = await kohaku.interactWrite(
@@ -336,6 +338,7 @@ async function PublishPoRT() {
         finalLogs[e["trxId"]].push(e["wallet"]);
     } else finalLogs[e["trxId"]] = [e["wallet"]];
   }
+  console.log(finalLogs);
   return finalLogs;
 }
 
@@ -586,7 +589,7 @@ async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
   const votes = state.votes;
   const activeVotesTracked = [];
-  const activeVotes = votes.filter((vote) => vote.status === "active");
+  const activeVotes = votes.filter((vote) => vote.status === "passed");
   activeVotes.map((vote) => {
     if (isVoteTracked(vote.id)) {
       activeVotesTracked.push(vote.id);
@@ -689,11 +692,13 @@ async function tryVote(state) {
     activeVotes.map(async (vote) => {
       // check if the node already voted for the activeVotes
       if (!voteIds.includes(vote.id)) {
-        const receiptFromBundler = await validateAndVote(vote.id, state);
-        const receiptsTracked = receipts;
-        receiptsTracked.push(receiptFromBundler);
-        voteIds.push(vote.id);
-        await updateData({ voteIds, receipts });
+        const receiptFrBundler = await validateAndVote(vote.id, state);
+        if (receiptFrBundler !== null) {
+          const receiptsTracked = receipts;
+          receiptsTracked.push(receiptFrBundler);
+          voteIds.push(vote.id);
+          await updateData({ voteIds, receipts });
+        }
       }
     })
   );
@@ -742,7 +747,7 @@ async function validateAndVote(id, state) {
     signPayload
   );
 
-  return receipt.data.receipt;
+  return "receipt" in receipt.data ? receipt.data.receipt : null;
   // save the receipt if the bundler didn't submit the vote then the node use the receipt to slash
 }
 

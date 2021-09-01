@@ -37,22 +37,21 @@ async function main() {
     fs.readFileSync(`src/koi_task/init_state.json`)
   );
   smartest.writeContractState(taskContractId, taskInitState);
-  // const attentionInput = {
-  //   function: "submitDistribution",
-  //   distributionTxId: "eo_YY_RAdYkWMYh7-MuBCgd3Dl-iWDIXx-vhfSZGodc",
-  //   cacheUrl: "http/bundler/cache",
-  //   mainContractId: koiContractId,
-  //   contractId: attentionContractId
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   attentionSrc,
-  //   wallet,
-  //   attentionInput,
-  //   smartest.readContractState(attentionContractId),
-  //   walletAddress,
-  //   attentionContractId
-  // );
+
+  const attentionInput = {
+    function: "batchAction",
+    batchFile: "rivOhJyE70LVRNjH7jUWGEnMHZw88VZCMkRyslhUrWs",
+    voteId: "oH2XaHh0vMaJTBraw2USfOwptd3aEfBz2SQRDf5lAyo"
+  };
+  await smartest.interactWrite(
+    arweave,
+    attentionSrc,
+    wallet,
+    attentionInput,
+    smartest.readContractState(attentionContractId),
+    walletAddress,
+    attentionContractId
+  );
 
   // const attentionInput0 = {
   //   function: "submitDistribution",
@@ -106,19 +105,19 @@ async function main() {
   //   attentionContractId
   // );
 
-  const attentionInput3 = {
-    function: "rankAndPrepareDistribution"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput3,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
-
+  // const attentionInput3 = {
+  //   function: "rankAndPrepareDistribution"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
+  // const t1 = new Date();
   // const attentionInput3 = {
   //   function: "cleanInvalidTransactions"
   // };
@@ -201,6 +200,7 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
+  //const t1 = new Date();
   // const attentionInput3 = {
   //   function: "migratePreRegister"
   // };
@@ -226,15 +226,19 @@ async function main() {
   //   koiContractId
   // );
 
-  console.log(
-    // "Koi final state: ",
-    // smartest.readContractState(koiContractId)
-    "Attention final state:",
-    smartest.readContractState(attentionContractId)
-  );
+  // console.log(
+  //   // "Koi final state: ",
+  //   // smartest.readContractState(koiContractId)
+  //   // "Attention final state:",
+  //   // smartest.readContractState(attentionContractId)
+  // );
 
-  const stateA = smartest.readContractState(attentionContractId);
-  console.log(stateA.task);
+  const state = smartest.readContractState(attentionContractId);
+  //const t2 = new Date();
+  // const koiState = smartest.readContractState(koiContractId);
+  // console.log(koiState.preRegisterDatas);
+  //console.log(`Done in ${t2 - t1}ms`);
+  console.log(state.votes[0]);
 }
 
 main().then(() => {
