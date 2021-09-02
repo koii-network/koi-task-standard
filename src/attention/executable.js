@@ -67,17 +67,17 @@ async function getNft(req, res) {
     // if (content && content.tx) delete content.tx;
     //res.status(200).send(content);
   } catch (e) {
-    console.log(e);
+    console.error("Error responding with NFT:", e);
     res.status(500).send({ error: e });
   }
 }
 
 function getTopContentPredicted(req, res) {
   try {
-    const peroid = req.query.peroid;
+    const period = req.query.period;
     //res.status(200).send(data);
   } catch (e) {
-    console.log(e);
+    console.error("Error responding with top content:", e);
     res.status(500).send({ error: e });
   }
 }
@@ -95,7 +95,7 @@ async function execute(_init_state) {
     try {
       [state, block] = await getAttentionStateAndBlock();
     } catch (e) {
-      console.error("Error", e);
+      console.error("Error while fetching attention state and block", e);
       continue;
     }
     await (namespace.app ? service : witness)(state, block);
@@ -274,7 +274,7 @@ async function submitPort(req, res) {
       message: "Port Received"
     });
   } catch (e) {
-    console.error(e);
+    console.error("Error in port submission", e);
     res.status(RESPONSE_INTERNAL_ERROR).send({ error: "ERROR: " + e });
   }
 }
@@ -361,8 +361,7 @@ async function readRawLogs() {
         prettyLogs.push(logJson);
       }
     } catch (err) {
-      // console.error('err', err)
-      // reject(err)
+      console.error("Error verifying log signature:", err);
     }
   }
   // console.log('resolving some prettyLogs ('+ prettyLogs.length +') sample:', prettyLogs[prettyLogs.length - 1])
@@ -603,7 +602,6 @@ async function isVoteTracked(voteId) {
     await namespace.fs("access", batchFileName);
     return true;
   } catch (_e) {
-    console.log("error", _e);
     return false;
   }
 }
@@ -750,7 +748,7 @@ async function validateAndVote(id, state) {
 }
 
 async function auditPort(txId, url) {
-  console.error("Trying to fetch:", url); // TODO FIX ME, NOT USING PROPER URL
+  console.log("Trying to fetch:", url); // TODO FIX ME, NOT USING PROPER URL
   const response = await axios.get(url);
   const fullLogs = response.data;
   const prettyLogs = [];
@@ -763,8 +761,7 @@ async function auditPort(txId, url) {
         prettyLogs.push(logJSON);
       }
     } catch (err) {
-      // console.error('err', err)
-      // reject(err)
+      console.error("Error verifying signature while auditing port:", err);
     }
   }
   const finalLogs = {};
