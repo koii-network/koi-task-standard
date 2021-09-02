@@ -107,6 +107,7 @@ async function getAttentionStateAndBlock() {
   if (block < lastBlock) block = lastBlock;
   const state = await tools.getState(namespace.taskTxId, block);
 
+  if (!state || !state.task) console.error("State or task invalid:", state);
   const logClose = state.task.close;
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
