@@ -134,11 +134,11 @@ async function getAttentionStateAndBlock() {
 }
 
 async function service(state, block) {
-  // if (canProposePorts(state, block)) await proposePorts();
-  // //if (canAudit(state, block)) await audit(state);
-  //if (canSubmitBatch(state, block)) await submitBatch(state);
-  // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
-  // if (canDistributeReward(state)) await distribute();
+  if (canProposePorts(state, block)) await proposePorts();
+  //if (canAudit(state, block)) await audit(state);
+  if (canSubmitBatch(state, block)) await submitBatch(state);
+  if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
+  if (canDistributeReward(state)) await distribute();
 }
 
 async function submitVote(req, res) {
@@ -245,7 +245,6 @@ async function submitPort(req, res) {
       .update(JSON.stringify(dataAndSignature.signature))
       .digest("hex");
     signatureHash = signatureHash.toString("hex");
-    // console.log(dataAndSignature.signature)
 
     if (!difficultyFunction(signatureHash)) {
       console.log("Signature hash incorrect");
@@ -341,7 +340,6 @@ async function PublishPoRT() {
         finalLogs[e["trxId"]].push(e["wallet"]);
     } else finalLogs[e["trxId"]] = [e["wallet"]];
   }
-  console.log(finalLogs);
   return finalLogs;
 }
 
@@ -381,7 +379,6 @@ async function verifySignature(log) {
   }
 
   const dataAndSignature = JSON.parse(signature);
-  console.log(typeof dataAndSignature);
   const valid = await tools.verifySignature({
     ...dataAndSignature,
     owner: publicKey
@@ -390,13 +387,12 @@ async function verifySignature(log) {
     console.log("Signature verification failed");
     return false;
   }
-  console.log(valid);
+
   let signatureHash = crypto
     .createHash("sha256")
     .update(JSON.stringify(dataAndSignature.signature))
     .digest("hex");
   signatureHash = signatureHash.toString("hex");
-  // console.log(dataAndSignature.signature)
 
   if (!difficultyFunction(signatureHash)) {
     console.log("Signature hash incorrect");
@@ -510,8 +506,7 @@ async function audit(state) {
       if (!valid) {
         const input = {
           function: "audit",
-          id: proposedData.txId,
-          description: "malicious_data"
+          id: proposedData.txId
         };
         const task = "submit audit";
         const tx = await kohaku.interactWrite(
@@ -592,7 +587,7 @@ async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
   const votes = state.votes;
   const activeVotesTracked = [];
-  const activeVotes = votes.filter((vote) => vote.status === "passed");
+  const activeVotes = votes.filter((vote) => vote.status === "active");
   activeVotes.map((vote) => {
     if (isVoteTracked(vote.id)) {
       activeVotesTracked.push(vote.id);
