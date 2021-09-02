@@ -47,12 +47,14 @@ export default async function rankPrepDistribution(state) {
         (proposeData) => proposeData.txId === acceptedProposedTxId
       );
       let scoreSum = 0;
-      const splitData = data.split();
-      const parseData = JSON.parse(splitData);
+      const parseData = JSON.parse(data.split());
       const parseDataKeys = Object.keys(parseData);
-      const registeredNfts = Object.values(registeredRecords);
+      const registeredNfts = Object.values(registeredRecords).reduce(
+        (acc, curVal) => acc.concat(curVal),
+        []
+      );
       parseDataKeys.map(async (key) => {
-        if (registeredNfts.some((nfts) => nfts.includes(key))) {
+        if (registeredNfts.includes(key)) {
           scoreSum += [...new Set(parseData[key])].length;
           !(key in distribution)
             ? (distribution[key] = [...new Set(parseData[key])])
@@ -64,9 +66,9 @@ export default async function rankPrepDistribution(state) {
       score[proposedPayload.distributer] = scoreSum;
     })
   );
+
   let totalAttention = 0;
   const attentionScore = {};
-
   Object.keys(distribution).map((key) => {
     attentionScore[key] = distribution[key].length;
     let attention = distribution[key].length;
