@@ -116,5 +116,8 @@ export default async function rankPrepDistribution(state) {
     isRanked: false
   };
   task.proposedPayloads.push(newTask);
+  task.proposedPayloads = task.proposedPayloads.filter(
+    (payload) => !payload.isRanked
+  );
   return { state };
 }

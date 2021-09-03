@@ -22,9 +22,9 @@ const arweave = Arweave.init({
   port: 443
 });
 
-const OFFSET_PROPOSE_PORTS_END = 12; // 300;
-const OFFSET_BATCH_VOTE_SUBMIT = 24; // 600;
-const OFFSET_PROPOSE_SLASH = 27; // 660
+const OFFSET_PROPOSE_PORTS_END = 25; // 300; //12
+const OFFSET_BATCH_VOTE_SUBMIT = 50; // 600; // 24
+const OFFSET_PROPOSE_SLASH = 55; // 660; //27
 
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
@@ -41,6 +41,7 @@ let hasRanked = false;
 let hasDistributed = false;
 let hasVoted = false;
 let hasSubmitBatch = false;
+let hasAudited = false;
 
 const logsInfo = {
   filename: "ports.log",
@@ -135,7 +136,7 @@ async function getAttentionStateAndBlock() {
 
 async function service(state, block) {
   if (canProposePorts(state, block)) await proposePorts();
-  //if (canAudit(state, block)) await audit(state);
+  if (canAudit(state, block)) await audit(state);
   if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
@@ -484,12 +485,18 @@ async function bundleAndExport(bundle) {
 async function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
+
   const activeProposedData = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
 
   const proposedData = activeProposedData.proposedData;
-  return proposedData.length !== 0;
+
+  return (
+    block < task.open + OFFSET_BATCH_VOTE_SUBMIT && // block in time frame
+    !hasAudited && // ports not submitted
+    proposedData.length !== 0
+  );
 }
 
 async function audit(state) {
@@ -499,7 +506,7 @@ async function audit(state) {
   );
 
   const proposedData = activeProposedData.proposedData;
-  await Promise.all(
+  await Promise.allSettled(
     proposedData.map(async (proposedData) => {
       const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
       if (!valid) {
@@ -519,6 +526,7 @@ async function audit(state) {
       }
     })
   );
+  hasAudited = true;
 }
 
 function canRankPrepDistribution(state, block) {
@@ -739,7 +747,7 @@ async function validateAndVote(id, state) {
   };
   const signPayload = await tools.signPayload(payload);
   const receipt = await axios.post(
-    "http://localhost:8887/BM-ljPOCelhOyb2meJLaeofDYPRyYdwFXSurchZXeiQ/submit-vote",
+    `${process.env.TRUSTED_SERVICE_URL}/${namespace.taskTxId}/submit-vote`,
     signPayload
   );
 
@@ -749,7 +757,7 @@ async function validateAndVote(id, state) {
 
 async function auditPort(txId, url) {
   console.log("Trying to fetch:", url); // TODO FIX ME, NOT USING PROPER URL
-  const response = await axios.get(url);
+  const response = await axios.get(`${url}/${namespace.taskTxId}/cache`);
   const fullLogs = response.data;
   const prettyLogs = [];
   const logs = fullLogs.toString().split("\n");
@@ -768,10 +776,10 @@ async function auditPort(txId, url) {
   for (let i = 0; i < prettyLogs.length; i++) {
     const e = prettyLogs[i];
     const keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"]))
+    if (keys.includes(e["trxId"])) {
       if (!finalLogs[e["trxId"]].includes(e["wallet"]))
         finalLogs[e["trxId"]].push(e["wallet"]);
-      else finalLogs[e["trxId"]] = [e["wallet"]];
+    } else finalLogs[e["trxId"]] = [e["wallet"]];
   }
   let proposedData = await arweave.transactions.getData(txId, {
     decode: true,
@@ -780,6 +788,7 @@ async function auditPort(txId, url) {
   proposedData = JSON.parse(proposedData);
 
   const proposedDataKeys = Object.keys(proposedData).sort();
+
   const finalLogsKeys = Object.keys(finalLogs).sort();
   if (proposedDataKeys.length !== finalLogsKeys.length) return false;
   if (!proposedDataKeys.every((e, i) => e === finalLogsKeys[i])) return false;
@@ -790,7 +799,6 @@ async function auditPort(txId, url) {
     if (!proposedViewers.every((e, i) => e === cachedViewers[i])) return false;
     return true;
   }
-  // return proposedData == JSON.stringify(finalLogs);
 }
 
 async function updateData(data) {
@@ -814,8 +822,8 @@ async function checkProposeSlash(state, block) {
   if (!activeVotes.length || !ids || hasProposedSlash || !receipts.length) {
     return false;
   }
-  return true;
-  //return task.open + OFFSET_PROPOSE_SLASH < block && block < task.close;
+
+  return task.open + OFFSET_PROPOSE_SLASH < block && block < task.close;
 }
 
 async function proposeSlash(state) {
