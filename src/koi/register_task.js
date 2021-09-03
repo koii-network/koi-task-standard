@@ -5,15 +5,14 @@ export default async function registerTask(state, action) {
   const taskName = input.taskName;
   const taskTxId = input.taskTxId;
   const koiReward = input.koiReward;
-  if (!taskTxId) throw new ContractError("No txid specified");
-  if (koiReward && balances[caller] < koiReward + 1)
-    throw new ContractError("Your Balance is not enough");
-  if (!koiReward && caller !== state.owner) {
-    throw new ContractError("Owner only can register special task");
+  if (caller !== state.owner) {
+    throw new ContractError("Owner only can register a task");
   }
+  if (!taskTxId) throw new ContractError("No txid specified");
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you need min 1 KOI to register data");
-
+  if (koiReward && balances[caller] < koiReward + 1)
+    throw new ContractError("Your Balance is not enough");
   const txId = state.tasks.find((task) => task.txId === taskTxId);
   if (txId !== undefined) {
     throw new ContractError(`task with ${txId}id is already registered `);

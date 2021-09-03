@@ -6,8 +6,8 @@ export default async function batchAction(state, action) {
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
   if (
-    SmartWeave.block.height > state.task.open + 27 ||
-    SmartWeave.block.height < state.task.open + 24
+    SmartWeave.block.height > state.task.open + 55 ||
+    SmartWeave.block.height < state.task.open + 50
   ) {
     throw new ContractError(" Batch time have passed or not reached yet");
   }
