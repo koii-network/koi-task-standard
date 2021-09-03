@@ -103,9 +103,9 @@ async function execute(_init_state) {
 }
 
 async function getAttentionStateAndBlock() {
-  let block = (await tools.getBlockHeight()) - 1; // Add delay to reduce chance of null block and actions happening ahead of nodes
+  const state = await tools.getState(namespace.taskTxId);
+  let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
-  const state = await tools.getState(namespace.taskTxId, block);
 
   if (!state || !state.task) console.error("State or task invalid:", state);
   const logClose = state.task.close;
