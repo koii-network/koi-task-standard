@@ -13,6 +13,7 @@ const tools = new koiSdk.Node(
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
+process.env.NODE_MODE = operationMode;
 
 async function main() {
   await tools.loadWallet(await tools.loadFile(process.env.WALLET_LOCATION));
