@@ -31,6 +31,7 @@ async function main() {
     expressApp.use(cors());
     expressApp.use(express.urlencoded({ extended: true }));
     expressApp.use(express.json());
+    expressApp.use(jsonErrorHandler);
     expressApp.use(cookieParser());
   }
 
@@ -107,6 +108,11 @@ class Namespace {
     return this.app[method]("/" + this.taskTxId + path, callback);
   }
 }
+
+const jsonErrorHandler = async (err, req, res) => {
+  console.error("express.json error on:", JSON.stringify(req));
+  res.status(500).send({ error: err });
+};
 
 main().then(() => {
   console.log("Terminated");
