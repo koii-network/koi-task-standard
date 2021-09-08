@@ -109,10 +109,13 @@ class Namespace {
   }
 }
 
-const jsonErrorHandler = async (err, req, res) => {
-  console.error("express.json error on:", JSON.stringify(req));
-  res.status(500).send({ error: err });
-};
+function jsonErrorHandler(err, req, res, next) {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    console.error(err);
+    return res.status(400).send({ status: 404, message: err.message }); // Bad request
+  }
+  next();
+}
 
 main().then(() => {
   console.log("Terminated");
