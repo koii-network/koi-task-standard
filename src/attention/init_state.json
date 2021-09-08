@@ -8705,7 +8705,7 @@
     "open": 755310,
     "close": 755340,
     "prepareDistribution": [],
-    "attentionReport": [],
+    "attentionReport": {},
     "rewardReport": [],
     "proposedPayloads": [
       {
@@ -8716,6 +8716,7 @@
     ]
   },
   "reputation": {},
+  "blackList": [],
   "executableId": "UmNepiCkrJwJXA26KU_iDbgV-MtsvixXUrGGLhl9uy8",
   "koiiContract": "k-3vYDcwrusBtnouFXh6QlRvwfH57lLvnG8jnf_q1EM"
 }
