@@ -68,12 +68,12 @@ export default async function rankPrepDistribution(state) {
   );
 
   let totalAttention = 0;
-  const attentionScore = {};
-  Object.keys(distribution).map((key) => {
-    attentionScore[key] = distribution[key].length;
-    let attention = distribution[key].length;
-    totalAttention += attention;
-  });
+  for (let key in distribution) {
+    key in attentionReport
+      ? (attentionReport[key] += distribution[key].length)
+      : (attentionReport[key] = distribution[key].length);
+    totalAttention += distribution[key].length;
+  }
 
   let rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
 
@@ -109,7 +109,7 @@ export default async function rankPrepDistribution(state) {
   attentionReport.push(attentionScore);
   task.open = SmartWeave.block.height;
   //task.close = SmartWeave.block.height + 720;
-  task.close = SmartWeave.block.height + 30;
+  task.close = SmartWeave.block.height + 50;
   const newTask = {
     block: task.open,
     proposedData: [],

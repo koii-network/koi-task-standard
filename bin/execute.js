@@ -3,7 +3,7 @@ const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const kohaku = require("@_koi/kohaku");
 
-const KOII_CONTRACT_ID = "WRRDj_jNqQrMlr6_m9zIjW_XvbD3OORyW8eFpl5afO8";
+const KOII_CONTRACT_ID = "kAAMofwpEVYnf0qBLRox-GG56nLAqt3M04-Qz7N9sl4";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,

@@ -1,15 +1,18 @@
 export default async function batchAction(state, action) {
   const votes = state.votes;
-  //const validBundlers = state.validBundlers;
+  const blackList = state.blackList;
   const caller = action.caller;
   const input = action.input;
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
+  if (blackList.includes(caller)) {
+    throw new ContractError("Not valid");
+  }
   if (
     SmartWeave.block.height > state.task.open + 55 ||
     SmartWeave.block.height < state.task.open + 50
   ) {
-    throw new ContractError(" Batch time have passed or not reached yet");
+    throw new ContractError("Batch time have passed or not reached yet");
   }
   const vote = votes.find((vote) => vote.id === voteId);
   if (!batchTxId) throw new ContractError("No txId specified");

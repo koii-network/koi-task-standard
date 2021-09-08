@@ -4,7 +4,6 @@ export default function stake(state, action) {
   const caller = action.caller;
   const input = action.input;
   const qty = input.qty;
-
   if (!Number.isInteger(qty))
     throw new ContractError('Invalid value for "qty". Must be an integer');
   if (qty <= 0) throw new ContractError("Invalid stake amount");
@@ -13,12 +12,11 @@ export default function stake(state, action) {
       "Balance is too low to stake that amount of tokens"
     );
   }
-
   balances[caller] -= qty;
-  // stake for 14 days which 10080 blocks
-  state.stakeReleaseBlock[caller] = SmartWeave.block.height + 10080;
-  if (stakes[caller]) stakes[caller] += qty;
-  else stakes[caller] = qty;
-
+  // // stake for 14 days which 10080 blocks
+  // state.stakeReleaseBlock[caller] = SmartWeave.block.height + 10080;
+  caller in stakes
+    ? stakes[caller].push({ value: qty, block: SmartWeave.block.height })
+    : (stakes[caller] = [{ value: qty, block: SmartWeave.block.height }]);
   return { state };
 }
