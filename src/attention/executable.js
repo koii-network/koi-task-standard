@@ -50,44 +50,82 @@ const logsInfo = {
 
 function setup(_init_state) {
   if (namespace.app) {
+    namespace.express("get", "/", root);
+    namespace.express("get", "/cache", servePortCache);
+    namespace.express("get", "/nft", getNft);
+    namespace.express("get", "/nft-summaries", getNftSummaries);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    namespace.express("get", "/cache", servePortCache);
-    namespace.express("get", "/", root);
-
-    namespace.express("get", "/nft", getNft);
-    namespace.express("get", "/top-content-predicted", getTopContentPredicted);
   }
+}
+
+function root(_req, res) {
+  res
+    .status(200)
+    .type("application/json")
+    .send(kohaku.readContractCache(namespace.taskTxId));
 }
 
 async function getNft(req, res) {
   try {
-    const state = await tools.getKoiiState();
-    // let content = await contentView(req.query.id, state);
-    // content.timestamp = moment().unix() * 1000;
-    // if (content && content.tx) delete content.tx;
-    //res.status(200).send(content);
+    const id = req.query.id;
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const nfts = Object.keys(attentionState.nfts).flat();
+    if (!nfts.includes(id))
+      return res.status(404).send(id + " is not registered");
+
+    const nftState = await tools.getState(id);
+    const attentionReport = attentionState.task.attentionReport;
+
+    let views, reward;
+    if (id in attentionReport) {
+      views = attentionReport[id].attention;
+      reward = attentionReport[id].reward;
+    } else {
+      views = 0;
+      reward = 0;
+    }
+    res.status(200).send({ ...nftState, id, views, reward });
   } catch (e) {
     console.error("Error responding with NFT:", e);
     res.status(500).send({ error: e });
   }
 }
 
-function getTopContentPredicted(req, res) {
+async function getNftSummaries(req, res) {
   try {
+    // TODO add date filtering
     const period = req.query.period;
-    //res.status(200).send(data);
+
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const attentionReport = attentionState.task.attentionReport;
+
+    const nftSummaries = [];
+    for (const owner in attentionState.nfts) {
+      for (const id in owner) {
+        let views, reward;
+        if (id in attentionReport) {
+          views = attentionReport[id].attention;
+          reward = attentionReport[id].reward;
+        } else {
+          views = 0;
+          reward = 0;
+        }
+
+        nftSummaries.push({
+          id,
+          owner,
+          views,
+          reward
+        });
+      }
+    }
+
+    res.status(200).send(nftSummaries);
   } catch (e) {
     console.error("Error responding with top content:", e);
     res.status(500).send({ error: e });
   }
-}
-
-async function root(_req, res) {
-  return res
-    .status(200)
-    .type("application/json")
-    .send(kohaku.readContractCache(namespace.taskTxId));
 }
 
 async function execute(_init_state) {
@@ -224,7 +262,7 @@ async function submitPort(req, res) {
     const publicKey = req.body["request-public-key"];
 
     if (!signature) {
-      console.error("Port submitted without signature");
+      console.error("Port received without signature");
       return res
         .status(RESPONSE_ACTION_FAILED)
         .send({ error: "ERROR: No signature" });
@@ -428,7 +466,7 @@ async function lockPorts() {
  */
 async function checkTxConfirmation(txId, task) {
   const MS_TO_MIN = 60000;
-  const TIMEOUT_TX = 30 * MS_TO_MIN;
+  const TIMEOUT_TX = 60 * MS_TO_MIN;
 
   const start = new Date().getTime() - 1;
   const update_period = MS_TO_MIN * 5;
