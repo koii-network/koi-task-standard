@@ -1,7 +1,7 @@
 {
   "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
   "name": "Attention_Game",
-  "registeredRecords": {
+  "nfts": {
     "sQTWslyCdKF6oeQ7xXUYUV1bluP0_5-483FXH_RVZKU": [
       "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ",
       "9LBalFIwg_a3KxPER2bm59X5h0CKFSsDOolU8Lo_hl8",
@@ -8716,7 +8716,7 @@
     ]
   },
   "reputation": {},
-  "blackList": [],
+  "blacklist": [],
   "executableId": "UmNepiCkrJwJXA26KU_iDbgV-MtsvixXUrGGLhl9uy8",
   "koiiContract": "k-3vYDcwrusBtnouFXh6QlRvwfH57lLvnG8jnf_q1EM"
 }
