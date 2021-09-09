@@ -77,15 +77,15 @@ async function getNft(req, res) {
     const nftState = await tools.getState(id);
     const attentionReport = attentionState.task.attentionReport;
 
-    let views, reward;
+    let attention, reward;
     if (id in attentionReport) {
-      views = attentionReport[id].attention;
+      attention = attentionReport[id].attention;
       reward = attentionReport[id].reward;
     } else {
-      views = 0;
+      attention = 0;
       reward = 0;
     }
-    res.status(200).send({ ...nftState, id, views, reward });
+    res.status(200).send({ ...nftState, id, attention, reward });
   } catch (e) {
     console.error("Error responding with NFT:", e);
     res.status(500).send({ error: e });
@@ -104,19 +104,19 @@ async function getNftSummaries(req, res) {
     for (const owner in attentionState.nfts) {
       const ownerNfts = attentionState.nfts[owner];
       for (const id of ownerNfts) {
-        let views, reward;
+        let attention, reward;
         if (id in attentionReport) {
-          views = attentionReport[id].attention;
+          attention = attentionReport[id].attention;
           reward = attentionReport[id].reward;
         } else {
-          views = 0;
+          attention = 0;
           reward = 0;
         }
 
         nftSummaries.push({
           id,
           owner,
-          views,
+          attention,
           reward
         });
       }
