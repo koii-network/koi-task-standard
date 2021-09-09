@@ -67,22 +67,13 @@ export default async function rankPrepDistribution(state) {
     })
   );
 
-  const totalAttention = Object.values(distribution).reduce(
-    (acc, curVal) => acc.concat(curVal),
-    []
-  ).length;
-  const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
+  let totalAttention = 0;
+  const attentionScore = {};
   for (let key in distribution) {
-    key in attentionReport
-      ? ((attentionReport[key].attention += distribution[key].length),
-        (attentionReport[key].reward +=
-          rewardPerAttention * distribution[key].length))
-      : (attentionReport[key] = {
-          attention: distribution[key].length,
-          reward: rewardPerAttention * distribution[key].length
-        });
+    attentionScore[key] = distribution[key].length;
+    totalAttention += distribution[key].length;
   }
-
+  const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
   let distributionReward = {};
 
