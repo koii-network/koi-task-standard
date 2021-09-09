@@ -70,7 +70,7 @@ async function getNft(req, res) {
   try {
     const id = req.query.id;
     const attentionState = await tools.getState(namespace.taskTxId);
-    const nfts = Object.keys(attentionState.nfts).flat();
+    const nfts = Object.values(attentionState.nfts).flat();
     if (!nfts.includes(id))
       return res.status(404).send(id + " is not registered");
 
@@ -102,7 +102,8 @@ async function getNftSummaries(req, res) {
 
     const nftSummaries = [];
     for (const owner in attentionState.nfts) {
-      for (const id in owner) {
+      const ownerNfts = attentionState.nfts[owner];
+      for (const id of ownerNfts) {
         let views, reward;
         if (id in attentionReport) {
           views = attentionReport[id].attention;
