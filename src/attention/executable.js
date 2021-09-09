@@ -77,14 +77,16 @@ async function getNft(req, res) {
     const nftState = await tools.getState(id);
     const attentionReport = attentionState.task.attentionReport;
 
-    let attention, reward;
-    if (id in attentionReport) {
-      attention = attentionReport[id].attention;
-      reward = attentionReport[id].reward;
-    } else {
-      attention = 0;
+    let attention = 0,
       reward = 0;
+    for (const report in attentionReport) {
+      if (id in report) {
+        const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
+        attention += report[id];
+        reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
+      }
     }
+
     res.status(200).send({ ...nftState, id, attention, reward });
   } catch (e) {
     console.error("Error responding with NFT:", e);
@@ -96,35 +98,36 @@ async function getNftSummaries(req, res) {
   try {
     // TODO add date filtering
     const period = req.query.period;
-
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
 
-    const nftSummaries = [];
+    const nftMap = {};
     for (const owner in attentionState.nfts) {
-      const ownerNfts = attentionState.nfts[owner];
-      for (const id of ownerNfts) {
-        let attention, reward;
-        if (id in attentionReport) {
-          attention = attentionReport[id].attention;
-          reward = attentionReport[id].reward;
-        } else {
-          attention = 0;
-          reward = 0;
-        }
-
-        nftSummaries.push({
+      for (const id of attentionState.nfts[owner]) {
+        nftMap[id] = {
           id,
           owner,
-          attention,
-          reward
-        });
+          attention: 0,
+          reward: 0
+        };
       }
     }
 
-    res.status(200).send(nftSummaries);
+    for (const report in attentionReport) {
+      let totalAttention = 0;
+      for (const nftId in report) {
+        nftMap[nftId].attention += report[nftId];
+        totalAttention += report[nftId];
+      }
+
+      const rewardPerAttention = 1000 / totalAttention;
+      for (const nftId in report)
+        nftMap[nftId].reward += report[nftId] * rewardPerAttention;
+    }
+
+    res.status(200).send(Object.values(nftMap));
   } catch (e) {
-    console.error("Error responding with top content:", e);
+    console.error("Error responding with nft summaries:", e);
     res.status(500).send({ error: e });
   }
 }
