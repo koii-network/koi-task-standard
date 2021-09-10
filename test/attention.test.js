@@ -172,19 +172,19 @@ async function main() {
   //   koiContractId
   // );
 
-  // const koiInput0 = {
-  //   function: "withdraw",
-  //   qty: 100
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput0,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
+  const koiInput0 = {
+    function: "withdraw",
+    qty: 200
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput0,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
   // const koiInput0 = {
   //   function: "burnKoi",
   //   contractId: attentionContractId,
@@ -233,12 +233,13 @@ async function main() {
   //   // smartest.readContractState(attentionContractId)
   // );
 
-  const state = smartest.readContractState(attentionContractId);
+  //const state = smartest.readContractState(attentionContractId);
   //const t2 = new Date();
-  // const koiState = smartest.readContractState(koiContractId);
-  // console.log(koiState.preRegisterDatas);
+  const koiState = smartest.readContractState(koiContractId);
+  console.log(koiState.balances);
+  console.log(koiState.stakes);
   //console.log(`Done in ${t2 - t1}ms`);
-  console.log(state.task);
+  //console.log(state.task);
 }
 
 main().then(() => {

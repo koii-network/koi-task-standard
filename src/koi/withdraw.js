@@ -1,24 +1,41 @@
 export default function withdraw(state, action) {
   const balances = state.balances;
   const stakes = state.stakes;
-  const stakeReleaseBlock = state.stakeReleaseBlock;
   const caller = action.caller;
   const input = action.input;
-  const qty = input.qty;
-
+  let qty = input.qty;
+  if (!(caller in stakes)) {
+    throw new ContractError(`This ${caller}adress hasn't staked`);
+  }
   if (!Number.isInteger(qty))
     throw new ContractError('Invalid value for "qty". Must be an integer');
   if (qty <= 0) throw new ContractError("Invalid stake withdrawal amount");
-  if (stakeReleaseBlock[caller] > SmartWeave.block.height)
-    throw new ContractError("Stake is not ready to be released");
-  if (stakes[caller] < qty) {
-    throw new ContractError(
-      "Stake balance is too low to withdraw that amount of tokens"
-    );
-  }
+  const callerStake = stakes[caller];
 
-  stakes[caller] -= qty;
-  balances[caller] += qty;
+  const avaliableTokenToWithDraw = callerStake.filter(
+    (stake) => SmartWeave.block.height > stake.block + 10080
+  );
+  const total = avaliableTokenToWithDraw.reduce(
+    (acc, curVal) => acc + curVal.value,
+    0
+  );
+  if (qty > total) {
+    throw new ContractError("Stake is not ready to be released");
+  }
+  for (let stake of callerStake) {
+    if (stake.block + 10080 < SmartWeave.block.height) {
+      if (qty <= stake.value) {
+        stake.value -= qty;
+        balances[caller] += qty;
+        break;
+      }
+      if (qty > stake.value) {
+        balances[caller] += stake.value;
+        qty -= stake.value;
+        stake.value -= stake.value;
+      }
+    }
+  }
 
   return { state };
 }

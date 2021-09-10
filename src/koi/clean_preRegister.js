@@ -15,9 +15,10 @@ export default async function cleanPreRegister(state) {
       const contractState = await SmartWeave.contracts.readContractState(
         contractId
       );
-      const registeredNfts = Object.values(
-        contractState.registeredRecords
-      ).reduce((acc, curVal) => acc.concat(curVal), []);
+      const registeredNfts = Object.values(contractState.nfts).reduce(
+        (acc, curVal) => acc.concat(curVal),
+        []
+      );
       state.preRegisterDatas = state.preRegisterDatas.filter(
         (preRegisterData) =>
           !registeredNfts.includes(preRegisterData.content.nft)

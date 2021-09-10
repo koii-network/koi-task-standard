@@ -1,7 +1,7 @@
 export default async function cleanInvalidTransactions(state) {
-  const registeredRecords = state.registeredRecords;
+  const nfts = state.nfts;
 
-  const registeredNfts = Object.values(registeredRecords);
+  const registeredNfts = Object.values(nfts);
   const registerdTransactions = registeredNfts.reduce(
     (acc, curVal) => acc.concat(curVal),
     []
@@ -12,10 +12,10 @@ export default async function cleanInvalidTransactions(state) {
         await SmartWeave.unsafeClient.transactions.getStatus(transaction);
 
       if (transactionStatus.status === 404) {
-        for (const address in registeredRecords) {
-          if (registeredRecords[address].includes(transaction)) {
-            const index = registeredRecords[address].indexOf(transaction);
-            registeredRecords[address].splice(index, 1);
+        for (const address in nfts) {
+          if (nfts[address].includes(transaction)) {
+            const index = nfts[address].indexOf(transaction);
+            nfts[address].splice(index, 1);
           }
         }
       }
