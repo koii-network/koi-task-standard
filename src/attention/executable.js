@@ -31,6 +31,8 @@ const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
 
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
+const ports = [];
+const OFFSET = 60;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -56,7 +58,14 @@ function setup(_init_state) {
     namespace.express("get", "/nft-summaries", getNftSummaries);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
+    namespace.express("get", "/realtime-attention", getRealtimeAttention);
+    portSetup()
   }
+}
+async function portSetup(){
+  let portsString = await redisGet("ports");
+  ports = JSON.parse(portsString);
+
 }
 
 function root(_req, res) {
@@ -182,8 +191,9 @@ async function service(state, block) {
   if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
+  
 }
-
+setInterval(checkViews,10000)
 async function submitVote(req, res) {
   const submission = req.body;
   if (
@@ -259,7 +269,59 @@ async function generateReceipt(payload) {
     blockHeight: blockHeight
   });
 }
+function addPortView(data, wallet) {
+  if (!Object.keys(ports).includes(data.payload)) {
+    ports[data.payload] = {
+      count: 1,
+      totalCount: 1,
+      viewers: [{ wallet: wallet, timeStamp: data.timeStamp }]
+    };
+  } else {
+    let nft = ports[data.payload];
+    viewer = nft.viewers.find((e) => {
+      if (e.wallet == wallet);
+    });
+    if (viewer) return;
+    nft.count++;
+    nft.totalCount++;
+    nft.viewers.push({
+      wallet,
+      timeStamp: data.timeStamp
+    });
+  }
 
+  // console.dir(ports)
+}
+function getRealtimeAttention(req, res) {
+  id = req.query.id;
+  return res.json({
+    count: ports[id]["count"],
+    totalCount: ports[id]["totalCount"]
+  });
+}
+function checkViews() {
+  currentTimeStamp = Math.floor(+new Date() / 1000);
+  let keys = Object.keys(ports);
+  for (let i = 0; i < keys.length; i++) {
+    let viewers = ports[keys[i]]["viewers"];
+    for (let j = 0; j < viewers.length; j++) {
+      const e = viewers[j];
+      if (currentTimeStamp - e.timeStamp > OFFSET) {
+        e.deleted = true;
+        ports[keys[i]]["count"]--;
+      }
+    }
+    let newViewers = [];
+    for (let j = 0; j < viewers.length; j++) {
+      const e = viewers[j];
+      if (!e.deleted) {
+        newViewers.push(JSON.parse(JSON.stringify(e)));
+      }
+    }
+    ports[keys[i]]["viewers"] = newViewers;
+    redisSet("ports", JSON.stringify(ports));
+  }
+}
 async function submitPort(req, res) {
   try {
     const signature = req.body["x-request-signature"];
@@ -295,18 +357,19 @@ async function submitPort(req, res) {
         .status(RESPONSE_ACTION_FAILED)
         .send({ error: "ERROR: PoRT verification failed " });
     }
-
+    let wallet  =  await arweave.wallets.ownerToAddress(publicKey)//generate from public modulo
     const data = dataAndSignature.data;
     const payload = {
       date: new Date(),
       timestamp: data.timeStamp,
       trxId: data.payload,
-      wallet: await arweave.wallets.ownerToAddress(publicKey), //generate from public modulo
+      wallet,
       proof: {
         signature, //req.headers['x-request-signature'],
         public_key: publicKey
       }
     };
+    addPortView(data, wallet)
     await namespace.fs(
       "appendFile",
       logsInfo.filename,
