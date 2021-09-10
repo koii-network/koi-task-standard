@@ -1,22 +1,26 @@
 export default async function submitDistribution(state, action) {
   const task = state.task;
   const caller = action.caller;
+  const blackList = state.blacklist;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const stakes = koiiState.stakes;
+  if (blackList.includes(caller)) {
+    throw new ContractError("Not valid");
+  }
   if (!(caller in stakes)) {
     throw new ContractError(
       "Submittion of PoRTs require minimum stake of 5 koii"
     );
   }
-  let callerStake = 0;
-  for (let obj of stakes[caller]) {
-    callerStake += obj.value;
-  }
-  if (callerStake < 5) {
+  const callerStakeAmt = stakes[caller].reduce(
+    (acc, curVal) => acc + curVal.value,
+    0
+  );
+  if (callerStakeAmt < 5) {
     throw new ContractError("Stake amount is not enough");
   }
 
