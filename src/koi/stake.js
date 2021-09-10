@@ -13,8 +13,7 @@ export default function stake(state, action) {
     );
   }
   balances[caller] -= qty;
-  // // stake for 14 days which 10080 blocks
-  // state.stakeReleaseBlock[caller] = SmartWeave.block.height + 10080;
+
   caller in stakes
     ? stakes[caller].push({ value: qty, block: SmartWeave.block.height })
     : (stakes[caller] = [{ value: qty, block: SmartWeave.block.height }]);

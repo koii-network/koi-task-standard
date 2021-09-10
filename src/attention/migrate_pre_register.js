@@ -1,5 +1,5 @@
 export default async function migratePreRegister(state) {
-  const registeredRecords = state.registeredRecords;
+  const nfts = state.nfts;
   const mainContactId = state.koiiContract;
   const transaction = await SmartWeave.unsafeClient.transactions.get(
     SmartWeave.transaction.id
@@ -19,7 +19,7 @@ export default async function migratePreRegister(state) {
       "nft" in preRegisterNft.content &&
       preRegisterNft.contractId === contractId
   );
-  const registeredNfts = Object.values(registeredRecords).reduce(
+  const registeredNfts = Object.values(nfts).reduce(
     (acc, curVal) => acc.concat(curVal),
     []
   );
@@ -32,16 +32,12 @@ export default async function migratePreRegister(state) {
         txStatus.status === 200 &&
         !registeredNfts.includes(preRegisterNft.content.nft)
       ) {
-        if (preRegisterNft.owner in registeredRecords) {
+        if (preRegisterNft.owner in nfts) {
           {
-            registeredRecords[preRegisterNft.owner].push(
-              preRegisterNft.content.nft
-            );
+            nfts[preRegisterNft.owner].push(preRegisterNft.content.nft);
           }
         } else {
-          registeredRecords[preRegisterNft.owner] = [
-            preRegisterNft.content.nft
-          ];
+          nfts[preRegisterNft.owner] = [preRegisterNft.content.nft];
         }
       }
     })
