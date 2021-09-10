@@ -1,6 +1,6 @@
 export default async function batchAction(state, action) {
   const votes = state.votes;
-  const blackList = state.blackList;
+  const blackList = state.blacklist;
   const caller = action.caller;
   const input = action.input;
   const batchTxId = input.batchFile;
