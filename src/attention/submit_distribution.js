@@ -1,10 +1,24 @@
 export default async function submitDistribution(state, action) {
   const task = state.task;
   const caller = action.caller;
-  const mainContractId = state.koiiContract;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
+  const koiiContract = state.koiiContract;
+  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+  const stakes = koiiState.stakes;
+  if (!(caller in stakes)) {
+    throw new ContractError(
+      "Submittion of PoRTs require minimum stake of 5 koii"
+    );
+  }
+  let callerStake = 0;
+  for (let obj of stakes[caller]) {
+    callerStake += obj.value;
+  }
+  if (callerStake < 5) {
+    throw new ContractError("Stake amount is not enough");
+  }
 
   if (SmartWeave.block.height > task.open + 25) {
     throw new ContractError("proposing is closed. wait for another round");
@@ -21,10 +35,8 @@ export default async function submitDistribution(state, action) {
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );
-  const mainContractState = await SmartWeave.contracts.readContractState(
-    mainContractId
-  );
-  const tasks = mainContractState.tasks;
+
+  const tasks = koiiState.tasks;
   const contractTask = tasks.find((task) => task.txId === contractId);
   if (contractTask !== undefined) {
     const rewardedBlock = contractTask.rewardedBlock;
