@@ -79,7 +79,7 @@ async function getNft(req, res) {
 
     let attention = 0,
       reward = 0;
-    for (const report in attentionReport) {
+    for (const report of attentionReport) {
       if (id in report) {
         const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
         attention += report[id];
@@ -113,7 +113,7 @@ async function getNftSummaries(req, res) {
       }
     }
 
-    for (const report in attentionReport) {
+    for (const report of attentionReport) {
       let totalAttention = 0;
       for (const nftId in report) {
         nftMap[nftId].attention += report[nftId];
