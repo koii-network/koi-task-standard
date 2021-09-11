@@ -10672,8 +10672,7 @@
     "open": 755310,
     "close": 755340,
     "prepareDistribution": [],
-    "attentionReport": {},
-    "rewardReport": [],
+    "attentionReport": [],
     "proposedPayloads": [
       {
         "block": 755310,
