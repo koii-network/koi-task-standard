@@ -22,9 +22,9 @@ const arweave = Arweave.init({
   port: 443
 });
 
-const OFFSET_PROPOSE_PORTS_END = 25; // 300; //12
-const OFFSET_BATCH_VOTE_SUBMIT = 50; // 600; // 24
-const OFFSET_PROPOSE_SLASH = 55; // 660; //27
+const OFFSET_PROPOSE_PORTS_END = 300; // 25;
+const OFFSET_BATCH_VOTE_SUBMIT = 600; // 50;
+const OFFSET_PROPOSE_SLASH = 660; // 55;
 
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;

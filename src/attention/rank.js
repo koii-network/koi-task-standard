@@ -105,8 +105,7 @@ export default async function rankPrepDistribution(state) {
   });
   attentionReport.push(attentionScore);
   task.open = SmartWeave.block.height;
-  //task.close = SmartWeave.block.height + 720;
-  task.close = SmartWeave.block.height + 50;
+  task.close = SmartWeave.block.height + 720; // 60
   const newTask = {
     block: task.open,
     proposedData: [],
