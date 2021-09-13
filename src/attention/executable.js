@@ -53,12 +53,13 @@ const logsInfo = {
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
+    namespace.express("get", "/id", getId);
     namespace.express("get", "/cache", servePortCache);
     namespace.express("get", "/nft", getNft);
     namespace.express("get", "/nft-summaries", getNftSummaries);
+    namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    namespace.express("get", "/realtime-attention", getRealtimeAttention);
     portSetup();
   }
 }
@@ -82,6 +83,10 @@ function root(_req, res) {
     .status(200)
     .type("application/json")
     .send(kohaku.readContractCache(namespace.taskTxId));
+}
+
+function getId(_req, res) {
+  res.status(200).send(namespace.taskTxId);
 }
 
 async function getNft(req, res) {
