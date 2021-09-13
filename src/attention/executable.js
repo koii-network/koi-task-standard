@@ -31,8 +31,8 @@ const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
 
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
-const ports = [];
-const OFFSET = 60;
+const ports = {};
+const OFFSET = 120;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -63,7 +63,7 @@ function setup(_init_state) {
   }
 }
 async function portSetup(){
-  let portsString = await redisGet("ports");
+  let portsString = await namespace.redisGet("ports");
   ports = JSON.parse(portsString);
 
 }
@@ -193,7 +193,8 @@ async function service(state, block) {
   if (canDistributeReward(state)) await distribute();
   
 }
-setInterval(checkViews,10000)
+setInterval(checkViews,120000)
+
 async function submitVote(req, res) {
   const submission = req.body;
   if (
@@ -319,7 +320,8 @@ function checkViews() {
       }
     }
     ports[keys[i]]["viewers"] = newViewers;
-    redisSet("ports", JSON.stringify(ports));
+    console.log(ports)
+    namespace.redisSet("ports", JSON.stringify(ports));
   }
 }
 async function submitPort(req, res) {
