@@ -23,6 +23,30 @@ async function deploy() {
   const id = await smartweave.createContract(arweave, wallet, src, state);
   console.log(`Deployed ${contract} Contract with ID ${id}`);
   fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
+  await checkTxConfirmation(id);
+}
+
+async function checkTxConfirmation(txId) {
+  console.log(`TxId: ${txId}\nWaiting for confirmation`);
+  const start = Date.now();
+  for (;;) {
+    try {
+      await arweave.transactions.get(txId);
+      console.log(`Transaction found`);
+      return true;
+    } catch (e) {
+      if (e.type === "TX_FAILED") {
+        console.error(e.type, "While checking tx confirmation");
+        return false;
+      }
+    }
+    console.log(Math.round((Date.now() - start) / 60000) + "m waiting");
+    await sleepAsync(60000); // Wait 1m before checks to not get rate limited
+  }
+}
+
+async function sleepAsync(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 (async () => await deploy())();
