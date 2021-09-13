@@ -5,7 +5,7 @@ export default async function proposeSlash(state, action) {
   const receiptTxId = action.input.receiptTxId;
   if (
     SmartWeave.block.height > state.task.close ||
-    SmartWeave.block.height < state.task.open + 55
+    SmartWeave.block.height < state.task.open + 660 // 55
   ) {
     throw new ContractError(" slash time have passed or not reached yet");
   }

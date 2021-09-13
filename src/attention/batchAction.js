@@ -9,8 +9,8 @@ export default async function batchAction(state, action) {
     throw new ContractError("Not valid");
   }
   if (
-    SmartWeave.block.height > state.task.open + 55 ||
-    SmartWeave.block.height < state.task.open + 50
+    SmartWeave.block.height > state.task.open + 660 || // 55
+    SmartWeave.block.height < state.task.open + 600 // 50
   ) {
     throw new ContractError("Batch time have passed or not reached yet");
   }

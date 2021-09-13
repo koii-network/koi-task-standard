@@ -24,7 +24,8 @@ export default async function submitDistribution(state, action) {
     throw new ContractError("Stake amount is not enough");
   }
 
-  if (SmartWeave.block.height > task.open + 25) {
+  // 25
+  if (SmartWeave.block.height > task.open + 300) {
     throw new ContractError("proposing is closed. wait for another round");
   }
   const transaction = await SmartWeave.unsafeClient.transactions.get(

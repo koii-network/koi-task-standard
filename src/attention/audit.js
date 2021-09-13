@@ -4,7 +4,8 @@ export default function audit(state, action) {
   const input = action.input;
   const id = input.id;
   const triggeredVote = votes.find((vote) => vote.id == id);
-  if (SmartWeave.block.height > state.task.open + 50) {
+  // 50
+  if (SmartWeave.block.height > state.task.open + 600) {
     throw new ContractError("audit is closed. wait for another round");
   }
   if (triggeredVote !== undefined) {
