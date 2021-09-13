@@ -66,21 +66,6 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    portSetup();
-  }
-}
-async function portSetup() {
-  // let portsString = await namespace.redisGet("ports");
-  let data;
-  try {
-    data = await namespace.fs("readFile", "realtimeports.log");
-  } catch (e) {
-    ports = {};
-  }
-  try {
-    ports = JSON.parse(data);
-  } catch (e) {
-    ports = {};
   }
 }
 
@@ -332,17 +317,15 @@ function addPortView(data, wallet) {
     if (!Object.keys(ports).includes(data.payload)) {
       ports[data.payload] = {
         count: 1,
-        totalCount: 1,
         viewers: [{ wallet: wallet, timeStamp: data.timeStamp }]
       };
     } else {
       let nft = ports[data.payload];
-      viewer = nft.viewers.find((e) => {
-        if (e.wallet == wallet);
-      });
-      if (viewer) return;
+      // viewer = nft.viewers.find((e) => {
+      //   if (e.wallet == wallet);
+      // });
+      // if (viewer) return;
       nft.count++;
-      nft.totalCount++;
       nft.viewers.push({
         wallet,
         timeStamp: data.timeStamp
@@ -358,13 +341,11 @@ function getRealtimeAttention(req, res) {
   let data;
   try {
     data = {
-      count: ports[id]["count"],
-      totalCount: ports[id]["totalCount"]
+      count: ports[id]["count"]
     };
   } catch (e) {
     data = {
-      count: 0,
-      totalCount: 0
+      count: 0
     };
   }
   return res.json(data);

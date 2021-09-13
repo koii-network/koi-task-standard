@@ -8,7 +8,8 @@
   "scripts": {
     "build": "rollup --config ./rollup.config.js && node ./bin/format.js",
     "deploy": "yarn build && node ./bin/deploy.js",
-    "execute": "node ./bin/execute.js"
+    "execute": "node ./bin/execute.js",
+    "deploy_executable": "node ./bin/deploy_executable.js"
   },
   "dependencies": {
     "@weavery/clarity": "^0.1.5",

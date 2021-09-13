@@ -44,6 +44,6 @@ Creator publish a content and register in the attention contract for attention. 
 
 - [MigratePreRegister](./migrate_pre_register.js)
 
-- [CleanInvalidTransaction](./clean_invalid_transanction.js)
-
 - [Rank](./rank.js)
+
+- [RegisterExecutable](./register_executbale_id)
