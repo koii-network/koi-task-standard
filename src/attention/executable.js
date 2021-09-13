@@ -19,7 +19,9 @@ const crypto = require("crypto");
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
-  port: 443
+  port: 443,
+  timeout: 60000,
+  logging: false
 });
 
 const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
@@ -191,7 +193,11 @@ async function execute(_init_state) {
       console.error("Error while fetching attention state and block", e);
       continue;
     }
-    await (namespace.app ? service : witness)(state, block);
+    try {
+      await (namespace.app ? service : witness)(state, block);
+    } catch (e) {
+      console.error("Error while performing attention task:", e);
+    }
   }
 }
 
