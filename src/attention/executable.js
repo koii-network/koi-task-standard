@@ -22,6 +22,10 @@ const arweave = Arweave.init({
   port: 443
 });
 
+const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
+const SECONDS_PER_DAY = 86400;
+const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
+
 const OFFSET_PROPOSE_PORTS_END = 300; // 25;
 const OFFSET_BATCH_VOTE_SUBMIT = 600; // 50;
 const OFFSET_PROPOSE_SLASH = 660; // 55;
@@ -44,6 +48,8 @@ let hasDistributed = false;
 let hasVoted = false;
 let hasSubmitBatch = false;
 let hasAudited = false;
+
+let nftStateMapCache = {};
 
 const logsInfo = {
   filename: "ports.log",
@@ -78,11 +84,11 @@ async function portSetup() {
   }
 }
 
-function root(_req, res) {
+async function root(_req, res) {
   res
     .status(200)
     .type("application/json")
-    .send(kohaku.readContractCache(namespace.taskTxId));
+    .send(await tools.getState(namespace.taskTxId));
 }
 
 function getId(_req, res) {
@@ -92,25 +98,35 @@ function getId(_req, res) {
 async function getNft(req, res) {
   try {
     const id = req.query.id;
-    const attentionState = await tools.getState(namespace.taskTxId);
-    const nfts = Object.values(attentionState.nfts).flat();
-    if (!nfts.includes(id))
-      return res.status(404).send(id + " is not registered");
+    let attentionState;
 
-    const nftState = await tools.getState(id);
-    const attentionReport = attentionState.task.attentionReport;
-
-    let attention = 0,
-      reward = 0;
-    for (const report of attentionReport) {
-      if (id in report) {
-        const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
-        attention += report[id];
-        reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
-      }
+    // Get NFT state
+    let nftState;
+    if (id in nftStateMapCache) {
+      nftState = nftStateMapCache[id];
+      if (nftState.updatedAttention) return res.status(200).send(nftState);
+    } else {
+      attentionState = await tools.getState(namespace.taskTxId);
+      const nfts = Object.values(attentionState.nfts).flat();
+      if (!nfts.includes(id))
+        return res.status(404).send(id + " is not registered");
+      nftState = await tools.getState(id);
+      nftState.id = id;
+      nftStateMapCache[id] = nftState;
     }
 
-    res.status(200).send({ ...nftState, id, attention, reward });
+    // Calculate attention and rewards
+    nftState.updatedAttention = true;
+    nftState.attention = 0;
+    nftState.reward = 0;
+    for (const report of attentionState.task.attentionReport) {
+      if (id in report) {
+        const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
+        nftState.attention += report[id];
+        nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
+      }
+    }
+    res.status(200).send(nftState);
   } catch (e) {
     console.error("Error responding with NFT:", e);
     res.status(500).send({ error: e });
@@ -119,31 +135,47 @@ async function getNft(req, res) {
 
 async function getNftSummaries(req, res) {
   try {
-    // TODO add date filtering
-    const period = req.query.period;
+    // Initialize NFT map
     const attentionState = await tools.getState(namespace.taskTxId);
-
     const attentionReport = attentionState.task.attentionReport;
-
     const nftMap = {};
-    for (const owner in attentionState.nfts) {
-      for (const id of attentionState.nfts[owner]) {
-        nftMap[id] = {
-          id,
-          owner,
-          attention: 0,
-          reward: 0
-        };
-      }
-    }
 
+    const days = PERIOD_MAP[req.query.period];
+    if (days) {
+      // Filter by day
+      const unixNow = Math.round(Date.now() / 1000);
+      const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
+      for (const owner in attentionState.nfts) {
+        for (const id of attentionState.nfts[owner]) {
+          if (
+            !(id in nftStateMapCache) || // If not in cache, assume valid age
+            oldestValidTimestamp <
+              (parseInt(nftStateMapCache[id].createdAt) || DEFAULT_CREATED_AT)
+          )
+            nftMap[id] = {
+              id,
+              owner,
+              attention: 0,
+              reward: 0
+            };
+        }
+      }
+    } else
+      for (const owner in attentionState.nfts)
+        for (const id of attentionState.nfts[owner])
+          nftMap[id] = {
+            id,
+            owner,
+            attention: 0,
+            reward: 0
+          };
+
+    // Calculate attention and rewards
     for (const report of attentionReport) {
       let totalAttention = 0;
       for (const nftId in report) {
-        if (nftId in nftMap) {
-          nftMap[nftId].attention += report[nftId];
-          totalAttention += report[nftId];
-        }
+        totalAttention += report[nftId];
+        if (nftId in nftMap) nftMap[nftId].attention += report[nftId];
       }
 
       const rewardPerAttention = 1000 / totalAttention;
@@ -151,7 +183,13 @@ async function getNftSummaries(req, res) {
         if (nftId in nftMap)
           nftMap[nftId].reward += report[nftId] * rewardPerAttention;
     }
-    res.status(200).send(Object.values(nftMap));
+
+    // Sort and send nft summaries
+    const nftSummaryArr = Object.values(nftMap);
+    nftSummaryArr.sort((a, b) => {
+      return b.attention - a.attention;
+    });
+    res.status(200).send(nftSummaryArr);
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
     res.status(500).send({ error: e });
@@ -161,6 +199,7 @@ async function getNftSummaries(req, res) {
 async function execute(_init_state) {
   let state, block;
   for (;;) {
+    await rateLimit();
     try {
       [state, block] = await getAttentionStateAndBlock();
     } catch (e) {
@@ -185,6 +224,9 @@ async function getAttentionStateAndBlock() {
       hasProposedSlash = false;
       hasRanked = false;
       hasDistributed = false;
+
+      for (const nftId in nftStateMapCache)
+        nftStateMapCache[nftId].updatedAttention = false;
     }
 
     lastLogClose = logClose;
@@ -198,7 +240,6 @@ async function getAttentionStateAndBlock() {
       "blocks"
     );
   lastBlock = block;
-  await rateLimit();
   return [state, block];
 }
 
