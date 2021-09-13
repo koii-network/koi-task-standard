@@ -2,7 +2,7 @@
 
 koii Contract is a smartweave contract,Smartweave is a new smart contract protocol, it takes a different approach: instead of requiring network nodes to execute smart contract code, a system of “lazy evaluation” is employed, pushing the computation of transaction validation to users of the smart contract. Koii Contract enable any one who has koii token to register a task and to run registered tasks and rewarded based on the payload they been submitted.
 
-# Contract Deployment
+## Contract Deployment
 
 `yarn deploy [koi]`
 
@@ -14,7 +14,7 @@ koii Contract is a smartweave contract,Smartweave is a new smart contract protoc
 
 - [Mint](./doc/mint.md)
 
-- [Withdraw](.doc/withdraw.md)
+- [Withdraw](./doc/withdraw.md)
 
 - [RegisterTask](./doc/register_task.md)
 

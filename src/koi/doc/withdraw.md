@@ -2,4 +2,4 @@
 
 - takes `quantity` as input.
 
-- it withdraw staked koi tokens. koi tokens withdrawal is possible if the stake time is older than two weeks
+- it withdraw staked koi tokens which are 14 days old or older and add the token to the `caller address` balance.
