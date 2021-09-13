@@ -103,6 +103,7 @@ async function getNftSummaries(req, res) {
     // TODO add date filtering
     const period = req.query.period;
     const attentionState = await tools.getState(namespace.taskTxId);
+
     const attentionReport = attentionState.task.attentionReport;
 
     const nftMap = {};
@@ -120,15 +121,17 @@ async function getNftSummaries(req, res) {
     for (const report of attentionReport) {
       let totalAttention = 0;
       for (const nftId in report) {
-        nftMap[nftId].attention += report[nftId];
-        totalAttention += report[nftId];
+        if (nftId in nftMap) {
+          nftMap[nftId].attention += report[nftId];
+          totalAttention += report[nftId];
+        }
       }
 
       const rewardPerAttention = 1000 / totalAttention;
       for (const nftId in report)
-        nftMap[nftId].reward += report[nftId] * rewardPerAttention;
+        if (nftId in nftMap)
+          nftMap[nftId].reward += report[nftId] * rewardPerAttention;
     }
-
     res.status(200).send(Object.values(nftMap));
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
