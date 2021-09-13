@@ -60,7 +60,6 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    namespace.express("get", "/realtime-attention", getRealtimeAttention);
   }
 }
 
