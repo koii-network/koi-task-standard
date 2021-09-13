@@ -5,8 +5,6 @@ export default function transfer(state, action) {
   const target = input.target;
   const qty = input.qty;
 
-  console.log(action);
-
   if (!target) throw new ContractError("No target specified");
   if (!Number.isInteger(qty))
     throw new ContractError('Invalid value for "qty". Must be an integer');
