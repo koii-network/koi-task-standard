@@ -9,10 +9,10 @@
   dependencies:
     smartweave "^0.4.41"
 
-"@_koi/sdk@^2.3.0-beta.1":
-  version "2.3.0-beta.1"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.3.0-beta.1.tgz#51e45c52bd620c832aee3c2dc146ab77caa6d926"
-  integrity sha512-G0ZFVLJL3j2oDGMzBjWQ6i/QoclhK8rH3K/iGml6TIz2hlReIJUVVA6ntn01o8kD6rwf0RD8AhSEWYd5vpQcqA==
+"@_koi/sdk@^2.3.0-beta.12":
+  version "2.3.0-beta.14"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.3.0-beta.14.tgz#b036e2ef46b81c4f30002937b9b5da3e4c54a477"
+  integrity sha512-16BeRad7zB0DYKmmL0OZFmNbxzbFVQgXBihY9+oeqskRxsDAEcv88Pl0KjnuM2elcTx+y5Ryt0o3QuEP141MFA==
   dependencies:
     "@_koi/kohaku" "^1.0.6"
     arweave "^1.10.13"
