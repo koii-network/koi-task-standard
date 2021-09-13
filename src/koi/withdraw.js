@@ -7,9 +7,12 @@ export default function withdraw(state, action) {
   if (!(caller in stakes)) {
     throw new ContractError(`This ${caller}adress hasn't staked`);
   }
-  if (!Number.isInteger(qty))
+  if (!Number.isInteger(qty)) {
     throw new ContractError('Invalid value for "qty". Must be an integer');
+  }
+
   if (qty <= 0) throw new ContractError("Invalid stake withdrawal amount");
+
   const callerStake = stakes[caller];
 
   const avaliableTokenToWithDraw = callerStake.filter(

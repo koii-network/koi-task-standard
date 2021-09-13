@@ -108,7 +108,7 @@ Examples:
 `yarn build`
 
 - `node test/attention.test.js path/to/wallet.json`
-- `node test/koi.test.js path/to/wallet.json`
+- `node test/koi.test.js `
 
 ## Testing Executable
 
