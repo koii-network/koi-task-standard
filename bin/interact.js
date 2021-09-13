@@ -13,19 +13,19 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-const contractId = "K9gUv_NoCkPqrrUu4l_N1LEUluygudXTblGfjVqqDCI";
-
-// const input = {
-//   function: "registerTask",
-//   taskName: "Attention_Game",
-//   taskTxId: "5AtfvnCinCborePPcouh331BdcTzu6P_6N6h_ZZUST0"
-// };
+const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
 
 const input = {
-  function: "mint",
-  target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
-  qty: 100
+  function: "registerTask",
+  taskName: "Attention_Game",
+  taskTxId: "CdPAQNONoR83Shj3CbI_9seC-LqgI1oLaRJhSwP90-o"
 };
+
+// const input = {
+//   function: "mint",
+//   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
+//   qty: 100
+// };
 
 async function main() {
   console.log("Writing", input.function);
