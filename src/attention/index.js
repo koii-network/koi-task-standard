@@ -3,7 +3,6 @@ import audit from "./audit";
 import rankPrepDistribution from "./rank";
 import batchAction from "./batchAction";
 import proposeSlash from "./propose_slash";
-import registerBundler from "./register_bundler";
 import registerExecutableId from "./register_executable_id";
 import migratePreRegister from "./migrate_pre_register";
 const handlers = [
@@ -12,7 +11,6 @@ const handlers = [
   rankPrepDistribution,
   batchAction,
   proposeSlash,
-  registerBundler,
   registerExecutableId,
   migratePreRegister
 ];
