@@ -22,18 +22,17 @@ export default function withdraw(state, action) {
   if (qty > total) {
     throw new ContractError("Stake is not ready to be released");
   }
-  for (let stake of callerStake) {
-    if (stake.block + 10080 < SmartWeave.block.height) {
-      if (qty <= stake.value) {
-        stake.value -= qty;
-        balances[caller] += qty;
-        break;
-      }
-      if (qty > stake.value) {
-        balances[caller] += stake.value;
-        qty -= stake.value;
-        stake.value -= stake.value;
-      }
+  // If Stake is 14 days old can be withdraw
+  for (let stake of avaliableTokenToWithDraw) {
+    if (qty <= stake.value) {
+      stake.value -= qty;
+      balances[caller] += qty;
+      break;
+    }
+    if (qty > stake.value) {
+      balances[caller] += stake.value;
+      qty -= stake.value;
+      stake.value -= stake.value;
     }
   }
 
