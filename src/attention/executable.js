@@ -72,7 +72,8 @@ let nftStateMapCache = {};
 
 const logsInfo = {
   filename: "ports.log",
-  oldFilename: "old-ports.log"
+  oldFilename: "old-ports.log",
+  lockedPorts:"locked-ports.log"
 };
 
 function setup(_init_state) {
@@ -483,6 +484,7 @@ function canProposePorts(state, block) {
 async function proposePorts() {
   await lockPorts();
   const payload = await PublishPoRT();
+  await unlockPorts()
   if (Object.keys(payload).length === 0) {
     hasSubmittedPorts = true;
     console.error("Payload empty, skipping submission");
@@ -529,7 +531,7 @@ async function PublishPoRT() {
 async function readRawLogs() {
   let fullLogs;
   try {
-    fullLogs = await namespace.fs("readFile", logsInfo.oldFilename);
+    fullLogs = await namespace.fs("readFile", logsInfo.lockedPorts);
   } catch {
     console.error("Error reading raw logs");
     return [];
@@ -581,9 +583,18 @@ async function verifySignature(log) {
     return false;
   }
 }
-
+async function unlockPorts(){
+  try{
+  await namespace.fs("rm", logsInfo.lockedPorts);
+  }catch(e){
+    console.log("error in unlockPorts",e)
+  }
+}
 async function lockPorts() {
   try {
+    lockedPorts = await namespace.fs("readFile", logsInfo.filename);
+    await namespace.fs("writeFile", logsInfo.lockedPorts, data);
+
     await namespace.fs("rm", logsInfo.oldFilename);
   } catch (e) {
     console.log("Unable to remove old ports file");
