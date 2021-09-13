@@ -287,7 +287,7 @@ function addPortView(data, wallet) {
       });
     }
   } catch (e) {
-    console.log("Error in addPortView",e)
+    console.log("Error in addPortView", e);
   }
   // console.dir(ports)
 }
