@@ -46,4 +46,4 @@ Creator publish a content and register in the attention contract for attention. 
 
 - [Rank](./rank.js)
 
-- [RegisterExecutable](./register_executbale_id)
+- [RegisterExecutable](./register_executbale_id.js)
