@@ -307,4 +307,4 @@ export default async function cleanPreRegister(state) {
 
 `yarn build`
 
-- `node test/koi.test.js path/to/wallet.json`
+- `node test/koi.test.js `
