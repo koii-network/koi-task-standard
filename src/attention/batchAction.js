@@ -16,7 +16,7 @@ export default async function batchAction(state, action) {
   }
   const vote = votes.find((vote) => vote.id === voteId);
   if (!batchTxId) throw new ContractError("No txId specified");
-  if (!(typeof batchTxId === "string"))
+  if (typeof batchTxId !== "string")
     throw new ContractError("batchTxId should be string");
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,

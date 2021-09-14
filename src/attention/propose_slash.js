@@ -10,6 +10,9 @@ export default async function proposeSlash(state, action) {
     throw new ContractError(" slash time have passed or not reached yet");
   }
   if (!receiptTxId) throw new ContractError("No receipt specified");
+  if (typeof receiptTxId !== "string")
+    throw new ContractError("receiptTxId should be string");
+
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
     {

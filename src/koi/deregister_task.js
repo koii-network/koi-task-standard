@@ -1,6 +1,9 @@
 export default function deregisterTask(state, action) {
   const caller = action.caller;
   const txId = action.input.taskTxId;
+  if (!txId) throw new ContractError("Task id not specified");
+  if (typeof txId !== "string")
+    throw new ContractError("txId should be string");
   const task = state.tasks.find(
     (task) => task.txId === txId && task.owner === caller
   );

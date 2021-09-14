@@ -49,11 +49,17 @@ Creator publish a content and register in the attention contract for attention. 
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
-  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-  const stakes = koiiState.stakes;
+
+  if (!distributionTxId)
+    throw new ContractError("distribution tx id not specified");
+  if (!url) throw new ContractError("url not specified");
+  if (typeof distributionTxId !== "string")
+    throw new ContractError("distributionTxId should be string");
   if (blackList.includes(caller)) {
     throw new ContractError("Not valid");
   }
+  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+  const stakes = koiiState.stakes;
   if (!(caller in stakes)) {
     throw new ContractError(
       "Submittion of PoRTs require minimum stake of 5 koii"
@@ -119,6 +125,7 @@ Creator publish a content and register in the attention contract for attention. 
   return { state };
 }
 
+
 ```
 
 ## Audit
@@ -133,6 +140,9 @@ export default function audit(state, action) {
   const caller = action.caller;
   const input = action.input;
   const id = input.id;
+
+  if (!id) throw new ContractError("Id not specified");
+  if (typeof id !== "string") throw new ContractError("id should be string");
   const triggeredVote = votes.find((vote) => vote.id == id);
   // 50
   if (SmartWeave.block.height > state.task.open + 600) {
@@ -153,6 +163,7 @@ export default function audit(state, action) {
   votes.push(vote);
   return { state };
 }
+
 
 ```
 
@@ -181,7 +192,7 @@ export default async function batchAction(state, action) {
   }
   const vote = votes.find((vote) => vote.id === voteId);
   if (!batchTxId) throw new ContractError("No txId specified");
-  if (!(typeof batchTxId === "string"))
+  if (typeof batchTxId !== "string")
     throw new ContractError("batchTxId should be string");
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
@@ -222,6 +233,7 @@ export default async function batchAction(state, action) {
   return { state };
 }
 
+
 ```
 
 ## ProposeSlash
@@ -243,6 +255,9 @@ export default async function proposeSlash(state, action) {
     throw new ContractError(" slash time have passed or not reached yet");
   }
   if (!receiptTxId) throw new ContractError("No receipt specified");
+  if (typeof receiptTxId !== "string")
+    throw new ContractError("receiptTxId should be string");
+
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
     {
@@ -502,6 +517,9 @@ export default function registerExecutableId(state, action) {
   const caller = action.caller;
   const executableId = input.executableId;
   const owner = state.owner;
+  if (!executableId) throw new ContractError("Executable id not specified");
+  if (typeof executableId !== "string")
+    throw new ContractError("executableId should be string");
   if (caller !== owner) {
     throw new ContractError("Only owner can register");
   }

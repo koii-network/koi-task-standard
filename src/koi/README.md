@@ -177,6 +177,11 @@ export default async function registerTask(state, action) {
     throw new ContractError("Only owner can register a task");
   }
   if (!taskTxId) throw new ContractError("No txid specified");
+  if (typeof taskTxId !== "string")
+    throw new ContractError("taskTxId should be string");
+  if (!taskName) throw new ContractError("Task name not specified");
+  if (!(typeof taskName === "string"))
+    throw new ContractError("Task name should be string");
   if (koiReward && balances[caller] < koiReward + 1)
     throw new ContractError("Your Balance is not enough");
   const txId = state.tasks.find((task) => task.txId === taskTxId);
@@ -219,6 +224,9 @@ export default async function registerTask(state, action) {
 export default function deregisterTask(state, action) {
   const caller = action.caller;
   const txId = action.input.taskTxId;
+  if (!txId) throw new ContractError("Task id not specified");
+  if (typeof txId !== "string")
+    throw new ContractError("txId should be string");
   const task = state.tasks.find(
     (task) => task.txId === txId && task.owner === caller
   );
@@ -231,6 +239,7 @@ export default function deregisterTask(state, action) {
   state.tasks.splice(index, 1);
   return { state };
 }
+
 
 ```
 
@@ -249,18 +258,34 @@ export default async function burnKoi(state, action) {
   const contractId = input.contractId;
   const contentType = input.contentType;
   const contentTxId = input.contentTxId;
+  const owner = input.owner;
+  if (!contractId) throw new ContractError("Contract id not specified");
+  if (!contentType) throw new ContractError("Content type not specified");
+  if (!contentTxId) throw new ContractError("No txId specified");
+  if (typeof contractId !== "string" || typeof contentTxId !== "string") {
+    throw new ContractError("Invalid inputs");
+  }
 
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
   --balances[caller]; // burn 1 koi per registration
-  preRegisterDatas.push({
-    contractId: contractId,
-    insertBlock: SmartWeave.block.height,
-    content: { [contentType]: contentTxId },
-    owner: caller
-  });
+  owner !== undefined
+    ? preRegisterDatas.push({
+        contractId: contractId,
+        insertBlock: SmartWeave.block.height,
+        content: { [contentType]: contentTxId },
+        owner: owner
+      })
+    : preRegisterDatas.push({
+        contractId: contractId,
+        insertBlock: SmartWeave.block.height,
+        content: { [contentType]: contentTxId },
+        owner: caller
+      });
+
   return { state };
 }
+
 
 ```
 

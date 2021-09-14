@@ -3,6 +3,9 @@ export default function audit(state, action) {
   const caller = action.caller;
   const input = action.input;
   const id = input.id;
+
+  if (!id) throw new ContractError("Id not specified");
+  if (typeof id !== "string") throw new ContractError("id should be string");
   const triggeredVote = votes.find((vote) => vote.id == id);
   // 50
   if (SmartWeave.block.height > state.task.open + 600) {
