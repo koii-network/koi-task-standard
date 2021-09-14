@@ -247,6 +247,7 @@ async function getAttentionStateAndBlock() {
       hasProposedSlash = false;
       hasRanked = false;
       hasDistributed = false;
+      hasAudited = false;
 
       for (const nftId in nftStateMapCache)
         nftStateMapCache[nftId].updatedAttention = false;
@@ -676,7 +677,7 @@ async function bundleAndExport(bundle) {
   return result;
 }
 
-async function canAudit(state, block) {
+function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
 
@@ -869,7 +870,7 @@ async function distribute() {
 
 async function witness(state, block) {
   if (checkForVote(state, block)) await tryVote(state);
-  if (checkProposeSlash(state, block)) await proposeSlash(state);
+  if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 
 function checkForVote(state, block) {
@@ -1010,6 +1011,7 @@ async function activeVotesVoted(state) {
   });
   return { receipts: receipts, activeVotes: activeVotes, ids: ids };
 }
+
 async function checkProposeSlash(state, block) {
   const task = state.task;
   const { receipts, activeVotes, ids } = await activeVotesVoted(state);
