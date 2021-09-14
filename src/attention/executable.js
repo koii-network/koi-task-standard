@@ -115,7 +115,18 @@ async function getNft(req, res) {
       const nfts = Object.values(attentionState.nfts).flat();
       if (!nfts.includes(id))
         return res.status(404).send(id + " is not registered");
-      nftState = await tools.getState(id);
+      try {
+        nftState = await tools.getState(id);
+      } catch (e) {
+        if (e.type !== "TX_NOT_FOUND") throw e;
+        nftState = {
+          owner: Object.keys(attentionState.nfts).find((owner) =>
+            attentionState.nfts[owner].includes(id)
+          ),
+          tags: ["missing"],
+          createdAt: DEFAULT_CREATED_AT
+        };
+      }
       nftState.id = id;
       nftStateMapCache[id] = nftState;
     }
