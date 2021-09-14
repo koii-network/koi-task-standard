@@ -13,8 +13,10 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-const contractId = "CdPAQNONoR83Shj3CbI_9seC-LqgI1oLaRJhSwP90-o";
-
+const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
+const input = {
+  function: "cleanPreRegister"
+};
 // const input = {
 //   function: "registerTask",
 //   taskName: "Attention_Game",
@@ -26,10 +28,10 @@ const contractId = "CdPAQNONoR83Shj3CbI_9seC-LqgI1oLaRJhSwP90-o";
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
 //   qty: 100
 // };
-const input = {
-  function: "registerExecutableId",
-  executableId: "myseSmK1blWYMcG9KeAZFOsMhBfjngKlxAIxvI9SQXI"
-};
+// const input = {
+//   function: "registerExecutableId",
+//   executableId: "myseSmK1blWYMcG9KeAZFOsMhBfjngKlxAIxvI9SQXI"
+// };
 async function main() {
   console.log("Writing", input.function);
   const txId = await smartweave.interactWrite(
