@@ -481,8 +481,8 @@ function canProposePorts(state, block) {
 }
 
 async function proposePorts() {
-  const payload = await PublishPoRT();
   await lockPorts();
+  const payload = await PublishPoRT();
   if (Object.keys(payload).length === 0) {
     hasSubmittedPorts = true;
     console.error("Payload empty, skipping submission");
@@ -529,7 +529,7 @@ async function PublishPoRT() {
 async function readRawLogs() {
   let fullLogs;
   try {
-    fullLogs = await namespace.fs("readFile", logsInfo.filename);
+    fullLogs = await namespace.fs("readFile", logsInfo.oldFilename);
   } catch {
     console.error("Error reading raw logs");
     return [];
