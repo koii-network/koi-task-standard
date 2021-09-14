@@ -25,7 +25,7 @@ const API_COOLDOWN = 666; // 1.5 requests per second
 let nextApiTime = 0;
 console.log("Reading wallet");
 let wallet = JSON.parse(fs.readFileSync("../wallet.json"));
-// This will only work if the wallet owner is equal to the Koii
+// This will only work if the wallet owner is equal to the Koii contract owner
 
 async function main() {
   // console.error(
