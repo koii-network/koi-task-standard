@@ -44,6 +44,13 @@ async function main() {
     return { addr, remaining: 5, tx: null };
   });
 
+  console.log("Snap shotting old balances");
+  let koiiState = (await axios.get("https://mainnet.koii.live/state")).data;
+  await fsProms.writeFile(
+    "balances.old.json",
+    JSON.stringify(koiiState.balances)
+  );
+
   while (attemptArr.some((attempt) => attempt.remaining)) {
     for (const attempt of attemptArr) {
       if (!attempt.remaining) continue;
@@ -76,6 +83,13 @@ async function main() {
 
   console.log("All done");
   await fsProms.writeFile("mint10.json", JSON.stringify(attemptArr));
+
+  console.log("Snap shotting new balances");
+  koiiState = (await axios.get("https://mainnet.koii.live/state")).data;
+  await fsProms.writeFile(
+    "balances.new.json",
+    JSON.stringify(koiiState.balances)
+  );
 }
 
 /**
