@@ -109,6 +109,7 @@ async function getNft(req, res) {
     if (id in nftStateMapCache) {
       nftState = nftStateMapCache[id];
       if (nftState.updatedAttention) return res.status(200).send(nftState);
+      attentionState = await tools.getState(namespace.taskTxId);
     } else {
       attentionState = await tools.getState(namespace.taskTxId);
       const nfts = Object.values(attentionState.nfts).flat();
