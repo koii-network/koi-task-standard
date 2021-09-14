@@ -28,13 +28,13 @@ let wallet = JSON.parse(fs.readFileSync("../wallet.json"));
 // This will only work if the wallet owner is equal to the Koii contract owner
 
 async function main() {
-  // console.error(
-  //   "This script is dangerous and will mint thousands of Koii, comment this out to run"
-  // );
-  // console.error(
-  //   "Please verify that the wallet is capable of minting on this contract"
-  // );
-  // return;
+  console.error(
+    "This script is dangerous and will mint thousands of Koii, comment this out to run"
+  );
+  console.error(
+    "Please verify that the wallet is capable of minting on this contract"
+  );
+  return;
 
   console.log("Getting state");
   const attentionState = (
