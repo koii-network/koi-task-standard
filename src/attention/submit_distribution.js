@@ -6,11 +6,17 @@ export default async function submitDistribution(state, action) {
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
-  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-  const stakes = koiiState.stakes;
+
+  if (!distributionTxId)
+    throw new ContractError("distribution tx id not specified");
+  if (!url) throw new ContractError("url not specified");
+  if (typeof distributionTxId !== "string")
+    throw new ContractError("distributionTxId should be string");
   if (blackList.includes(caller)) {
     throw new ContractError("Not valid");
   }
+  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+  const stakes = koiiState.stakes;
   if (!(caller in stakes)) {
     throw new ContractError(
       "Submittion of PoRTs require minimum stake of 5 koii"
