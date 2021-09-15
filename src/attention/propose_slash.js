@@ -24,7 +24,7 @@ export default async function proposeSlash(state, action) {
   const payload = receipt.vote;
   const vote = payload.vote;
   const voteId = vote.voteId;
-  const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
+  const voterAddress = await SmartWeave.arweave.wallets.ownerToAddress(
     payload.owner
   );
   const suspectedVote = votes.find((vote) => vote.id === voteId);
@@ -55,7 +55,7 @@ export default async function proposeSlash(state, action) {
     rawReceiptSignature
   );
   if (!isReceiptValid) throw new ContractError("receipt is not valid");
-  const bundlerAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
+  const bundlerAddress = await SmartWeave.arweave.wallets.ownerToAddress(
     receipt.owner
   );
   const index = validBundlers.indexOf(bundlerAddress);

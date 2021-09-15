@@ -2,9 +2,10 @@ export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
   const score = state.reputation;
+  const blacklist = state.blacklist;
   const prepareDistribution = task.prepareDistribution;
   const attentionReport = task.attentionReport;
-  const registeredRecords = state.registeredRecords;
+  const nfts = state.nfts;
   if (SmartWeave.block.height < task.close) {
     throw new ContractError(
       `Ranking is in ${task.close - SmartWeave.block.height} blocks`
@@ -13,17 +14,19 @@ export default async function rankPrepDistribution(state) {
   const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
-  if (currentProposed.isRanked) {
-    throw new ContractError("It is Ranked");
-  }
+
   const proposeDatas = currentProposed.proposedData;
-  let acceptedProposedTxIds = [];
+  const acceptedProposedTxIds = [];
+
+  // Get active votes
+  const activeVotes = votes.filter((vote) => vote.status === "active");
   proposeDatas.map((proposeData) => {
-    if (votes.length !== 0) {
-      for (let vote of votes) {
+    if (activeVotes.length !== 0) {
+      for (let vote of activeVotes) {
         vote.status = "passed";
         vote.id === proposeData.txId && vote.yays > vote.nays
-          ? (proposeData.status = "rejected")
+          ? ((proposeData.status = "rejected"),
+            blacklist.push(proposeData.distributer))
           : ((proposeData.status = "accepted"),
             acceptedProposedTxIds.push(proposeData.txId));
       }
@@ -32,8 +35,8 @@ export default async function rankPrepDistribution(state) {
       acceptedProposedTxIds.push(proposeData.txId);
     }
   });
-
-  let distribution = {};
+  // deduplicate PoRts
+  const distribution = {};
   await Promise.allSettled(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -49,7 +52,7 @@ export default async function rankPrepDistribution(state) {
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
       const parseDataKeys = Object.keys(parseData);
-      const registeredNfts = Object.values(registeredRecords).reduce(
+      const registeredNfts = Object.values(nfts).reduce(
         (acc, curVal) => acc.concat(curVal),
         []
       );
@@ -75,8 +78,7 @@ export default async function rankPrepDistribution(state) {
   }
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
-  let distributionReward = {};
-
+  const distributionReward = {};
   await Promise.allSettled(
     Object.keys(distribution).map(async (nftId) => {
       const state = await SmartWeave.contracts.readContractState(nftId);
