@@ -790,8 +790,8 @@ async function activeVoteId(state) {
   const votes = state.votes;
   const activeVotesTracked = [];
   const activeVotes = votes.filter((vote) => vote.status === "active");
-  activeVotes.map((vote) => {
-    if (isVoteTracked(vote.id)) {
+  activeVotes.map(async (vote) => {
+    if (await isVoteTracked(vote.id)) {
       activeVotesTracked.push(vote.id);
     }
   });
@@ -801,6 +801,11 @@ async function activeVoteId(state) {
 
 async function isVoteTracked(voteId) {
   const batchFileName = "batches/" + voteId;
+  try {
+    await namespace.fs("access", "batches");
+  } catch (_e) {
+    return false;
+  }
   try {
     await namespace.fs("access", batchFileName);
     return true;
