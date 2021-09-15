@@ -1,4 +1,3 @@
-import account from "./account";
 import deregisterTask from "./deregister_task";
 import distributeReward from "./distribute_reward";
 import mint from "./mint";
@@ -10,7 +9,6 @@ import burnKoi from "./burn_koi";
 import cleanPreRegister from "./clean_preRegister";
 
 const handlers = [
-  account,
   burnKoi,
   deregisterTask,
   distributeReward,

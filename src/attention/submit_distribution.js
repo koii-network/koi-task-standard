@@ -34,19 +34,11 @@ export default async function submitDistribution(state, action) {
   if (SmartWeave.block.height > task.open + 300) {
     throw new ContractError("proposing is closed. wait for another round");
   }
-  const transaction = await SmartWeave.unsafeClient.transactions.get(
-    SmartWeave.transaction.id
-  );
-  let contractId;
-  transaction.get("tags").forEach((tag) => {
-    if (tag.get("name", { decode: true, string: true }) == "Contract") {
-      contractId = tag.get("value", { decode: true, string: true });
-    }
-  });
+
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );
-
+  const contractId = SmartWeave.contract.id;
   const tasks = koiiState.tasks;
   const contractTask = tasks.find((task) => task.txId === contractId);
   if (contractTask !== undefined) {

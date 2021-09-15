@@ -13,16 +13,28 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
+//const contractId = "MzoFJIJMkpxF7shMfSUGfrgtA54g2cTFoeNgKDp6pgg";
+const contractId = "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY";
+// const input = {
+//   function: "cleanPreRegister"
+// };
 const input = {
-  function: "cleanPreRegister"
+  function: "migratePreRegister"
 };
+// const input = {
+//   function: "rankPrepDistribution"
+// };
 // const input = {
 //   function: "registerTask",
 //   taskName: "Attention_Game",
-//   taskTxId: "CdPAQNONoR83Shj3CbI_9seC-LqgI1oLaRJhSwP90-o"
+//   taskTxId: "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY"
 // };
-
+// const input = {
+//   function: "burnKoi",
+//   contractId: "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY",
+//   contentType: "nft",
+//   contentTxId: "3RyJjofjhKnkNUffMv2pEBbLuxBmMqRsLCHA5qFFmwc"
+// };
 // const input = {
 //   function: "mint",
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
