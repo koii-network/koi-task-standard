@@ -85,10 +85,11 @@ export default async function rankPrepDistribution(state) {
       const balances = Object.values(state.balances).reduce(
         (preValue, curValue) => preValue + curValue
       );
-      if (balances !== 0) {
-        for (let address in state.balances) {
+
+      for (let address in state.balances) {
+        if (typeof address === "string" && address.length === 43) {
           let rewardPer = state.balances[address] / balances;
-          if (rewardPer !== 0) {
+          if (rewardPer !== 0 && !isNaN(rewardPer)) {
             address in distributionReward
               ? (distributionReward[address] +=
                   distribution[nftId].length * rewardPerAttention * rewardPer)
