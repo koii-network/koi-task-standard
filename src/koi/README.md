@@ -22,11 +22,13 @@ koii Contract is a smartweave contract,Smartweave is a new smart contract protoc
   const target = input.target;
   const qty = input.qty;
 
-  if (!target) throw new ContractError("No target specified");
-  if (!Number.isInteger(qty))
-    throw new ContractError('Invalid value for "qty". Must be an integer');
-  if (qty <= 0 || caller === target)
-    throw new ContractError("Invalid token transfer");
+  if (!target || isNaN(qty) || qty <= 0 || caller === target)
+    throw new ContractError("Invalid inputs");
+  if (typeof target !== "string")
+    throw new ContractError("Invalid input format");
+  if (target.length !== 43) {
+    throw new ContractError("Address should have 43 characters");
+  }
   if (balances[caller] < qty) {
     throw new ContractError(
       `Caller balance not high enough to send ${qty} token(s)!`
@@ -54,9 +56,7 @@ export default function stake(state, action) {
   const caller = action.caller;
   const input = action.input;
   const qty = input.qty;
-  if (!Number.isInteger(qty))
-    throw new ContractError('Invalid value for "qty". Must be an integer');
-  if (qty <= 0) throw new ContractError("Invalid stake amount");
+  if (isNaN(qty) || qty <= 0) throw new ContractError("Invalid input");
   if (balances[caller] < qty) {
     throw new ContractError(
       "Balance is too low to stake that amount of tokens"
@@ -69,6 +69,7 @@ export default function stake(state, action) {
     : (stakes[caller] = [{ value: qty, block: SmartWeave.block.height }]);
   return { state };
 }
+
 ```
 
 #### Mint
@@ -85,13 +86,10 @@ export default function mint(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;
-
   const target = input.target;
   const qty = input.qty;
 
-  if (!target) throw new ContractError("No target specified");
-  if (!Number.isInteger(qty))
-    throw new ContractError('Invalid value for "qty". Must be an integer');
+  if (!target || isNaN(qty)) throw new ContractError("Invalid Inputs");
   if (owner !== caller)
     throw new ContractError("Only the owner can mint new tokens");
 
@@ -100,6 +98,7 @@ export default function mint(state, action) {
 
   return { state };
 }
+
 
 
 ```
@@ -117,17 +116,10 @@ export default function withdraw(state, action) {
   const caller = action.caller;
   const input = action.input;
   let qty = input.qty;
-  if (!(caller in stakes)) {
+  if (!(caller in stakes))
     throw new ContractError(`This ${caller}adress hasn't staked`);
-  }
-  if (!Number.isInteger(qty)) {
-    throw new ContractError('Invalid value for "qty". Must be an integer');
-  }
-
-  if (qty <= 0) throw new ContractError("Invalid stake withdrawal amount");
-
+  if (isNaN(qty) || qty <= 0) throw new ContractError("Invalid inputs");
   const callerStake = stakes[caller];
-
   const avaliableTokenToWithDraw = callerStake.filter(
     (stake) => SmartWeave.block.height > stake.block + 10080
   );
@@ -135,9 +127,8 @@ export default function withdraw(state, action) {
     (acc, curVal) => acc + curVal.value,
     0
   );
-  if (qty > total) {
-    throw new ContractError("Stake is not ready to be released");
-  }
+  if (qty > total) throw new ContractError("Stake is not ready to be released");
+
   // If Stake is 14 days old can be withdraw
   for (let stake of avaliableTokenToWithDraw) {
     if (qty <= stake.value) {
@@ -154,8 +145,6 @@ export default function withdraw(state, action) {
 
   return { state };
 }
-
-
 
 ```
 
@@ -176,12 +165,9 @@ export default async function registerTask(state, action) {
   if (caller !== state.owner) {
     throw new ContractError("Only owner can register a task");
   }
-  if (!taskTxId) throw new ContractError("No txid specified");
-  if (typeof taskTxId !== "string")
-    throw new ContractError("taskTxId should be string");
-  if (!taskName) throw new ContractError("Task name not specified");
-  if (!(typeof taskName === "string"))
-    throw new ContractError("Task name should be string");
+  if (!taskTxId || !taskName) throw new ContractError("Invalid inputs");
+  if (typeof taskTxId !== "string" || typeof taskName !== "string")
+    throw new ContractError("Invalid inputs format");
   if (koiReward && balances[caller] < koiReward + 1)
     throw new ContractError("Your Balance is not enough");
   const txId = state.tasks.find((task) => task.txId === taskTxId);
@@ -212,6 +198,7 @@ export default async function registerTask(state, action) {
   return { state };
 }
 
+
 ```
 
 #### DeregisterTask
@@ -224,15 +211,16 @@ export default async function registerTask(state, action) {
 export default function deregisterTask(state, action) {
   const caller = action.caller;
   const txId = action.input.taskTxId;
-  if (!txId) throw new ContractError("Task id not specified");
-  if (typeof txId !== "string")
-    throw new ContractError("txId should be string");
+  if (!txId) throw new ContractError("Invalid input");
+  if (typeof txId !== "string") throw new ContractError("Invalid input format");
+  if (txId.length !== 43)
+    throw new ContractError("Input should have 43 characters");
   const task = state.tasks.find(
     (task) => task.txId === txId && task.owner === caller
   );
   if (task === undefined) {
     throw new ContractError(
-      `task with ${txId} Id and ${caller} owner did not register`
+      `Task with ${txId} Id and ${caller} owner is not registered`
     );
   }
   const index = state.tasks.indexOf(task);
@@ -259,15 +247,22 @@ export default async function burnKoi(state, action) {
   const contentType = input.contentType;
   const contentTxId = input.contentTxId;
   const owner = input.owner;
-  if (!contractId) throw new ContractError("Contract id not specified");
-  if (!contentType) throw new ContractError("Content type not specified");
-  if (!contentTxId) throw new ContractError("No txId specified");
-  if (typeof contractId !== "string" || typeof contentTxId !== "string") {
+  if (!contractId || !contentType || !contentTxId)
     throw new ContractError("Invalid inputs");
+  if (typeof contractId !== "string" || typeof contentTxId !== "string") {
+    throw new ContractError("Invalid inputs format");
   }
-
+  if (contractId.length !== 43 || contentTxId.length !== 43) {
+    throw new ContractError("Inputs should have 43 characters");
+  }
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
+  const data = preRegisterDatas.find(
+    (preRegisterData) => preRegisterData.content[contentType] === contentTxId
+  );
+  if (data !== undefined) {
+    throw new ContractError("Content is already registered");
+  }
   --balances[caller]; // burn 1 koi per registration
   owner !== undefined
     ? preRegisterDatas.push({

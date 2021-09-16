@@ -1,20 +1,25 @@
 export default async function submitDistribution(state, action) {
   const task = state.task;
   const caller = action.caller;
-  const blackList = state.blacklist;
+  const blacklist = state.blacklist;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
-
-  if (!distributionTxId)
-    throw new ContractError("distribution tx id not specified");
-  if (!url) throw new ContractError("url not specified");
-  if (typeof distributionTxId !== "string")
-    throw new ContractError("distributionTxId should be string");
-  if (blackList.includes(caller)) {
-    throw new ContractError("Not valid");
+  if (SmartWeave.block.height > task.open + 300) {
+    throw new ContractError("proposing is closed. wait for another round");
   }
+  if (!distributionTxId || !url) throw new ContractError("Invalid inputs");
+  if (typeof distributionTxId !== "string" || typeof url !== "string")
+    throw new ContractError("Invalid inputs format");
+  if (distributionTxId.length !== 43)
+    throw new ContractError("Distribution txId should have 43 characters");
+  if (blacklist.includes(caller)) {
+    throw new ContractError(
+      "Address is in blacklist can not submit distribution"
+    );
+  }
+
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const stakes = koiiState.stakes;
   if (!(caller in stakes)) {
@@ -28,11 +33,6 @@ export default async function submitDistribution(state, action) {
   );
   if (callerStakeAmt < 5) {
     throw new ContractError("Stake amount is not enough");
-  }
-
-  // 25
-  if (SmartWeave.block.height > task.open + 300) {
-    throw new ContractError("proposing is closed. wait for another round");
   }
 
   const currentTask = task.proposedPayloads.find(

@@ -7,13 +7,14 @@ export default async function burnKoi(state, action) {
   const contentType = input.contentType;
   const contentTxId = input.contentTxId;
   const owner = input.owner;
-  if (!contractId) throw new ContractError("Contract id not specified");
-  if (!contentType) throw new ContractError("Content type not specified");
-  if (!contentTxId) throw new ContractError("No txId specified");
-  if (typeof contractId !== "string" || typeof contentTxId !== "string") {
+  if (!contractId || !contentType || !contentTxId)
     throw new ContractError("Invalid inputs");
+  if (typeof contractId !== "string" || typeof contentTxId !== "string") {
+    throw new ContractError("Invalid inputs format");
   }
-
+  if (contractId.length !== 43 || contentTxId.length !== 43) {
+    throw new ContractError("Inputs should have 43 characters");
+  }
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("you do not have enough koi");
   const data = preRegisterDatas.find(

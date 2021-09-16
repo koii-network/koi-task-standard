@@ -4,9 +4,7 @@ export default function stake(state, action) {
   const caller = action.caller;
   const input = action.input;
   const qty = input.qty;
-  if (!Number.isInteger(qty))
-    throw new ContractError('Invalid value for "qty". Must be an integer');
-  if (qty <= 0) throw new ContractError("Invalid stake amount");
+  if (isNaN(qty) || qty <= 0) throw new ContractError("Invalid input");
   if (balances[caller] < qty) {
     throw new ContractError(
       "Balance is too low to stake that amount of tokens"

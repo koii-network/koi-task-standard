@@ -9,15 +9,18 @@ export default async function batchAction(state, action) {
     throw new ContractError("Not valid");
   }
   if (
-    SmartWeave.block.height > state.task.open + 660 || // 55
-    SmartWeave.block.height < state.task.open + 600 // 50
+    SmartWeave.block.height > state.task.open + 660 ||
+    SmartWeave.block.height < state.task.open + 600
   ) {
     throw new ContractError("Batch time have passed or not reached yet");
   }
+  if (!batchTxId || !voteId) throw new ContractError("Invalid inputs");
+  if (typeof batchTxId !== "string" || typeof voteId !== "string")
+    throw new ContractError("Invalid input format");
+  if (batchTxId.length !== 43 || voteId.length !== 43)
+    throw new ContractError("Inputs should have 43 characters");
+
   const vote = votes.find((vote) => vote.id === voteId);
-  if (!batchTxId) throw new ContractError("No txId specified");
-  if (typeof batchTxId !== "string")
-    throw new ContractError("batchTxId should be string");
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
     string: true

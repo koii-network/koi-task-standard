@@ -5,14 +5,16 @@ export default async function proposeSlash(state, action) {
   const receiptTxId = action.input.receiptTxId;
   if (
     SmartWeave.block.height > state.task.close ||
-    SmartWeave.block.height < state.task.open + 660 // 55
+    SmartWeave.block.height < state.task.open + 660
   ) {
-    throw new ContractError(" slash time have passed or not reached yet");
+    throw new ContractError("slash time have passed or not reached yet");
   }
-  if (!receiptTxId) throw new ContractError("No receipt specified");
+  if (!receiptTxId) throw new ContractError("Invalid input");
   if (typeof receiptTxId !== "string")
-    throw new ContractError("receiptTxId should be string");
-
+    throw new ContractError("Invalid input format");
+  if (receiptTxId.length !== 43) {
+    throw new ContractError("Input should have 43 characters");
+  }
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
     {
