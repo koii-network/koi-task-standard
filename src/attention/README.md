@@ -325,7 +325,7 @@ export default async function proposeSlash(state, action) {
 - Migrate the preregistered nft from koii Contract.
 
 ```bash
-eexport default async function migratePreRegister(state) {
+export default async function migratePreRegister(state) {
   const nfts = state.nfts;
   const mainContactId = state.koiiContract;
   const contractId = SmartWeave.contract.id;
@@ -344,11 +344,7 @@ eexport default async function migratePreRegister(state) {
   );
 
   for (let i = 0; i < preRegisterNfts.length; i++) {
-    if (
-      typeof preRegisterNfts[i].content.nft === "string" &&
-      preRegisterNfts[i].content.nft.length === 43 &&
-      !registeredNfts.includes(preRegisterNfts[i].content.nft)
-    ) {
+    if (!registeredNfts.includes(preRegisterNfts[i].content.nft)) {
       if (preRegisterNfts[i].owner in nfts) {
         {
           nfts[preRegisterNfts[i].owner].push(preRegisterNfts[i].content.nft);
@@ -361,6 +357,7 @@ eexport default async function migratePreRegister(state) {
 
   return { state };
 }
+
 
 
 ```

@@ -14,21 +14,21 @@ const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
 //const contractId = "MzoFJIJMkpxF7shMfSUGfrgtA54g2cTFoeNgKDp6pgg";
-const contractId = "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY";
+const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
 // const input = {
 //   function: "cleanPreRegister"
 // };
-const input = {
-  function: "migratePreRegister"
-};
+// const input = {
+//   function: "migratePreRegister"
+// };
 // const input = {
 //   function: "rankPrepDistribution"
 // };
-// const input = {
-//   function: "registerTask",
-//   taskName: "Attention_Game",
-//   taskTxId: "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY"
-// };
+const input = {
+  function: "registerTask",
+  taskName: "Attention_Game",
+  taskTxId: "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"
+};
 // const input = {
 //   function: "burnKoi",
 //   contractId: "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY",
