@@ -44,20 +44,25 @@ Creator publish a content and register in the attention contract for attention. 
  export default async function submitDistribution(state, action) {
   const task = state.task;
   const caller = action.caller;
-  const blackList = state.blacklist;
+  const blacklist = state.blacklist;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
-
-  if (!distributionTxId)
-    throw new ContractError("distribution tx id not specified");
-  if (!url) throw new ContractError("url not specified");
-  if (typeof distributionTxId !== "string")
-    throw new ContractError("distributionTxId should be string");
-  if (blackList.includes(caller)) {
-    throw new ContractError("Not valid");
+  if (SmartWeave.block.height > task.open + 300) {
+    throw new ContractError("proposing is closed. wait for another round");
   }
+  if (!distributionTxId || !url) throw new ContractError("Invalid inputs");
+  if (typeof distributionTxId !== "string" || typeof url !== "string")
+    throw new ContractError("Invalid inputs format");
+  if (distributionTxId.length !== 43)
+    throw new ContractError("Distribution txId should have 43 characters");
+  if (blacklist.includes(caller)) {
+    throw new ContractError(
+      "Address is in blacklist can not submit distribution"
+    );
+  }
+
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const stakes = koiiState.stakes;
   if (!(caller in stakes)) {
@@ -73,23 +78,10 @@ Creator publish a content and register in the attention contract for attention. 
     throw new ContractError("Stake amount is not enough");
   }
 
-  // 25
-  if (SmartWeave.block.height > task.open + 300) {
-    throw new ContractError("proposing is closed. wait for another round");
-  }
-  const transaction = await SmartWeave.unsafeClient.transactions.get(
-    SmartWeave.transaction.id
-  );
-  let contractId;
-  transaction.get("tags").forEach((tag) => {
-    if (tag.get("name", { decode: true, string: true }) == "Contract") {
-      contractId = tag.get("value", { decode: true, string: true });
-    }
-  });
   const currentTask = task.proposedPayloads.find(
     (activeTask) => activeTask.block === task.open
   );
-
+  const contractId = SmartWeave.contract.id;
   const tasks = koiiState.tasks;
   const contractTask = tasks.find((task) => task.txId === contractId);
   if (contractTask !== undefined) {
@@ -128,7 +120,7 @@ Creator publish a content and register in the attention contract for attention. 
 
 ```
 
-## Audit
+#### Audit
 
 - takes `id` as input.
 
@@ -141,13 +133,15 @@ export default function audit(state, action) {
   const input = action.input;
   const id = input.id;
 
-  if (!id) throw new ContractError("Id not specified");
-  if (typeof id !== "string") throw new ContractError("id should be string");
-  const triggeredVote = votes.find((vote) => vote.id == id);
-  // 50
+  if (!id) throw new ContractError("Invalid input");
+  if (typeof id !== "string") throw new ContractError("Invalid input format");
+  if (id.length !== 43) {
+    throw new ContractError("Input should have 43 characters");
+  }
   if (SmartWeave.block.height > state.task.open + 600) {
     throw new ContractError("audit is closed. wait for another round");
   }
+  const triggeredVote = votes.find((vote) => vote.id == id);
   if (triggeredVote !== undefined) {
     throw new ContractError(`Vote is triggered with ${id} id`);
   }
@@ -167,7 +161,7 @@ export default function audit(state, action) {
 
 ```
 
-## BatchAction
+#### BatchAction
 
 - takes `batchTxId` and `voteId` as input.
 
@@ -185,15 +179,18 @@ export default async function batchAction(state, action) {
     throw new ContractError("Not valid");
   }
   if (
-    SmartWeave.block.height > state.task.open + 660 || // 55
-    SmartWeave.block.height < state.task.open + 600 // 50
+    SmartWeave.block.height > state.task.open + 660 ||
+    SmartWeave.block.height < state.task.open + 600
   ) {
     throw new ContractError("Batch time have passed or not reached yet");
   }
+  if (!batchTxId || !voteId) throw new ContractError("Invalid inputs");
+  if (typeof batchTxId !== "string" || typeof voteId !== "string")
+    throw new ContractError("Invalid input format");
+  if (batchTxId.length !== 43 || voteId.length !== 43)
+    throw new ContractError("Inputs should have 43 characters");
+
   const vote = votes.find((vote) => vote.id === voteId);
-  if (!batchTxId) throw new ContractError("No txId specified");
-  if (typeof batchTxId !== "string")
-    throw new ContractError("batchTxId should be string");
   const batch = await SmartWeave.unsafeClient.transactions.getData(batchTxId, {
     decode: true,
     string: true
@@ -233,10 +230,9 @@ export default async function batchAction(state, action) {
   return { state };
 }
 
-
 ```
 
-## ProposeSlash
+#### ProposeSlash
 
 - takes `receiptTxId` as input.
 
@@ -250,14 +246,16 @@ export default async function proposeSlash(state, action) {
   const receiptTxId = action.input.receiptTxId;
   if (
     SmartWeave.block.height > state.task.close ||
-    SmartWeave.block.height < state.task.open + 660 // 55
+    SmartWeave.block.height < state.task.open + 660
   ) {
-    throw new ContractError(" slash time have passed or not reached yet");
+    throw new ContractError("slash time have passed or not reached yet");
   }
-  if (!receiptTxId) throw new ContractError("No receipt specified");
+  if (!receiptTxId) throw new ContractError("Invalid input");
   if (typeof receiptTxId !== "string")
-    throw new ContractError("receiptTxId should be string");
-
+    throw new ContractError("Invalid input format");
+  if (receiptTxId.length !== 43) {
+    throw new ContractError("Input should have 43 characters");
+  }
   const receiptData = await SmartWeave.unsafeClient.transactions.getData(
     receiptTxId,
     {
@@ -269,7 +267,7 @@ export default async function proposeSlash(state, action) {
   const payload = receipt.vote;
   const vote = payload.vote;
   const voteId = vote.voteId;
-  const voterAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
+  const voterAddress = await SmartWeave.arweave.wallets.ownerToAddress(
     payload.owner
   );
   const suspectedVote = votes.find((vote) => vote.id === voteId);
@@ -300,7 +298,7 @@ export default async function proposeSlash(state, action) {
     rawReceiptSignature
   );
   if (!isReceiptValid) throw new ContractError("receipt is not valid");
-  const bundlerAddress = await SmartWeave.unsafeClient.wallets.ownerToAddress(
+  const bundlerAddress = await SmartWeave.arweave.wallets.ownerToAddress(
     receipt.owner
   );
   const index = validBundlers.indexOf(bundlerAddress);
@@ -320,25 +318,17 @@ export default async function proposeSlash(state, action) {
 
 ```
 
-## MigratePreRegister
+#### MigratePreRegister
 
 - does not take an input.
 
 - Migrate the preregistered nft from koii Contract.
 
 ```bash
-export default async function migratePreRegister(state) {
+eexport default async function migratePreRegister(state) {
   const nfts = state.nfts;
   const mainContactId = state.koiiContract;
-  const transaction = await SmartWeave.unsafeClient.transactions.get(
-    SmartWeave.transaction.id
-  );
-  let contractId;
-  transaction.get("tags").forEach((tag) => {
-    if (tag.get("name", { decode: true, string: true }) == "Contract") {
-      contractId = tag.get("value", { decode: true, string: true });
-    }
-  });
+  const contractId = SmartWeave.contract.id;
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
@@ -352,31 +342,30 @@ export default async function migratePreRegister(state) {
     (acc, curVal) => acc.concat(curVal),
     []
   );
-  await Promise.allSettled(
-    preRegisterNfts.map(async (preRegisterNft) => {
-      const txStatus = await SmartWeave.unsafeClient.transactions.getStatus(
-        preRegisterNft.content.nft
-      );
-      if (
-        txStatus.status === 200 &&
-        !registeredNfts.includes(preRegisterNft.content.nft)
-      ) {
-        if (preRegisterNft.owner in nfts) {
-          {
-            nfts[preRegisterNft.owner].push(preRegisterNft.content.nft);
-          }
-        } else {
-          nfts[preRegisterNft.owner] = [preRegisterNft.content.nft];
+
+  for (let i = 0; i < preRegisterNfts.length; i++) {
+    if (
+      typeof preRegisterNfts[i].content.nft === "string" &&
+      preRegisterNfts[i].content.nft.length === 43 &&
+      !registeredNfts.includes(preRegisterNfts[i].content.nft)
+    ) {
+      if (preRegisterNfts[i].owner in nfts) {
+        {
+          nfts[preRegisterNfts[i].owner].push(preRegisterNfts[i].content.nft);
         }
+      } else {
+        nfts[preRegisterNfts[i].owner] = [preRegisterNfts[i].content.nft];
       }
-    })
-  );
+    }
+  }
+
   return { state };
 }
 
+
 ```
 
-## Rank
+#### Rank
 
 - does not take an input.
 
@@ -387,9 +376,10 @@ export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
   const score = state.reputation;
+  const blacklist = state.blacklist;
   const prepareDistribution = task.prepareDistribution;
   const attentionReport = task.attentionReport;
-  const registeredRecords = state.registeredRecords;
+  const nfts = state.nfts;
   if (SmartWeave.block.height < task.close) {
     throw new ContractError(
       `Ranking is in ${task.close - SmartWeave.block.height} blocks`
@@ -398,17 +388,20 @@ export default async function rankPrepDistribution(state) {
   const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
-  if (currentProposed.isRanked) {
-    throw new ContractError("It is Ranked");
-  }
+
   const proposeDatas = currentProposed.proposedData;
-  let acceptedProposedTxIds = [];
+  const acceptedProposedTxIds = [];
+
+  // Get active votes
+  const activeVotes = votes.filter((vote) => vote.status === "active");
+  // Get accepted proposed payloads
   proposeDatas.map((proposeData) => {
-    if (votes.length !== 0) {
-      for (let vote of votes) {
+    if (activeVotes.length !== 0) {
+      for (let vote of activeVotes) {
         vote.status = "passed";
         vote.id === proposeData.txId && vote.yays > vote.nays
-          ? (proposeData.status = "rejected")
+          ? ((proposeData.status = "rejected"),
+            blacklist.push(proposeData.distributer))
           : ((proposeData.status = "accepted"),
             acceptedProposedTxIds.push(proposeData.txId));
       }
@@ -417,8 +410,8 @@ export default async function rankPrepDistribution(state) {
       acceptedProposedTxIds.push(proposeData.txId);
     }
   });
-
-  let distribution = {};
+  // deduplicate PoRts
+  const distribution = {};
   await Promise.allSettled(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -434,7 +427,7 @@ export default async function rankPrepDistribution(state) {
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
       const parseDataKeys = Object.keys(parseData);
-      const registeredNfts = Object.values(registeredRecords).reduce(
+      const registeredNfts = Object.values(nfts).reduce(
         (acc, curVal) => acc.concat(curVal),
         []
       );
@@ -460,18 +453,18 @@ export default async function rankPrepDistribution(state) {
   }
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
-  let distributionReward = {};
-
+  const distributionReward = {};
   await Promise.allSettled(
     Object.keys(distribution).map(async (nftId) => {
       const state = await SmartWeave.contracts.readContractState(nftId);
       const balances = Object.values(state.balances).reduce(
         (preValue, curValue) => preValue + curValue
       );
-      if (balances !== 0) {
-        for (let address in state.balances) {
+
+      for (let address in state.balances) {
+        if (typeof address === "string" && address.length === 43) {
           let rewardPer = state.balances[address] / balances;
-          if (rewardPer !== 0) {
+          if (rewardPer !== 0 && !isNaN(rewardPer)) {
             address in distributionReward
               ? (distributionReward[address] +=
                   distribution[nftId].length * rewardPerAttention * rewardPer)
@@ -489,6 +482,7 @@ export default async function rankPrepDistribution(state) {
     isRewarded: false
   });
   attentionReport.push(attentionScore);
+  // Open a new game
   task.open = SmartWeave.block.height;
   task.close = SmartWeave.block.height + 720; // 60
   const newTask = {
@@ -497,15 +491,17 @@ export default async function rankPrepDistribution(state) {
     isRanked: false
   };
   task.proposedPayloads.push(newTask);
+  // Delete Distributed Payloads
   task.proposedPayloads = task.proposedPayloads.filter(
     (payload) => !payload.isRanked
   );
   return { state };
 }
 
+
 ```
 
-## RegisterExecutable
+#### RegisterExecutable
 
 - takes `executableId` as input.
 
@@ -517,15 +513,19 @@ export default function registerExecutableId(state, action) {
   const caller = action.caller;
   const executableId = input.executableId;
   const owner = state.owner;
-  if (!executableId) throw new ContractError("Executable id not specified");
-  if (typeof executableId !== "string")
-    throw new ContractError("executableId should be string");
   if (caller !== owner) {
     throw new ContractError("Only owner can register");
   }
+  if (!executableId) throw new ContractError("Invalid input");
+  if (typeof executableId !== "string")
+    throw new ContractError("Invalid input format");
+  if (executableId.length !== 43)
+    throw new ContractError("Input should have 43 characters");
+
   state.executableId = executableId;
   return { state };
 }
+
 
 
 ```

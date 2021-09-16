@@ -8,12 +8,9 @@ export default async function registerTask(state, action) {
   if (caller !== state.owner) {
     throw new ContractError("Only owner can register a task");
   }
-  if (!taskTxId) throw new ContractError("No txid specified");
-  if (typeof taskTxId !== "string")
-    throw new ContractError("taskTxId should be string");
-  if (!taskName) throw new ContractError("Task name not specified");
-  if (!(typeof taskName === "string"))
-    throw new ContractError("Task name should be string");
+  if (!taskTxId || !taskName) throw new ContractError("Invalid inputs");
+  if (typeof taskTxId !== "string" || typeof taskName !== "string")
+    throw new ContractError("Invalid inputs format");
   if (koiReward && balances[caller] < koiReward + 1)
     throw new ContractError("Your Balance is not enough");
   const txId = state.tasks.find((task) => task.txId === taskTxId);

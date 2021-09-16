@@ -20,6 +20,7 @@ export default async function rankPrepDistribution(state) {
 
   // Get active votes
   const activeVotes = votes.filter((vote) => vote.status === "active");
+  // Get accepted proposed payloads
   proposeDatas.map((proposeData) => {
     if (activeVotes.length !== 0) {
       for (let vote of activeVotes) {
@@ -107,6 +108,7 @@ export default async function rankPrepDistribution(state) {
     isRewarded: false
   });
   attentionReport.push(attentionScore);
+  // Open a new game
   task.open = SmartWeave.block.height;
   task.close = SmartWeave.block.height + 720; // 60
   const newTask = {
@@ -115,6 +117,7 @@ export default async function rankPrepDistribution(state) {
     isRanked: false
   };
   task.proposedPayloads.push(newTask);
+  // Delete Distributed Payloads
   task.proposedPayloads = task.proposedPayloads.filter(
     (payload) => !payload.isRanked
   );
