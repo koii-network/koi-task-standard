@@ -1,15 +1,13 @@
 export default async function migratePreRegister(state) {
   const nfts = state.nfts;
   const mainContactId = state.koiiContract;
-  const contractId = SmartWeave.contract.id;
+  //const contractId = SmartWeave.contract.id;
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
   const preRegisterDatas = contractState.preRegisterDatas;
   const preRegisterNfts = preRegisterDatas.filter(
-    (preRegisterNft) =>
-      "nft" in preRegisterNft.content &&
-      preRegisterNft.contractId === contractId
+    (preRegisterNft) => "nft" in preRegisterNft.content
   );
   const registeredNfts = Object.values(nfts).reduce(
     (acc, curVal) => acc.concat(curVal),
