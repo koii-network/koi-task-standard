@@ -1,6 +1,6 @@
 <p align="center">
  <h1 align="center">Koii Tasks</h1>
- <img height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
+ <img align="center" height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
 </p>
 
 ### Introduction
