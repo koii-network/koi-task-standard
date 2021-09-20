@@ -1,6 +1,8 @@
 # KOII Tasks
 
-![Alt text](diagram/koi_task_diagram.jpg?raw=true "Title")
+<p align="center">
+ <img height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
+</p>
 
 ### Introduction
 
