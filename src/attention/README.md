@@ -1,6 +1,8 @@
-# Attention Game Contract
-
-Attention Game is one of the koii task. The aim of the attention game is to rewards content creators and publishers relative to the amount of attention they get. 1,000 KOII are minted daily and awarded proportionally to owners based on the number of views relative to the ecosystem.
+<h1 align="center">Attention Contract</h1>
+<p align="center">
+ <img align="center" height=512px src="diagram/attention_diagram.jpg?raw=true"></a>
+</p>
+Attention contract is one of the koii task. The aim of the attention game is to rewards content creators and publishers relative to the amount of attention they get. 1,000 KOII are minted daily and awarded proportionally to owners based on the number of views relative to the ecosystem.
 
 ## How does attention game work.
 
