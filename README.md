@@ -1,5 +1,7 @@
 # KOII Tasks
 
+![Alt text](diagram/koi_task_diagram.jpg?raw=true "Title")
+
 ### Introduction
 
 KOII task a way to create tasks that solve some computational problem and earn KOII as your reward by submitting you data payloads. KOII tasks are created as an executable bundle that can be run on bundler nodes.
