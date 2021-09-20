@@ -1,4 +1,7 @@
-# KOII Tasks
+<h1 align="center">Koii Tasks</h1>
+<p align="center">
+ <img align="center" height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
+</p>
 
 ### Introduction
 
