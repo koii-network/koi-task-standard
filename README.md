@@ -10,7 +10,7 @@ A Koii task is a way to create tasks that solve some computational problem to ea
 ## Description
 
 A Koii task is market-based software that is deployed on the Arweave blockchain. Tasks run on Koii nodes to perform a repeatable and auditable process like 
-* Verifyign Proofs
+* Verifying Proofs
 * Web scraping 
 * Indexing decentralized storage
 * Proxy Services
