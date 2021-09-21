@@ -5,7 +5,7 @@
 
 ### Introduction
 
-KOII task a way to create tasks that solve some computational problem and earn KOII as your reward by submitting your data payloads. KOII tasks are created as an executable bundle that can be run on Koii nodes.
+A Koii task is a way to create tasks that solve some computational problem to earn KOII as a reward. Koii tasks are created as an executable bundle that is first deployed to a decentralized network, and can then be run on Koii nodes.
 
 ## Description
 
