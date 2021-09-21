@@ -64,7 +64,7 @@ The [Koii SDK](https://github.com/koii-network/tools) is accessible via `tools` 
 
 ##### **_Smart Weave_**
 
-SmartWeave is used to interact with other smart contracts and Koii Tasks stored on Arweave and is accessible via `smartWeave` object.
+SmartWeave is used to interact with other smart contracts and Koii Tasks stored on Arweave and is accessible via the `smartWeave` object.
 
 **_For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)_**
 
