@@ -9,7 +9,21 @@ KOII task a way to create tasks that solve some computational problem and earn K
 
 ## Description
 
-KOII tasks is a piece of code that is deployed on arweave blockchain and runs on the KOII nodes and perform some task like **Attention Game, Web scraping etc**.
+A Koii task is market-based software that is deployed on Arweave blockchain. Tasks run on Koii nodes to perform a repeatable task like 
+* Verifyign Proofs
+* Web scraping 
+* Indexing decentralized storage
+* Proxy Services
+* Message passing
+
+## Running Koii Tasks
+Each Koii Task receives it's own namespace and runtime on a node, including
+* a customizeable REST API (powered by express.js)
+* a Redis cache
+* external interactions via Axios 
+* APIs to sign and encrypt payloads using either RSA or ECDSA key pairs
+
+Nodes can run as many tasks in parallel as they want, and receive rewards based on the their ability to provide competitive results that pass verification by other nodes. Desktop clients will be released in the future to provide better control for CPU and i/o management for different tasks.
 
 ## How to create KOII tasks:
 
@@ -23,7 +37,7 @@ KOII tasks consists of two vital parts
 **_This smart contract is different from KOII main contract_**. This smart contract will have all the state data related to that particular KOII task. The smart contract consist of an
 
 1. **_initial state_** which acts a starting point to your KOII tasks state.
-2. **_index.js_** Provides all necessary handles for you smart contract
+2. **_index.js_** Provides all necessary handles for your smart contract
 
 **_For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)_**
 
