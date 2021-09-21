@@ -107,8 +107,9 @@ namespace.express("post", "/submit-port", submitPort);
 
 This file consist of two important methods `setup()` and `execute()` which are called by the node while running the KOII task.
 
-1. The `setup()` method should be used to register endpoints on express app `
-2. The `execute()` method is the main function which is also called by the node executing the Task
+1. The `setup()` method should be used to register endpoints on the webserver [Example](https://github.com/koii-network/koi-task-standard/blob/7966a8a9e3bc35eff2435726d6f008a382200e84/src/attention/executable.js#L78)
+2. The `execute()` method is the root function which will be called by the node as it processes the Task [Example](https://github.com/koii-network/koi-task-standard/blob/7966a8a9e3bc35eff2435726d6f008a382200e84/src/attention/executable.js#L218)
+3. A third (optional) method, which is not executed by the node unless programmed inside of `execute()` is the Audit function, which can be used to define a slashing behaviour for bad actors.  [Example](https://github.com/koii-network/koi-task-standard/blob/7966a8a9e3bc35eff2435726d6f008a382200e84/src/attention/executable.js#L697)
 
 ## Deployment
 The easiest way to get started is to copy this repository exactly, which will let you use the built-in commands.
