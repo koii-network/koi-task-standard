@@ -21,30 +21,34 @@ Each Koii Task receives it's own namespace and runtime on a node, including
 * a customizeable REST API (powered by express.js)
 * a Redis cache
 * external interactions via Axios 
+* a filesystem store
 * APIs to sign and encrypt payloads using either RSA or ECDSA key pairs
 
 Nodes can run as many tasks in parallel as they want, and receive rewards based on the their ability to provide competitive results that pass verification by other nodes. Desktop clients will be released in the future to provide better control for CPU and i/o management for different tasks.
 
-## How to create KOII tasks:
+# How to create KOII tasks:
 
 KOII tasks consists of two vital parts
 
 1. A smart contract
 2. `Executable.js`
 
-#### Smart Contract
+## Smart Contract
 
-**_This smart contract is different from KOII main contract_**. This smart contract will have all the state data related to that particular KOII task. The smart contract consist of an
+This smart contract will have all the state data related to that particular KOII task. The smart contract consist of an
 
 1. **_initial state_** which acts a starting point to your KOII tasks state.
 2. **_index.js_** Provides all necessary handles for your smart contract
 
-**_For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)_**
+Each contract is first stored on decentralized storage, and then registered to the Koii network by setting a bounty in the main Koii contract. This introduces the offering into the marketplace, and provides a reward that will be unlocked when the task is successfully completed.
 
-#### Actual KOII Task
+## Building the Executable
+Each executable file is a self-contained web-server, and runs tasks as if it were deployed to a hosting solution like Heroku or AWS Lambda. Each task has access to a number of supported toolkits, which can be initialized using the `setup()` function, and implemented in the `execute()` function.
+
+### Supported Namespace Toolkit
 
 The code for KOII task should be written inside `executable.js`.
-This file has access to a `namespace` object via **_dependency injection_** which has several useful API including:
+This file has access to a `namespace` object via **_dependency injection_** which has several useful APIs including:
 
 1. `koi-sdk`
 2. `smartWeave`
@@ -56,16 +60,17 @@ Here are the detail of each component of namespace:
 
 ##### **_KOII-SDK_**
 
-KOII-SDK is accessible via `tools` object, Please refer to [KOII_SDK](https://github.com/koii-network/tools) for documentation and usage details.
+The [Koii SDK](https://github.com/koii-network/tools) is accessible via `tools` object, Please refer to [the official docs here for supported interactions and key pair management tips](https://github.com/koii-network/tools).
 
 ##### **_Smart Weave_**
 
-SmartWeave is used to interact with smart contract on arweave and is accessible via `smartWeave` object .
+SmartWeave is used to interact with other smart contracts and Koii Tasks stored on Arweave and is accessible via `smartWeave` object.
+
 **_For more information on Arweave Smart contract visit [SmartWeave](https://github.com/ArweaveTeam/SmartWeave)_**
 
 #### redis
 
-KOII task namespace also has a redis wrapper to interact with redis. Redis must be installed in order to use this wrapper. Each Task has its own `namespaceId` prepended to all the keys in redis.
+Each Koii task namespace also has a redis wrapper for high-speed term key:value storage. Redis must be installed in order to use this wrapper. Each Task has its own `namespaceId` prepended to all the keys in redis.
 
 This API exposes two methods in order to communicate with Redis.
 
@@ -79,8 +84,7 @@ For example if you call `redisSet("Hello","world)` you can get it by calling `re
 
 #### filesystem(fs)
 
-The KOII task namespace also have a fs module exposed in it.
-this module can be called as
+The KOII task namespace also has an fs module exposed to it.
 
 ```js
 await namespace.fs("readFile", filename, options);
@@ -90,15 +94,16 @@ The first parameter to `namespace.fs` is the function name from [fs.promise modu
 
 #### Express:
 
-In some types of KOII task you want to expose some endpoint in order to receive data from outside world, like for example in case of attention game we need to receive the PoRT(proof of real Traffic) from the end user, so to serve this purpose express API comes to the play.
-
-So in order to serve an endpoint via express app.
+In some types of KOII task you want to expose some endpoint in order to receive data from outside world. As an example, the daily Koii Attention Tracking Task requires nodes to receive the PoRT (Proofs of Real Traffic) from the end user, which can be implemented in only one line.
 
 ```js
-namespace.express(method, path, callback);
+// Format: namespace.express(method, path, callback);
+
+// Example
+namespace.express("post", "/submit-port", submitPort);
 ```
 
-in setup function
+### Handling the Setup Function
 
 This file consist of two important methods `setup()` and `execute()` which are called by the node while running the KOII task.
 
@@ -106,8 +111,9 @@ This file consist of two important methods `setup()` and `execute()` which are c
 2. The `execute()` method is the main function which is also called by the node executing the Task
 
 ## Deployment
+The easiest way to get started is to copy this repository exactly, which will let you use the built-in commands.
 
-#### Contracts
+### Contracts
 
 `yarn deploy [contract]`
 
@@ -116,18 +122,18 @@ Examples:
 - `yarn deploy koi`
 - `yarn deploy attention`
 
-#### Executable File
+### Executable File
 
 `yarn deploy_executable`
 
-## Testing Contract
+## Testing Your Contract
 
 `yarn build`
 
 - `node test/attention.test.js path/to/wallet.json`
 - `node test/koi.test.js `
 
-## Testing Executable
+## Testing Your Executable
 
 `yarn build`
 
