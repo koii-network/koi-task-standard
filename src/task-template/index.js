@@ -2,19 +2,10 @@
 
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
-import rankPrepDistribution from "./rank";
-import batchAction from "./batchAction";
-import proposeSlash from "./propose_slash";
-import registerExecutableId from "./register_executable_id";
-import migratePreRegister from "./migrate_pre_register";
+
 const handlers = [
   submitDistribution,
-  audit,
-  rankPrepDistribution,
-  batchAction,
-  proposeSlash,
-  registerExecutableId,
-  migratePreRegister
+  audit
 ];
 
 export async function handle(state, action) {
