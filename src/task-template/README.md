@@ -1,7 +1,8 @@
 <h1 align="center">Template Task</h1>
 <p align="center">
- <img align="center" height=512px src="../../diagram/attention_diagram.jpg?raw=true"></a>
+ <img align="center" height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
 </p>
+
 This folder contains a template of the main features of a Koii Task. See the full docs in the parent folder for more information.
 
 To register a new task, use the process below.
