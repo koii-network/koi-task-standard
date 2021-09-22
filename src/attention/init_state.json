@@ -52747,6 +52747,12 @@
   },
   "reputation": {},
   "blacklist": [],
+  "validContractSrcsB64": [
+    "STh4Z3EzMzYxcXBSOF9EdnFjR3BrQ1lBVVRNa3R5QWd2a202a0doSnpFUQ",
+    "TlRFcFA5Y3JJLWZkODMtUm1HYXV4U2pHalJRWm5Ddm0xWTVmYnhJVVpoYw",
+    "NDZwZlVIaVRkbElma3NWbXRCV080eWMxdVh0bUN2dnItSExPb3BSczJHbw",
+    "cl9pYmVPVEhKVzhNY0p2aXZQSmpIeGpNd2tZZkFLUmpzLUxqQWVhQmNMYw"
+  ],
   "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
   "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"
 }
