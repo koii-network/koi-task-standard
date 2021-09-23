@@ -67,6 +67,13 @@ async function someMethod(_req, res) {
 }
 
 /*
+  bounty request api
+*/
+function getTask () {
+  let response = 'https://app.getstorecat.com:8888/api/v1/bounty/get'
+  return response
+}
+/*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
