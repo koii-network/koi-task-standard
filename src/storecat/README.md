@@ -1,4 +1,4 @@
-<h1 align="center">Template Task</h1>
+<h1 align="center">Storecat Scraping Task</h1>
 <p align="center">
  <img align="center" height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
 </p>
