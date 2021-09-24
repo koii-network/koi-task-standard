@@ -102,6 +102,7 @@ function getId(_req, res) {
 async function getNft(req, res) {
   try {
     const id = req.query.id;
+    tools.assertTxId(id);
     let attentionState;
 
     // Get NFT state
