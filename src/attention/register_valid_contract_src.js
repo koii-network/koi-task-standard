@@ -1,4 +1,4 @@
-export default async function registerValidContractSrc(state, action) {
+export default function registerValidContractSrc(state, action) {
   const caller = action.caller;
   const input = action.input;
   const contractSrc = input.contractSrc;
