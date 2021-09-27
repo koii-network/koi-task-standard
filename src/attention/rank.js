@@ -78,7 +78,8 @@ export default async function rankPrepDistribution(state) {
     attentionScore[key] = distribution[key].length;
     totalAttention += distribution[key].length;
   }
-  const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
+  const rewardPerAttention =
+    totalAttention !== 0 ? 1000000 / totalAttention : 0;
   // Distributing Reward to owners
   const distributionReward = {};
   Object.keys(distribution).map((nft) => {
