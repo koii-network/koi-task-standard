@@ -9,8 +9,8 @@ export default function transfer(state, action) {
     throw new ContractError("Invalid inputs");
   if (typeof target !== "string")
     throw new ContractError("Invalid input format");
-  if (target.length !== 43) {
-    throw new ContractError("Address should have 43 characters");
+  if (target.length !== 43 && target.indexOf(" ") >= 0) {
+    throw new ContractError("Address should have 43 characters and no space");
   }
   if (balances[caller] < qty) {
     throw new ContractError(

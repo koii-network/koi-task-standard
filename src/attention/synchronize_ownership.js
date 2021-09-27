@@ -19,7 +19,12 @@ export default async function syncOwnership(state, action) {
         const nftState = await SmartWeave.contracts.readContractState(nft);
         const owners = {};
         for (let owner in nftState.balances) {
-          if (nftState.balances[owner] > 0)
+          if (
+            nftState.balances[owner] > 0 &&
+            typeof owner === "string" &&
+            owner.length === 43 &&
+            !(owner.indexOf(" ") >= 0)
+          )
             owners[owner] = nftState.balances[owner];
         }
         state.nfts[nft] = owners;
@@ -34,7 +39,12 @@ export default async function syncOwnership(state, action) {
       const owners = {};
       const nftState = await SmartWeave.contracts.readContractState(txId);
       for (let owner in nftState.balances) {
-        if (nftState.balances[owner] > 0)
+        if (
+          nftState.balances[owner] > 0 &&
+          typeof owner === "string" &&
+          owner.length === 43 &&
+          !(owner.indexOf(" ") >= 0)
+        )
           owners[owner] = nftState.balances[owner];
       }
       state.nfts[txId] = owners;

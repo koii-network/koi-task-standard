@@ -31,7 +31,8 @@ export default async function migratePreRegister(state) {
           if (
             nftState.balances[owner] > 0 &&
             typeof owner === "string" &&
-            owner.length === 43
+            owner.length === 43 &&
+            !(owner.indexOf(" ") >= 0)
           )
             owners[owner] = nftState.balances[owner];
         }

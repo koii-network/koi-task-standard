@@ -11,6 +11,8 @@ export default async function registerTask(state, action) {
   if (!taskTxId || !taskName) throw new ContractError("Invalid inputs");
   if (typeof taskTxId !== "string" || typeof taskName !== "string")
     throw new ContractError("Invalid inputs format");
+  if (!(caller in balances) || balances[caller] < 1)
+    throw new ContractError("you do not have enough koi");
   if (koiReward && balances[caller] < koiReward + 1)
     throw new ContractError("Your Balance is not enough");
   const txId = state.tasks.find((task) => task.txId === taskTxId);
@@ -19,6 +21,7 @@ export default async function registerTask(state, action) {
   }
   // Required to start caching this task state in kohaku
   await SmartWeave.contracts.readContractState(taskTxId);
+  --balances[caller]; // burn 1 koi per registration
   koiReward
     ? (state.tasks.push({
         owner: caller,
