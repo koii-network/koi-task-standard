@@ -55,7 +55,9 @@ const RESPONSE_INTERNAL_ERROR = 500;
 
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 let ports = {};
-const REALTIME_PORTS_OFFSET = 120;
+const REALTIME_PORTS_OFFSET = 86400;
+const REALTIME_PORTS_CHECK_OFFSET = 1600
+
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -275,7 +277,7 @@ async function service(state, block) {
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
 }
-setInterval(checkViews, REALTIME_PORTS_OFFSET * 1000); //converting seconds to ms
+setInterval(checkViews, REALTIME_PORTS_CHECK_OFFSET  * 1000); //converting seconds to ms
 
 async function submitVote(req, res) {
   const submission = req.body;
