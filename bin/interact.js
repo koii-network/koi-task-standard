@@ -13,13 +13,22 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-//const contractId = "MzoFJIJMkpxF7shMfSUGfrgtA54g2cTFoeNgKDp6pgg";
-const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
+//const contractId = "BroAWSa9f-qAcf6j9TqGwWxxff6V1SeRfsZdY4PUg_4"; // attention contract
+const contractId = "SZCmcvdDbl1ndY11qTVOxkd9_cTzfHHp3DkM_xuLLuY"; // koii Contract
 // const input = {
 //   function: "cleanPreRegister"
 // };
 // const input = {
+//   function: "syncOwnership",
+//   txId: "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"
+// };
+// const input = {
 //   function: "migratePreRegister"
+// };
+// const input = {
+//   function: "transfer",
+//   target: "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
+//   qty: 1
 // };
 // const input = {
 //   function: "rankPrepDistribution"
@@ -27,13 +36,13 @@ const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
 const input = {
   function: "registerTask",
   taskName: "Attention_Game",
-  taskTxId: "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"
+  taskTxId: "BroAWSa9f-qAcf6j9TqGwWxxff6V1SeRfsZdY4PUg_4"
 };
 // const input = {
 //   function: "burnKoi",
-//   contractId: "OL2tdYPfhIFItavcxwF-1GIRLAVQNRPFE3HaaTpZYEY",
+//   contractId: "bHcuebblye6FLTLA3-2uK_1BUJNdxdTFxUECpi5kupk",
 //   contentType: "nft",
-//   contentTxId: "3RyJjofjhKnkNUffMv2pEBbLuxBmMqRsLCHA5qFFmwc"
+//   contentTxId: "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"
 // };
 // const input = {
 //   function: "mint",

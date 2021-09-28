@@ -5,6 +5,8 @@ import batchAction from "./batchAction";
 import proposeSlash from "./propose_slash";
 import registerExecutableId from "./register_executable_id";
 import migratePreRegister from "./migrate_pre_register";
+import syncOwnership from "./synchronize_ownership";
+import registerValidContractSrc from "./register_valid_contract_src";
 const handlers = [
   submitDistribution,
   audit,
@@ -12,7 +14,9 @@ const handlers = [
   batchAction,
   proposeSlash,
   registerExecutableId,
-  migratePreRegister
+  migratePreRegister,
+  syncOwnership,
+  registerValidContractSrc
 ];
 
 export async function handle(state, action) {

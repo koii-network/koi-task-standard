@@ -1,6 +1,10 @@
 export default async function distributeReward(state) {
   const balances = state.balances;
   const tasks = state.tasks;
+  const distributionStatus = state.distributionBlock;
+  if (distributionStatus > SmartWeave.block.height) {
+    throw new ContractError("Distribution already happen");
+  }
   const koiiTask = tasks.filter((task) => "bounty" in task);
 
   await Promise.allSettled(
@@ -57,6 +61,6 @@ export default async function distributeReward(state) {
       }
     })
   );
-
+  state.distributionBlock = SmartWeave.block.height + 720;
   return { state };
 }
