@@ -31,11 +31,10 @@ async function main() {
     txInfos = txInfos.concat(await fetchTransactions(chunk));
   }
 
-  //const validNfts = txInfos.map((tx) => tx.node.id);
-  //const missingNfts = nfts.filter((nftId) => !validNfts.includes(nftId));
-
   await sortTransactions(arweave, txInfos);
   const sortedTxIds = txInfos.map((tx) => tx.node.id);
+
+  // const missingNfts = nfts.filter((nftId) => !sortedTxIds.includes(nftId));
 
   fs.writeFileSync("sortedTxIds.json", JSON.stringify(sortedTxIds));
   console.log("done");
