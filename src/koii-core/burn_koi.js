@@ -16,7 +16,7 @@ export default async function burnKoi(state, action) {
     throw new ContractError("Inputs should have 43 characters");
   }
   if (!(caller in balances) || balances[caller] < 1)
-    throw new ContractError("you do not have enough koi");
+    throw new ContractError("You do not have enough koi");
   const data = preRegisterDatas.find(
     (preRegisterData) =>
       preRegisterData.content[contentType] === contentTxId &&
