@@ -1,9 +1,98 @@
 const axios = require("axios");
+const Arweave = require("arweave");
+const { arrayToHex } = require("smartweave/lib/utils");
+const fs = require("fs");
+
+const CHUNK_SIZE = 2000;
+const MAX_REQUEST = 100;
+
+const arweave = Arweave.init({
+  host: "arweave.net",
+  port: 443,
+  protocol: "https",
+  timeout: 60000,
+  logging: false
+});
 
 async function main() {
-  const res = await axios.get("https://mainnet.koii.live/attention");
-  const nfts = Object.values(res.data.nfts).flat();
+  let nfts = Object.values(
+    (await axios.get("http://localhost:8887/attention")).data.nfts
+  ).flat();
+
+  // Clean NFT list
+  nfts = nfts.filter(
+    (ele, pos) =>
+      nfts.indexOf(ele) === pos && typeof ele === "string" && ele.length === 43
+  );
+
+  let txInfos = [];
+  for (let i = 0; i < nfts.length; i += CHUNK_SIZE) {
+    const chunk = nfts.slice(i, i + CHUNK_SIZE);
+    txInfos = txInfos.concat(await fetchTransactions(chunk));
+  }
+
+  //const validNfts = txInfos.map((tx) => tx.node.id);
+  //const missingNfts = nfts.filter((nftId) => !validNfts.includes(nftId));
+
+  await sortTransactions(arweave, txInfos);
+  const sortedTxIds = txInfos.map((tx) => tx.node.id);
+
+  fs.writeFileSync("sortedTxIds.json", JSON.stringify(sortedTxIds));
   console.log("done");
+}
+
+async function fetchTransactions(ids) {
+  let transactions = await getNextPage(ids);
+  let txInfos = transactions.edges;
+
+  while (transactions.pageInfo.hasNextPage) {
+    const cursor = transactions.edges[MAX_REQUEST - 1].cursor;
+    transactions = await getNextPage(ids, cursor);
+    txInfos = txInfos.concat(transactions.edges);
+  }
+  return txInfos;
+}
+
+async function getNextPage(ids, after) {
+  const afterQuery = after ? `,after:"${after}"` : "";
+  const query = `query {
+    transactions(ids: ${JSON.stringify(
+      ids
+    )}, sort: HEIGHT_ASC, first: ${MAX_REQUEST}${afterQuery}) {
+      pageInfo { hasNextPage }
+      edges {
+        node {
+          id
+          owner { address }
+          recipient
+          tags { name value }
+          block { height id timestamp }
+          fee { winston }
+          quantity { winston }
+          parent { id }
+        }
+        cursor
+      }
+    }
+  }`;
+  const res = await arweave.api.post("graphql", { query });
+  return res.data.data.transactions;
+}
+
+// Exact copy of smartweave implementation
+async function sortTransactions(arweave, txInfos) {
+  const addKeysFuncs = txInfos.map((tx) => addSortKey(arweave, tx));
+  await Promise.all(addKeysFuncs);
+  txInfos.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+}
+async function addSortKey(arweave, txInfo) {
+  const { node } = txInfo;
+  const blockHashBytes = arweave.utils.b64UrlToBuffer(node.block.id);
+  const txIdBytes = arweave.utils.b64UrlToBuffer(node.id);
+  const concatted = arweave.utils.concatBuffers([blockHashBytes, txIdBytes]);
+  const hashed = arrayToHex(await arweave.crypto.hash(concatted));
+  const blockHeight = `000000${node.block.height}`.slice(-12);
+  txInfo.sortKey = `${blockHeight},${hashed}`;
 }
 
 main();
