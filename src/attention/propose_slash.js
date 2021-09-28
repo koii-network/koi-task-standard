@@ -1,8 +1,8 @@
 export default async function proposeSlash(state, action) {
   const votes = state.votes;
   const validBundlers = state.validBundlers;
-  const blackList = state.blackList;
   const receiptTxId = action.input.receiptTxId;
+  const blacklist = state.blacklist;
   if (
     SmartWeave.block.height > state.task.close ||
     SmartWeave.block.height < state.task.open + 660
@@ -64,7 +64,7 @@ export default async function proposeSlash(state, action) {
   if (index > -1) {
     validBundlers.splice(index, 1);
   }
-  blackList.push(bundlerAddress);
+  blacklist.push(bundlerAddress);
   if (vote.userVote === "true") {
     suspectedVote.yays += 1;
   }

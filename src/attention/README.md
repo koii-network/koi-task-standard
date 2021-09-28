@@ -118,8 +118,6 @@ Creator publish a content and register in the attention contract for attention. 
   currentTask.proposedData.push(payload);
   return { state };
 }
-
-
 ```
 
 #### Audit
@@ -159,8 +157,6 @@ export default function audit(state, action) {
   votes.push(vote);
   return { state };
 }
-
-
 ```
 
 #### BatchAction
@@ -172,12 +168,12 @@ export default function audit(state, action) {
 ```bash
 export default async function batchAction(state, action) {
   const votes = state.votes;
-  const blackList = state.blacklist;
+  const blacklist = state.blacklist;
   const caller = action.caller;
   const input = action.input;
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
-  if (blackList.includes(caller)) {
+  if (blacklist.includes(caller)) {
     throw new ContractError("Not valid");
   }
   if (
@@ -231,7 +227,6 @@ export default async function batchAction(state, action) {
   vote.bundlers[caller].push(batchTxId);
   return { state };
 }
-
 ```
 
 #### ProposeSlash
@@ -244,7 +239,7 @@ export default async function batchAction(state, action) {
 export default async function proposeSlash(state, action) {
   const votes = state.votes;
   const validBundlers = state.validBundlers;
-  const blackList = state.blackList;
+  const blacklist = state.blacklist;
   const receiptTxId = action.input.receiptTxId;
   if (
     SmartWeave.block.height > state.task.close ||
@@ -307,7 +302,7 @@ export default async function proposeSlash(state, action) {
   if (index > -1) {
     validBundlers.splice(index, 1);
   }
-  blackList.push(bundlerAddress);
+  blacklist.push(bundlerAddress);
   if (vote.userVote === "true") {
     suspectedVote.yays += 1;
   }
@@ -317,7 +312,6 @@ export default async function proposeSlash(state, action) {
   votersList.push(voterAddress);
   return { state };
 }
-
 ```
 
 #### MigratePreRegister
@@ -328,9 +322,10 @@ export default async function proposeSlash(state, action) {
 
 ```bash
 export default async function migratePreRegister(state) {
-  const nfts = state.nfts;
   const mainContactId = state.koiiContract;
+  const validContractSrc = state.validContractSrcsB64;
   const contractId = SmartWeave.contract.id;
+  const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
@@ -340,28 +335,37 @@ export default async function migratePreRegister(state) {
       "nft" in preRegisterNft.content &&
       preRegisterNft.contractId === contractId
   );
-  const registeredNfts = Object.values(nfts).reduce(
-    (acc, curVal) => acc.concat(curVal),
-    []
+  const nfts = Object.keys(state.nfts);
+  const nonMigratedNfts = preRegisterNfts.filter(
+    (nft) => !nfts.includes(nft.content.nft)
   );
-
-  for (let i = 0; i < preRegisterNfts.length; i++) {
-    if (!registeredNfts.includes(preRegisterNfts[i].content.nft)) {
-      if (preRegisterNfts[i].owner in nfts) {
-        {
-          nfts[preRegisterNfts[i].owner].push(preRegisterNfts[i].content.nft);
+  await Promise.allSettled(
+    nonMigratedNfts.map(async (nft) => {
+      const txInfo = await SmartWeave.unsafeClient.transactions.get(
+        nft.content.nft
+      );
+      const contractSrcTag = txInfo.tags.find((tag) => tag.name === tagNameB64);
+      const owners = {};
+      if (validContractSrc.includes(contractSrcTag.value)) {
+        const nftState = await SmartWeave.contracts.readContractState(
+          nft.content.nft
+        );
+        for (let owner in nftState.balances) {
+          if (
+            nftState.balances[owner] > 0 &&
+            typeof owner === "string" &&
+            owner.length === 43 &&
+            !(owner.indexOf(" ") >= 0)
+          )
+            owners[owner] = nftState.balances[owner];
         }
-      } else {
-        nfts[preRegisterNfts[i].owner] = [preRegisterNfts[i].content.nft];
+        state.nfts[nft.content.nft] = owners;
       }
-    }
-  }
+    })
+  );
 
   return { state };
 }
-
-
-
 ```
 
 #### Rank
@@ -411,6 +415,7 @@ export default async function rankPrepDistribution(state) {
   });
   // deduplicate PoRts
   const distribution = {};
+  const registeredNfts = Object.keys(nfts);
   await Promise.allSettled(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -426,18 +431,18 @@ export default async function rankPrepDistribution(state) {
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
       const parseDataKeys = Object.keys(parseData);
-      const registeredNfts = Object.values(nfts).reduce(
-        (acc, curVal) => acc.concat(curVal),
-        []
-      );
-      parseDataKeys.map(async (key) => {
-        if (registeredNfts.includes(key)) {
-          scoreSum += [...new Set(parseData[key])].length;
-          !(key in distribution)
-            ? (distribution[key] = [...new Set(parseData[key])])
-            : (distribution[key] = [
-                ...new Set(distribution[key].concat(parseData[key]))
-              ]);
+      parseDataKeys.map(async (nftId) => {
+        if (registeredNfts.includes(nftId)) {
+          const balances = Object.values(nfts[nftId]);
+          const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
+          if (sumNftBalances > 0) {
+            scoreSum += [...new Set(parseData[nftId])].length;
+            !(nftId in distribution)
+              ? (distribution[nftId] = [...new Set(parseData[nftId])])
+              : (distribution[nftId] = [
+                  ...new Set(distribution[nftId].concat(parseData[nftId]))
+                ]);
+          }
         }
       });
       score[proposedPayload.distributer] = scoreSum;
@@ -450,30 +455,25 @@ export default async function rankPrepDistribution(state) {
     attentionScore[key] = distribution[key].length;
     totalAttention += distribution[key].length;
   }
-  const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
+  const rewardPerAttention =
+    totalAttention !== 0 ? 1000000 / totalAttention : 0;
   // Distributing Reward to owners
   const distributionReward = {};
-  await Promise.allSettled(
-    Object.keys(distribution).map(async (nftId) => {
-      const state = await SmartWeave.contracts.readContractState(nftId);
-      const balances = Object.values(state.balances).reduce(
-        (preValue, curValue) => preValue + curValue
-      );
-
-      for (let address in state.balances) {
-        if (typeof address === "string" && address.length === 43) {
-          let rewardPer = state.balances[address] / balances;
-          if (rewardPer !== 0 && !isNaN(rewardPer)) {
-            address in distributionReward
-              ? (distributionReward[address] +=
-                  distribution[nftId].length * rewardPerAttention * rewardPer)
-              : (distributionReward[address] =
-                  distribution[nftId].length * rewardPerAttention * rewardPer);
-          }
-        }
+  Object.keys(distribution).map((nft) => {
+    const balances = Object.values(nfts[nft]);
+    const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
+    for (let owner in nfts[nft]) {
+      let rewardPer = nfts[nft][owner] / balancesSum;
+      if (rewardPer > 0 && !isNaN(rewardPer)) {
+        owner in distributionReward
+          ? (distributionReward[owner] +=
+              distribution[nft].length * rewardPerAttention * rewardPer)
+          : (distributionReward[owner] =
+              distribution[nft].length * rewardPerAttention * rewardPer);
       }
-    })
-  );
+    }
+  });
+
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,
@@ -496,7 +496,69 @@ export default async function rankPrepDistribution(state) {
   );
   return { state };
 }
+```
 
+#### SyncOwnership
+
+- takes `txId` as input. The input can be a single string or an Array.
+
+- It updates the ownership of the NFTs.
+
+```bash
+ export default async function syncOwnership(state, action) {
+  const caller = action.caller;
+  const input = action.input;
+  const validContractSrc = state.validContractSrcsB64;
+  const txId = input.txId;
+  if (!txId) throw new ContractError("Invalid inputs");
+  if (!Array.isArray(txId) && typeof txId !== "string")
+    throw new ContractError("Invalid inputs format");
+  if (Array.isArray(txId) && caller !== state.owner)
+    throw new ContractError("Owner can only update in batch");
+
+  if (Array.isArray(txId)) {
+    // filler the nfts registered only to avoid reading invalid nft contract
+    const validNfts = txId.filter((nft) =>
+      Object.keys(state.nfts).includes(nft)
+    );
+    await Promise.allSettled(
+      validNfts.map(async (nft) => {
+        const nftState = await SmartWeave.contracts.readContractState(nft);
+        const owners = {};
+        for (let owner in nftState.balances) {
+          if (
+            nftState.balances[owner] > 0 &&
+            typeof owner === "string" &&
+            owner.length === 43 &&
+            !(owner.indexOf(" ") >= 0)
+          )
+            owners[owner] = nftState.balances[owner];
+        }
+        state.nfts[nft] = owners;
+      })
+    );
+  }
+  if (typeof txId === "string") {
+    const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64
+    const txInfo = await SmartWeave.unsafeClient.transactions.get(txId);
+    const contractSrcTag = txInfo.tags.find((tag) => tag.name === tagNameB64);
+    if (validContractSrc.includes(contractSrcTag.value)) {
+      const owners = {};
+      const nftState = await SmartWeave.contracts.readContractState(txId);
+      for (let owner in nftState.balances) {
+        if (
+          nftState.balances[owner] > 0 &&
+          typeof owner === "string" &&
+          owner.length === 43 &&
+          !(owner.indexOf(" ") >= 0)
+        )
+          owners[owner] = nftState.balances[owner];
+      }
+      state.nfts[txId] = owners;
+    }
+  }
+  return { state };
+}
 
 ```
 

@@ -1,11 +1,11 @@
 export default async function batchAction(state, action) {
   const votes = state.votes;
-  const blackList = state.blacklist;
+  const blacklist = state.blacklist;
   const caller = action.caller;
   const input = action.input;
   const batchTxId = input.batchFile;
   const voteId = input.voteId;
-  if (blackList.includes(caller)) {
+  if (blacklist.includes(caller)) {
     throw new ContractError("Not valid");
   }
   if (
