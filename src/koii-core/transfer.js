@@ -5,9 +5,9 @@ export default function transfer(state, action) {
   const target = input.target;
   const qty = input.qty;
 
-  if (!target || isNaN(qty) || qty <= 0 || caller === target)
+  if (!target || !qty || caller === target)
     throw new ContractError("Invalid inputs");
-  if (typeof target !== "string" || typeof qty !== "number")
+  if (typeof target !== "string" || typeof qty !== "number" || qty <= 0)
     throw new ContractError("Invalid input format");
   if (target.length !== 43 || target.indexOf(" ") >= 0) {
     throw new ContractError("Address should have 43 characters and no space");
