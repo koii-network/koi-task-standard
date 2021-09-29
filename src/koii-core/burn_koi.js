@@ -17,14 +17,7 @@ export default async function burnKoi(state, action) {
   }
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("You do not have enough koi");
-  const data = preRegisterDatas.find(
-    (preRegisterData) =>
-      preRegisterData.content[contentType] === contentTxId &&
-      preRegisterData.contractId === contractId
-  );
-  if (data !== undefined) {
-    throw new ContractError("Content is already registered");
-  }
+
   --balances[caller]; // burn 1 koi per registration
   owner !== undefined
     ? preRegisterDatas.push({

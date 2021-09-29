@@ -16,7 +16,7 @@ const arweave = Arweave.init({
 
 async function main() {
   let nfts = Object.values(
-    (await axios.get("http://localhost:8887/attention")).data.nfts
+    (await axios.get("https://mainnet.koii.live/attention")).data.nfts
   ).flat();
 
   // Clean NFT list
