@@ -9,7 +9,7 @@ const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
   KOII_CONTRACT_ID
 );
-
+console.log('args', process.argv)
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
