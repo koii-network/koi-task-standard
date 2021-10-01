@@ -1,0 +1,18 @@
+{
+  "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
+  "name": "task_name",
+  "votes": [],
+  "task": {
+    "open": 770649,
+    "close": 771369,
+    "proposedPayloads": [
+      {
+        "block": 770649,
+        "proposedData": [],
+        "isRanked": false
+      }
+    ]
+  },
+  "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
+  "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"
+}
