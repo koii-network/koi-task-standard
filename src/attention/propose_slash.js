@@ -3,6 +3,7 @@ export default async function proposeSlash(state, action) {
   const validBundlers = state.validBundlers;
   const receiptTxId = action.input.receiptTxId;
   const blacklist = state.blacklist;
+  //55
   if (
     SmartWeave.block.height > state.task.close ||
     SmartWeave.block.height < state.task.open + 660

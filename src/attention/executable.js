@@ -45,9 +45,9 @@ const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if fi
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
 
-const OFFSET_PROPOSE_PORTS_END = 300; // 25;
-const OFFSET_BATCH_VOTE_SUBMIT = 600; // 50;
-const OFFSET_PROPOSE_SLASH = 660; // 55;
+const OFFSET_PROPOSE_PORTS_END = 300; // 300; //25
+const OFFSET_BATCH_VOTE_SUBMIT = 600; //50
+const OFFSET_PROPOSE_SLASH = 660; //55
 
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
@@ -56,8 +56,7 @@ const RESPONSE_INTERNAL_ERROR = 500;
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 let ports = {};
 const REALTIME_PORTS_OFFSET = 86400;
-const REALTIME_PORTS_CHECK_OFFSET = 1600
-
+const REALTIME_PORTS_CHECK_OFFSET = 1600;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -277,7 +276,7 @@ async function service(state, block) {
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   if (canDistributeReward(state)) await distribute();
 }
-setInterval(checkViews, REALTIME_PORTS_CHECK_OFFSET  * 1000); //converting seconds to ms
+setInterval(checkViews, REALTIME_PORTS_CHECK_OFFSET * 1000); //converting seconds to ms
 
 async function submitVote(req, res) {
   const submission = req.body;

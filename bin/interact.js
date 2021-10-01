@@ -13,9 +13,11 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-//const contractId = "BroAWSa9f-qAcf6j9TqGwWxxff6V1SeRfsZdY4PUg_4"; // attention contract
-//const contractId = "SZCmcvdDbl1ndY11qTVOxkd9_cTzfHHp3DkM_xuLLuY"; // koii Contract
-const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
+//const contractId = "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"; // test attention contract
+const contractId = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"; // test koii Contract
+//const contractId = "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"; // attention in production
+//const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"; // koii Contract in production
+//const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
 // const input = {
 //   function: "cleanPreRegister"
 // };
@@ -26,24 +28,24 @@ const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
 // const input = {
 //   function: "migratePreRegister"
 // };
-const input = {
-  function: "transfer",
-  target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
-  qty: 1
-};
+// const input = {
+//   function: "transfer",
+//   target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
+//   qty: 1
+// };
 // const input = {
 //   function: "rankPrepDistribution"
 // };
-// const input = {
-//   function: "registerTask",
-//   taskName: "Attention_Game",
-//   taskTxId: "BroAWSa9f-qAcf6j9TqGwWxxff6V1SeRfsZdY4PUg_4"
-// };
+const input = {
+  function: "registerTask",
+  taskName: "Attention_Game",
+  taskTxId: "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"
+};
 // const input = {
 //   function: "burnKoi",
-//   contractId: "bHcuebblye6FLTLA3-2uK_1BUJNdxdTFxUECpi5kupk",
+//   contractId: "COrDoKhQwlplYWgShhTF4YpFtFQRFJ1gunZGCx36Xa0",
 //   contentType: "nft",
-//   contentTxId: "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"
+//   contentTxId: "hAvOySHDaBo9KE4m3cvDhlC4yUh_VjR6rhUIS2c47bs"
 // };
 // const input = {
 //   function: "mint",

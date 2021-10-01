@@ -11,13 +11,19 @@ const arweave = Arweave.init({
 const main = async () => {
   const nftFromFile = JSON.parse(
     fs.readFileSync(
-      "/Users/makdasebhatu/Desktop/edge/koi-task-moddifed/newNfts.json"
+      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/newNftStructureB.json"
     )
   );
+  const invalidNftsFs = JSON.parse(
+    fs.readFileSync(
+      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/invalidNfts.json"
+    )
+  );
+
   const nftsSaved = Object.keys(nftFromFile);
   const sortedNfts = JSON.parse(
     fs.readFileSync(
-      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/sortedTxIds.json"
+      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/sortedTxIds.json"
     )
   );
   const fixedNfts = JSON.parse(
@@ -29,6 +35,7 @@ const main = async () => {
   const invalidNfts = [];
   const newNftStructure = {};
   for (let i = 0; i < sortedNfts.length; ++i) {
+    if (invalidNftsFs.includes(sortedNfts[i])) continue;
     if (fixedArray.includes(sortedNfts[i])) {
       //console.log(sortedNfts[i]);
       newNftStructure[fixedNfts[sortedNfts[i]]] =
@@ -54,8 +61,11 @@ const main = async () => {
     }
     console.log("Done", i + 1, "/", sortedNfts.length);
   }
-  fs.writeFileSync("newNftStructure.json", JSON.stringify(newNftStructure));
-  //fs.writeFileSync("notFound.json", JSON.stringify(notFound));
-  fs.writeFileSync("invalidNfts.json", JSON.stringify(invalidNfts));
+  fs.writeFileSync(
+    "dist/newNftStructureC.json",
+    JSON.stringify(newNftStructure)
+  );
+
+  fs.writeFileSync("invalidNfts1.json", JSON.stringify(invalidNfts));
 };
 main();

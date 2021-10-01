@@ -2,8 +2,8 @@ const fs = require("fs");
 const axios = require("axios");
 
 const main = async () => {
-  const balances = (await axios.get("https://mainnet.koii.live/state")).data
-    .balances;
+  const data = (await axios.get("https://mainnet.koii.live/state")).data;
+  const balances = data.balances;
   const newBalances = {};
   const addresses = Object.keys(balances);
   for (let i = 0; i < addresses.length; ++i) {
@@ -16,6 +16,7 @@ const main = async () => {
     }
     console.log("Done", i + 1, "/", addresses.length);
   }
-  fs.writeFileSync("dist/balances.json", JSON.stringify(newBalances));
+
+  fs.writeFileSync("dist/balances1.json", JSON.stringify(newBalances));
 };
 main();
