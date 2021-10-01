@@ -2,19 +2,19 @@
 # yarn lockfile v1
 
 
-"@_koi/kohaku@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.npmjs.org/@_koi/kohaku/-/kohaku-1.0.9.tgz#638fdb8ac2000a1039ef2107595df1fc0b55fbdc"
-  integrity sha512-v8Ctc8weggqrSeGOKD660wsKFYctrNhQCL20Ki2NFESMrin26oOUW96HdnYFkK9MX5PoYgyZtN505fxrc/7gaw==
+"@_koi/kohaku@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.npmjs.org/@_koi/kohaku/-/kohaku-1.0.11.tgz#c598255194bc89d1fa2619187320ec54ec1f7e40"
+  integrity sha512-No6Hush8nbpTh/kOotT2TfZJtSEm9r87fLcsEC9lavtq3qROHpnLQ/oRHA2cUhAyby5ni80wdvkSYxeJd2uKgQ==
   dependencies:
     smartweave "^0.4.41"
 
-"@_koi/sdk@^2.3.3":
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.3.3.tgz#4ee2b82b3b2c2202a7be70bd4599f5acdced055c"
-  integrity sha512-+u8Sp3uvBLb+IWJI3lYdfqwoleGZ+0BB8vCaa3WgFTkqKJvAbglpXuztNWaIr8TwRJUGBfu5ok1H2qNqtpxupA==
+"@_koi/sdk@^2.4.0-beta.2":
+  version "2.4.0-beta.2"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.4.0-beta.2.tgz#b9d7462148b9f7f9d9e330d0a74d1ddc2d04a0bc"
+  integrity sha512-FKJUxy+F8MXGFSUxxI5bi7Hh9M0zeURyWcfPb8kVBn2jiVVv1ITnwjI4iy1jqpjIPqvYE7QEx+TVBPnT/Vr/iQ==
   dependencies:
-    "@_koi/kohaku" "^1.0.9"
+    "@_koi/kohaku" "^1.0.11"
     arweave "^1.10.13"
     axios "^0.21.1"
     dotenv "^9.0.2"

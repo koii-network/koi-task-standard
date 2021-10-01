@@ -86,11 +86,15 @@ function getId(_req, res) {
 async function getNft(req, res) {
   try {
     const id = req.query.id;
-    tools.assertTxId(id);
-    let attentionState;
+
+    if (!tools.validArId(id)) {
+      res.status(400).send({ error: "invalid txId" });
+      return;
+    }
 
     // Get NFT state
     let nftState;
+    let attentionState;
     if (Object.prototype.hasOwnProperty.call(nftStateMapCache, id)) {
       nftState = nftStateMapCache[id];
       if (nftState.updatedAttention) return res.status(200).send(nftState);
