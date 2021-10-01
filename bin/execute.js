@@ -94,16 +94,7 @@ class Namespace {
   }
   async fs(method, path, ...args) {
     const basePath = "namespace/" + this.taskTxId;
-    try {
-      try {
-        await fsPromises.access("namespace");
-      } catch {
-        await fsPromises.mkdir("namespace");
-      }
-      await fsPromises.access(basePath);
-    } catch {
-      await fsPromises.mkdir(basePath);
-    }
+    await fsPromises.mkdir(basePath, { recursive: true }).catch(() => {});
     return fsPromises[method](`${basePath}/${path}`, ...args);
   }
   express(method, path, callback) {
