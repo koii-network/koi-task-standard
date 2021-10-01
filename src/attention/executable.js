@@ -35,12 +35,14 @@ const OFFSET_PROPOSE_SLASH = 660; //55
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
+const REDIS_KEY = process.env["SERVICE_URL"];
 
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
-let ports = {};
 const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
+const PORT_LOGS_CACHE_OFFSET = 300
 
+let ports = {};
 let lastBlock = 0;
 let lastLogClose = 0;
 
@@ -53,10 +55,11 @@ let hasSubmitBatch = false;
 let hasAudited = false;
 
 let nftStateMapCache = {};
+let portsLog = [];
 
 const logsInfo = {
-  filename: "ports.log",
-  oldFilename: "old-ports.log"
+  redisPortsKey: `${REDIS_KEY}-ports`,
+  lockedRedisPortsKey: `${REDIS_KEY}-lockedPorts`
 };
 
 function setup(_init_state) {
@@ -69,6 +72,22 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
+    initializePorts();
+  }
+}
+
+setInterval(async () => {
+ 
+  await namespace.redisSet(logsInfo.redisPortsKey, JSON.stringify(portsLog));
+}, PORT_LOGS_CACHE_OFFSET* 1000);
+
+async function initializePorts() {
+  try {
+    let redisPorts = await namespace.redisGet(logsInfo.redisPortsKey);
+    if (redisPorts) portsLog = JSON.parse(redisPorts);
+  } catch (e) {
+    portsLog = [];
+    console.log(e);
   }
 }
 
@@ -459,11 +478,12 @@ async function submitPort(req, res) {
       }
     };
     addPortView(data, wallet);
-    await namespace.fs(
-      "appendFile",
-      logsInfo.filename,
-      JSON.stringify(payload) + "\n"
-    );
+    portsLog.push(payload);
+    // await namespace.fs(
+    //   "appendFile",
+    //   logsInfo.redisPortsKey,
+    //   JSON.stringify(payload) + "\n"
+    // );
 
     res.status(RESPONSE_OK).json({
       message: "Port Received"
@@ -479,8 +499,13 @@ function difficultyFunction(hash) {
 }
 
 async function servePortCache(_req, res) {
-  await namespace.fs("appendFile", logsInfo.oldFilename, "");
-  const logs = await namespace.fs("readFile", logsInfo.oldFilename, "utf8");
+  try {
+    let ports = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
+    if (ports) return res.send("ports");
+    return res.send("");
+  } catch (e) {
+    res.send("");
+  }
   res.send(logs);
 }
 
@@ -525,7 +550,7 @@ async function proposePorts() {
 }
 
 async function PublishPoRT() {
-  const portLogs = await readRawLogs();
+  const portLogs = await getLockedPorts();
   const finalLogs = {};
   for (let i = 0; i < portLogs.length; i++) {
     const e = portLogs[i];
@@ -538,22 +563,22 @@ async function PublishPoRT() {
   return finalLogs;
 }
 
-async function readRawLogs() {
-  let fullLogs;
+async function getLockedPorts() {
+  let logs;
   try {
-    fullLogs = await namespace.fs("readFile", logsInfo.oldFilename);
+    logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
+    logs = JSON.parse(logs);
   } catch {
+    console.log(e);
     console.error("Error reading raw logs");
     return [];
   }
-  const logs = fullLogs.toString().split("\n");
   const prettyLogs = [];
   for (const log of logs) {
     try {
       if (log && !(log === " ") && !(log === "")) {
-        const logJson = JSON.parse(log);
-        if (!verifySignature(logJson)) return;
-        prettyLogs.push(logJson);
+        if (!verifySignature(log)) return;
+        prettyLogs.push(log);
       }
     } catch (err) {
       console.error("Error verifying log signature:", err);
@@ -596,21 +621,13 @@ async function verifySignature(log) {
 
 async function lockPorts() {
   try {
-    await namespace.fs("rm", logsInfo.oldFilename);
+    let redisPorts = await namespace.redisGet(logsInfo.redisPortsKey);
+    await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
+    portsLog = [];
+    return;
   } catch (e) {
-    console.log("Unable to remove old ports file");
-  }
-  let data = "";
-  try {
-    data = await namespace.fs("readFile", logsInfo.filename);
-  } catch (e) {
-    console.log("Unable to read previous port file");
-  }
-  try {
-    await namespace.fs("writeFile", logsInfo.oldFilename, data);
-    await namespace.fs("writeFile", logsInfo.filename, "");
-  } catch (e) {
-    console.error("Error writing ports files");
+    console.log(e);
+    console.log("Unable to lock Ports ", e);
   }
 }
 
@@ -962,7 +979,12 @@ async function auditPort(txId, url) {
   const response = await axios.get(`${url}/${namespace.taskTxId}/cache`);
   const fullLogs = response.data;
   const prettyLogs = [];
-  const logs = fullLogs.toString().split("\n");
+  const logs = [];
+  try {
+    logs = JSON.parse(fullLogs);
+  } catch (e) {
+    logs = [];
+  }
   for (const log of logs) {
     try {
       if (log && !(log === " ") && !(log === "")) {
