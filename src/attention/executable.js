@@ -24,23 +24,6 @@ const arweave = Arweave.init({
   logging: false
 });
 
-const CORRUPTED_NFT = [
-  "Y4txuRg9l1NXRSDZ7FDtZQiTl7Zv7RQ9impMzoReGDU",
-  "dyLgErL7IJfSH2fU9mWBhfSdb5HOUnU2lOPq5y1twho",
-  "54ExppB1akUYllW4BZhmYx679eMtiA6tSTsrJ8IDCOo",
-  "EpbbtviT8nqC3aCflyfM5sWf0lAq6YsFW6K48T1tAbU",
-  "oOyREnD872TBaOnXDMNG5CM3QYYpqJTNuSe4sL2sCfc",
-  "YYSb3A_VYwgs1l_MEXnhNvKmdIwTBQ2GYBpJa2qNOU0",
-  "O7whFDUayKrP4bKdKAwYRWw1qwJ4-5alQWVoSAI1i_4",
-  "UI2V5Yyd4dW-1KdJnpVZDNFZ3l6reZ4nrKKg_YCN_Wo",
-  "X63sVIgKjL7lf3CBCDRjUrkXEkm8QulJw1mVpc6LHKc",
-  "kpgshM3-SZbK2ChO3lJIPQ84hS90_FnJBNsSr9n3QHA",
-  "A268M4BDGF6y-wA7MZ-1G5QAyfj8Hufcop4fVHu0SFc",
-  "s52dZCUGSTF2Sl3QF2f1Egyv-BCSrqulkMk3fXT9EOw",
-  "QIrGq8VqcqbGEV2QHQOyS7TjMm_Xpa_5mww3edn0TUs",
-  "ZTZDEPuAfh2Nsv9Ad46zJ4k6coHbZcmi7BcJgt126wU"
-];
-
 const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
