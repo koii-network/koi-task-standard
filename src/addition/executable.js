@@ -17,6 +17,8 @@ const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
 
+const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
+
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
@@ -27,6 +29,7 @@ const arweave = Arweave.init({
 
 // Define system constants
 const FOO = "BAR";
+const portNumber = process.env.portNumber || 8887;
 
 // You can also access and store files locally
 const logsInfo = {
@@ -45,26 +48,26 @@ function setup(_init_state) {
  * Awaitable rate limit
  * @returns
  */
- function rateLimit() {
-  return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
+function rateLimit() {
+  return new Promise((resolve) => setTimeout(resolve, 5000));
 }
 
 // Define the execution block (this will be triggered after setup is complete)
 async function execute(_init_state) {
+  console.log('starting')
   let state, block;
   for (;;) {
-    await rateLimit();
     try {
-      [nodes] = await getRegisteredNodeList();
+      // await setTimeout(async () => {
+      //   console.log('ss')
+      // }, 5000)
+      await rateLimit()
+      console.log('still running')
+      // [nodes] = await getRegisteredNodeList();
       // auditNodes();
     } catch (e) {
-      console.error("Error while fetching node list", e);
+      console.error("Error", e);
       continue;
-    }
-    try {
-      await (namespace.app ? service : witness)(state, block);
-    } catch (e) {
-      console.error("Error while addition task:", e);
     }
   }
 }
@@ -78,19 +81,18 @@ async function helloWorld(_req, res) {
 
 async function getSum(_req, res) {
   let sum;
+  _req.params.first = parseInt(_req.params.first);
+  _req.params.second = parseInt(_req.params.second);
   if (_req.params.first && _req.params.second) {
-    sum = _req.params.first + _req.params.second;
+    sum = _req.params.first  + _req.params.second;
   } else {
-    sum = [_req.params.first, _req.params.second]
+    sum = [_req.params.first, _req.params.second];
   }
-  res
-    .status(200)
-    .type("application/json")
-    .send(sum);
+  res.json({"result" : sum });
 }
 
 async function getRegisteredNodeList () {
-  return ["https://localhost:3000"]
+  return ["https://localhost" + portNumber]
 }
 
 // /*
