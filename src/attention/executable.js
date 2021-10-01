@@ -108,13 +108,13 @@ async function getNft(req, res) {
 
     // Get NFT state
     let nftState;
-    if (nftStateMapCache.hasOwnProperty(id)) {
+    if (Object.prototype.hasOwnProperty.call(nftStateMapCache, id)) {
       nftState = nftStateMapCache[id];
       if (nftState.updatedAttention) return res.status(200).send(nftState);
       attentionState = await tools.getState(namespace.taskTxId);
     } else {
       attentionState = await tools.getState(namespace.taskTxId);
-      const nfts = Object.values(attentionState.nfts).flat();
+      const nfts = Object.keys(attentionState.nfts);
       if (!nfts.includes(id))
         return res.status(404).send(id + " is not registered");
       try {
@@ -122,9 +122,8 @@ async function getNft(req, res) {
       } catch (e) {
         if (e.type !== "TX_NOT_FOUND") throw e;
         nftState = {
-          owner: Object.keys(attentionState.nfts).find((owner) =>
-            attentionState.nfts[owner].includes(id)
-          ),
+          owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
+          balances: attentionState.nfts[id],
           tags: ["missing"],
           createdAt: DEFAULT_CREATED_AT
         };
@@ -156,40 +155,51 @@ async function getNftSummaries(req, res) {
     // Initialize NFT map
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
+
+    //const nftMap = {};
+    // const days = PERIOD_MAP[req.query.period];
+    // if (days) {
+    //   // Filter by day
+    //   const unixNow = Math.round(Date.now() / 1000);
+    //   const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
+    //   for (const owner in attentionState.nfts) {
+    //     for (const id of attentionState.nfts[owner]) {
+    //       if (CORRUPTED_NFT.includes(id)) continue;
+    //       if (
+    //         !(id in nftStateMapCache) || // If not in cache, assume valid age
+    //         oldestValidTimestamp <
+    //           (parseInt(nftStateMapCache[id].createdAt) || DEFAULT_CREATED_AT)
+    //       )
+    //         nftMap[id] = {
+    //           id,
+    //           owner,
+    //           attention: 0,
+    //           reward: 0
+    //         };
+    //     }
+    //   }
+    // } else
+    //   for (const owner in attentionState.nfts)
+    //     for (const id of attentionState.nfts[owner]) {
+    //       if (CORRUPTED_NFT.includes(id)) continue;
+    //       nftMap[id] = {
+    //         id,
+    //         owner,
+    //         attention: 0,
+    //         reward: 0
+    //       };
+    //     }
+
     const nftMap = {};
 
-    const days = PERIOD_MAP[req.query.period];
-    if (days) {
-      // Filter by day
-      const unixNow = Math.round(Date.now() / 1000);
-      const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
-      for (const owner in attentionState.nfts) {
-        for (const id of attentionState.nfts[owner]) {
-          if (CORRUPTED_NFT.includes(id)) continue;
-          if (
-            !(id in nftStateMapCache) || // If not in cache, assume valid age
-            oldestValidTimestamp <
-              (parseInt(nftStateMapCache[id].createdAt) || DEFAULT_CREATED_AT)
-          )
-            nftMap[id] = {
-              id,
-              owner,
-              attention: 0,
-              reward: 0
-            };
-        }
-      }
-    } else
-      for (const owner in attentionState.nfts)
-        for (const id of attentionState.nfts[owner]) {
-          if (CORRUPTED_NFT.includes(id)) continue;
-          nftMap[id] = {
-            id,
-            owner,
-            attention: 0,
-            reward: 0
-          };
-        }
+    for (const id in attentionState.nfts) {
+      nftMap[id] = {
+        id,
+        owners: Object.keys(attentionState.nfts[id]),
+        attention: 0,
+        reward: 0
+      };
+    }
 
     // Calculate attention and rewards
     for (const report of attentionReport) {
