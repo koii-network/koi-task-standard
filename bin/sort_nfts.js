@@ -16,18 +16,40 @@ const arweave = Arweave.init({
 
 async function main() {
   let nfts = Object.values(
-    (await axios.get("http://localhost:8887/attention")).data.nfts
+    (await axios.get("https://mainnet.koii.live/attention")).data.nfts
   ).flat();
+  const narccis1 = JSON.parse(
+    fs.readFileSync("/Users/makdasebhatu/Downloads/NFT_IDS_1_100.txt")
+  );
+  const narccis2 = JSON.parse(
+    fs.readFileSync("/Users/makdasebhatu/Downloads/NFT_IDS_2_100.txt")
+  );
+  const narccis3 = JSON.parse(
+    fs.readFileSync("/Users/makdasebhatu/Downloads/NFT_IDS_3_100.txt")
+  );
+  const narccis4 = JSON.parse(
+    fs.readFileSync("/Users/makdasebhatu/Downloads/NEW_NFTID_ARR_100.txt")
+  );
+  let combinedArray = [];
 
+  combinedArray.push(
+    ...nfts,
+    ...narccis1,
+    ...narccis2,
+    ...narccis3,
+    ...narccis4
+  );
   // Clean NFT list
-  nfts = nfts.filter(
+  combinedArray = combinedArray.filter(
     (ele, pos) =>
-      nfts.indexOf(ele) === pos && typeof ele === "string" && ele.length === 43
+      combinedArray.indexOf(ele) === pos &&
+      typeof ele === "string" &&
+      ele.length === 43
   );
 
   let txInfos = [];
-  for (let i = 0; i < nfts.length; i += CHUNK_SIZE) {
-    const chunk = nfts.slice(i, i + CHUNK_SIZE);
+  for (let i = 0; i < combinedArray.length; i += CHUNK_SIZE) {
+    const chunk = combinedArray.slice(i, i + CHUNK_SIZE);
     txInfos = txInfos.concat(await fetchTransactions(chunk));
   }
 
@@ -36,7 +58,7 @@ async function main() {
 
   // const missingNfts = nfts.filter((nftId) => !sortedTxIds.includes(nftId));
 
-  fs.writeFileSync("sortedTxIds.json", JSON.stringify(sortedTxIds));
+  fs.writeFileSync("dist/sortedTxIds.json", JSON.stringify(sortedTxIds));
   console.log("done");
 }
 

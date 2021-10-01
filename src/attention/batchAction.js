@@ -8,6 +8,7 @@ export default async function batchAction(state, action) {
   if (blacklist.includes(caller)) {
     throw new ContractError("Not valid");
   }
+  //55 & 50
   if (
     SmartWeave.block.height > state.task.open + 660 ||
     SmartWeave.block.height < state.task.open + 600

@@ -21,7 +21,8 @@ export default async function cleanPreRegister(state) {
       const registeredNfts = Object.keys(contractState.nfts);
       state.preRegisterDatas = state.preRegisterDatas.filter(
         (preRegisterData) =>
-          !registeredNfts.includes(preRegisterData.content.nft)
+          !registeredNfts.includes(preRegisterData.content.nft) &&
+          preRegisterData.insertBlock + 720 > SmartWeave.block.height
       );
     })
   );

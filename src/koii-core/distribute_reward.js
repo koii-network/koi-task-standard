@@ -61,6 +61,6 @@ export default async function distributeReward(state) {
       }
     })
   );
-  state.distributionBlock = SmartWeave.block.height + 720;
+  state.distributionBlock = SmartWeave.block.height + 600;
   return { state };
 }

@@ -1,7 +1,6 @@
 export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
-  const score = state.reputation;
   const blacklist = state.blacklist;
   const prepareDistribution = task.prepareDistribution;
   const attentionReport = task.attentionReport;
@@ -68,7 +67,9 @@ export default async function rankPrepDistribution(state) {
           }
         }
       });
-      score[proposedPayload.distributer] = scoreSum;
+      proposedPayload.distributer in state.reputation
+        ? (state.reputation[proposedPayload.distributer] += scoreSum)
+        : (state.reputation[proposedPayload.distributer] = scoreSum);
     })
   );
 
@@ -78,8 +79,7 @@ export default async function rankPrepDistribution(state) {
     attentionScore[key] = distribution[key].length;
     totalAttention += distribution[key].length;
   }
-  const rewardPerAttention =
-    totalAttention !== 0 ? 1000000 / totalAttention : 0;
+  const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
   const distributionReward = {};
   Object.keys(distribution).map((nft) => {
@@ -106,7 +106,7 @@ export default async function rankPrepDistribution(state) {
   attentionReport.push(attentionScore);
   // Open a new game
   task.open = SmartWeave.block.height;
-  task.close = SmartWeave.block.height + 720; // 60
+  task.close = SmartWeave.block.height + 720; //60
   const newTask = {
     block: task.open,
     proposedData: [],

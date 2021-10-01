@@ -99,18 +99,18 @@ async function main() {
   //   attentionContractId
   // );
 
-  const attentionInput3 = {
-    function: "rankPrepDistribution"
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput3,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput3 = {
+  //   function: "rankPrepDistribution"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput3,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   // const koiInput = {
   //   function: "registerTask",
@@ -152,28 +152,27 @@ async function main() {
   //   walletAddress,
   //   attentionContractId
   // );
-  // const koiInput2 = {
-  //   function: "cleanPreRegister"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   koiSrc,
-  //   wallet,
-  //   koiInput2,
-  //   smartest.readContractState(koiContractId),
-  //   walletAddress,
-  //   koiContractId
-  // );
+  const koiInput2 = {
+    function: "cleanPreRegister"
+  };
+  await smartest.interactWrite(
+    arweave,
+    koiSrc,
+    wallet,
+    koiInput2,
+    smartest.readContractState(koiContractId),
+    walletAddress,
+    koiContractId
+  );
 
   console.log(
     "Koi final state: ",
-    smartest.readContractState(koiContractId),
-    "Attention final state:",
-    smartest.readContractState(attentionContractId)
+    smartest.readContractState(koiContractId)
+    // "Attention final state:",
+    // smartest.readContractState(attentionContractId)
   );
-  const state = smartest.readContractState(attentionContractId);
-  console.log(state.task.attentionReport);
-  console.log(state.task.prepareDistribution);
+  const state = smartest.readContractState(koiContractId);
+  console.log(state.preRegisterDatas);
 }
 
 main().then(() => {
