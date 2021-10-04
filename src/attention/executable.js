@@ -40,7 +40,7 @@ const REDIS_KEY = process.env["SERVICE_URL"];
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
-const PORT_LOGS_CACHE_OFFSET = 300
+const PORT_LOGS_CACHE_OFFSET = 300;
 
 let ports = {};
 let lastBlock = 0;
@@ -55,6 +55,7 @@ let hasSubmitBatch = false;
 let hasAudited = false;
 
 let nftStateMapCache = {};
+let cachedNftIds = [];
 let portsLog = [];
 
 const logsInfo = {
@@ -77,9 +78,8 @@ function setup(_init_state) {
 }
 
 setInterval(async () => {
- 
   await namespace.redisSet(logsInfo.redisPortsKey, JSON.stringify(portsLog));
-}, PORT_LOGS_CACHE_OFFSET* 1000);
+}, PORT_LOGS_CACHE_OFFSET * 1000);
 
 async function initializePorts() {
   try {
@@ -101,7 +101,19 @@ async function root(_req, res) {
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
-
+function getNFTSiblings(nftState) {
+  const id = nftState.id;
+  const index = cachedNftIds.findIndex((nftId) => nftId == id);
+  if (index > 0 && index < cachedNftIds.length - 1) {
+    nftState.nextNFT = cachedNftIds[index + 1];
+    nftState.prevNFT = cachedNftIds[index - 1];
+  } else if (index > 0) {
+    nftState.prevNFT = cachedNftIds[index - 1];
+  } else if (index == 0 && cachedNftIds.length > 1) {
+    nftState.nextNFT = cachedNftIds[index + 1];
+  }
+  return nftState;
+}
 async function getNft(req, res) {
   try {
     const id = req.query.id;
@@ -116,7 +128,11 @@ async function getNft(req, res) {
     let attentionState;
     if (Object.prototype.hasOwnProperty.call(nftStateMapCache, id)) {
       nftState = nftStateMapCache[id];
-      if (nftState.updatedAttention) return res.status(200).send(nftState);
+      if (nftState.updatedAttention) {
+        nftState = getNFTSiblings(nftState);
+        res.status(200).send(nftState);
+        return;
+      }
       attentionState = await tools.getState(namespace.taskTxId);
     } else {
       attentionState = await tools.getState(namespace.taskTxId);
@@ -136,6 +152,7 @@ async function getNft(req, res) {
       }
       nftState.id = id;
       nftStateMapCache[id] = nftState;
+      cachedNftIds.push(id);
     }
 
     // Calculate attention and rewards
@@ -149,6 +166,7 @@ async function getNft(req, res) {
         nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
       }
     }
+    nftState = getNFTSiblings(nftState);
     res.status(200).send(nftState);
   } catch (e) {
     console.error("getNft error:", e.message);
