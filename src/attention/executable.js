@@ -100,7 +100,20 @@ async function root(_req, res) {
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
-
+function getNFTSiblings(nftState) {
+  const id = nftState.id;
+  let cachedNftIds = Object.keys(nftStateMapCache)
+  const index = cachedNftIds.findIndex((nftId) => nftId == id);
+  if (index > 0 && index < cachedNftIds.length - 1) {
+    nftState.nextNFT = cachedNftIds[index + 1];
+    nftState.prevNFT = cachedNftIds[index - 1];
+  } else if (index > 0) {
+    nftState.prevNFT = cachedNftIds[index - 1];
+  } else if (index == 0 && cachedNftIds.length > 1) {
+    nftState.nextNFT = cachedNftIds[index + 1];
+  }
+  return nftState;
+}
 async function getNft(req, res) {
   try {
     const id = req.query.id;
@@ -115,7 +128,11 @@ async function getNft(req, res) {
     let attentionState;
     if (Object.prototype.hasOwnProperty.call(nftStateMapCache, id)) {
       nftState = nftStateMapCache[id];
-      if (nftState.updatedAttention) return res.status(200).send(nftState);
+      if (nftState.updatedAttention) {
+        nftState = getNFTSiblings(nftState);
+        res.status(200).send(nftState);
+        return;
+      }
       attentionState = await tools.getState(namespace.taskTxId);
     } else {
       attentionState = await tools.getState(namespace.taskTxId);
@@ -148,6 +165,7 @@ async function getNft(req, res) {
         nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
       }
     }
+    nftState = getNFTSiblings(nftState);
     res.status(200).send(nftState);
   } catch (e) {
     console.error("getNft error:", e.message);
