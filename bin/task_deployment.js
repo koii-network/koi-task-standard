@@ -15,35 +15,26 @@ const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
 const contractName = process.argv[2];
 if (!contractName) throw new Error("task name not specified");
-
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 const src = fs.readFileSync(`dist/${contractName}.js`);
 const state = fs.readFileSync(`src/${contractName}/init_state.json`);
 const EXE_PATH = `src/${contractName}/executable.js`;
 
 async function main() {
-  const id = await smartweave.createContract(arweave, wallet, src, state);
-  console.log(`Deployed ${contractName} Contract with ID ${id}`);
-  await checkTxConfirmation(id, contractName);
-  console.log(`Deployed Executable with ID ${id}`);
   const executableId = await deployExecutable();
-  await registerExecutable(id, executableId);
-  fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
-}
-
-async function registerExecutable(contractId, executableId) {
-  const input = {
-    function: "registerExecutableId",
-    executableId: executableId
-  };
-  console.log("Writing", input.function);
-  const txId = await smartweave.interactWrite(
+  console.log(`Deployed Executable with ID ${executableId}`);
+  await checkTxConfirmation(executableId, "executable");
+  const initState = JSON.parse(state);
+  initState.executableId = executableId;
+  const id = await smartweave.createContract(
     arweave,
     wallet,
-    contractId,
-    input
+    src,
+    JSON.stringify(initState)
   );
-  await checkTxConfirmation(txId, "register executable");
+  console.log(`Deployed ${contractName} Contract with ID ${id}`);
+  await checkTxConfirmation(id, contractName);
+  fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
 }
 
 async function deployExecutable() {
@@ -56,7 +47,6 @@ async function deployExecutable() {
 
   // Deploy the Executable file
   await arweave.transactions.post(tx);
-  await checkTxConfirmation(tx.id, "executable");
   return tx.id;
 }
 
