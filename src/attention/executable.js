@@ -55,7 +55,6 @@ let hasSubmitBatch = false;
 let hasAudited = false;
 
 let nftStateMapCache = {};
-let cachedNftIds = [];
 let portsLog = [];
 
 const logsInfo = {
@@ -103,6 +102,7 @@ function getId(_req, res) {
 }
 function getNFTSiblings(nftState) {
   const id = nftState.id;
+  let cachedNftIds = Object.keys(nftStateMapCache)
   const index = cachedNftIds.findIndex((nftId) => nftId == id);
   if (index > 0 && index < cachedNftIds.length - 1) {
     nftState.nextNFT = cachedNftIds[index + 1];
@@ -152,7 +152,6 @@ async function getNft(req, res) {
       }
       nftState.id = id;
       nftStateMapCache[id] = nftState;
-      cachedNftIds.push(id);
     }
 
     // Calculate attention and rewards
