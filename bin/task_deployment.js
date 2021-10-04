@@ -2,6 +2,7 @@ const fs = require("fs");
 const Arweave = require("arweave");
 const smartweave = require("smartweave");
 require("dotenv").config();
+
 const arweave = Arweave.init({
   host: "arweave.net",
   port: 443,
@@ -12,23 +13,25 @@ const arweave = Arweave.init({
 
 const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
-const contract = process.argv[2];
-if (!contract) throw new Error("task name not specified");
+const contractName = process.argv[2];
+if (!contractName) throw new Error("task name not specified");
 
 const wallet = JSON.parse(fs.readFileSync(walletPath));
-const src = fs.readFileSync(`dist/${contract}.js`);
-const state = fs.readFileSync(`src/${contract}/init_state.json`);
-const EXE_PATH = `src/${contract}/executable.js`;
-async function deploy() {
+const src = fs.readFileSync(`dist/${contractName}.js`);
+const state = fs.readFileSync(`src/${contractName}/init_state.json`);
+const EXE_PATH = `src/${contractName}/executable.js`;
+
+async function main() {
   const id = await smartweave.createContract(arweave, wallet, src, state);
-  console.log(`Deployed ${contract} Contract with ID ${id}`);
-  await checkTxConfirmation(id, contract);
+  console.log(`Deployed ${contractName} Contract with ID ${id}`);
+  await checkTxConfirmation(id, contractName);
   console.log(`Deployed Executable with ID ${id}`);
-  const executabeId = await deployExecutable();
-  await registerExecutable(id, executabeId);
+  const executableId = await deployExecutable();
+  await registerExecutable(id, executableId);
   fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
 }
-const registerExecutable = async (contractId, executableId) => {
+
+async function registerExecutable(contractId, executableId) {
   const input = {
     function: "registerExecutableId",
     executableId: executableId
@@ -41,9 +44,9 @@ const registerExecutable = async (contractId, executableId) => {
     input
   );
   await checkTxConfirmation(txId, "register executable");
-};
+}
 
-const deployExecutable = async () => {
+async function deployExecutable() {
   const exeSrc = fs.readFileSync(EXE_PATH, "utf8");
   let tx = await arweave.createTransaction({ data: exeSrc }, wallet);
   tx.addTag("Content-Type", "application/javascript");
@@ -55,7 +58,8 @@ const deployExecutable = async () => {
   await arweave.transactions.post(tx);
   await checkTxConfirmation(tx.id, "executable");
   return tx.id;
-};
+}
+
 async function checkTxConfirmation(txId, name) {
   console.log(`TxId: ${txId}\nWaiting for confirmation`);
   const start = Date.now();
@@ -79,4 +83,4 @@ async function sleepAsync(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-(async () => await deploy())();
+main();
