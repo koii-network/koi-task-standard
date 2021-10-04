@@ -40,7 +40,7 @@ const REDIS_KEY = process.env["SERVICE_URL"];
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
-const PORT_LOGS_CACHE_OFFSET = 300
+const PORT_LOGS_CACHE_OFFSET = 300;
 
 let ports = {};
 let lastBlock = 0;
@@ -77,9 +77,8 @@ function setup(_init_state) {
 }
 
 setInterval(async () => {
- 
   await namespace.redisSet(logsInfo.redisPortsKey, JSON.stringify(portsLog));
-}, PORT_LOGS_CACHE_OFFSET* 1000);
+}, PORT_LOGS_CACHE_OFFSET * 1000);
 
 async function initializePorts() {
   try {
@@ -162,50 +161,42 @@ async function getNftSummaries(req, res) {
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
 
-    //const nftMap = {};
-    // const days = PERIOD_MAP[req.query.period];
-    // if (days) {
-    //   // Filter by day
-    //   const unixNow = Math.round(Date.now() / 1000);
-    //   const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
-    //   for (const owner in attentionState.nfts) {
-    //     for (const id of attentionState.nfts[owner]) {
-    //       if (CORRUPTED_NFT.includes(id)) continue;
-    //       if (
-    //         !(id in nftStateMapCache) || // If not in cache, assume valid age
-    //         oldestValidTimestamp <
-    //           (parseInt(nftStateMapCache[id].createdAt) || DEFAULT_CREATED_AT)
-    //       )
-    //         nftMap[id] = {
-    //           id,
-    //           owner,
-    //           attention: 0,
-    //           reward: 0
-    //         };
-    //     }
-    //   }
-    // } else
-    //   for (const owner in attentionState.nfts)
-    //     for (const id of attentionState.nfts[owner]) {
-    //       if (CORRUPTED_NFT.includes(id)) continue;
-    //       nftMap[id] = {
-    //         id,
-    //         owner,
-    //         attention: 0,
-    //         reward: 0
-    //       };
-    //     }
-
     const nftMap = {};
+    const days = PERIOD_MAP[req.query.period];
+    if (days) {
+      // Filter by day
+      const unixNow = Math.round(Date.now() / 1000);
+      const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
 
-    for (const id in attentionState.nfts) {
-      nftMap[id] = {
-        id,
-        owners: Object.keys(attentionState.nfts[id]),
-        attention: 0,
-        reward: 0
-      };
-    }
+      // Iterate from newest to oldest nfts
+      const nftIds = Object.keys(attentionState.nfts);
+      for (let i = nftIds.length - 1; i >= 0; --i) {
+        const id = nftIds[i];
+        if (kohaku.isContractCached(id)) {
+          const nftCachedState = JSON.parse(kohaku.readContractCache(id));
+          if (
+            oldestValidTimestamp >
+            (parseInt(nftCachedState.createdAt) || DEFAULT_CREATED_AT)
+          )
+            break;
+        }
+        nftMap[id] = {
+          id,
+          owners: Object.keys(attentionState.nfts[id]),
+          attention: 0,
+          reward: 0
+        };
+      }
+    } // Skip filtering if day is not set
+    else
+      for (const id in attentionState.nfts) {
+        nftMap[id] = {
+          id,
+          owners: Object.keys(attentionState.nfts[id]),
+          attention: 0,
+          reward: 0
+        };
+      }
 
     // Calculate attention and rewards
     for (const report of attentionReport) {
@@ -214,7 +205,6 @@ async function getNftSummaries(req, res) {
         totalAttention += report[nftId];
         if (nftId in nftMap) nftMap[nftId].attention += report[nftId];
       }
-
       const rewardPerAttention = 1000 / totalAttention;
       for (const nftId in report)
         if (nftId in nftMap)
@@ -223,9 +213,7 @@ async function getNftSummaries(req, res) {
 
     // Sort and send nft summaries
     const nftSummaryArr = Object.values(nftMap);
-    nftSummaryArr.sort((a, b) => {
-      return b.attention - a.attention;
-    });
+    nftSummaryArr.sort((a, b) => b.attention - a.attention);
     res.status(200).send(nftSummaryArr);
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
