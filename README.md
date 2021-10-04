@@ -74,10 +74,10 @@ Each Koii task namespace also has a redis wrapper for high-speed term key:value 
 
 This API exposes two methods in order to communicate with Redis.
 
-1. `redisGet(key,value)`
-2. `redisSet(key)`
+1. `redisSet(key,value)`
+2. `redisGet(key)`
 
-For example if you call `redisSet("Hello","world)` you can get it by calling `redisGet("Hello")` but behind the scenes it is actually adding namespace prefix with the key like so
+For example if you call `redisSet("Hello","world")` you can get it by calling `redisGet("Hello")` but behind the scenes it is actually adding namespace prefix with the key like so
 
 > `hello` will be stored as `09ea3bcd43hello`
 > This is done to isolate the KOII tasks data from others.
