@@ -570,10 +570,11 @@ async function PublishPoRT() {
 }
 
 async function getLockedPorts() {
-  let logs;
+  let logs=[];
   try {
     logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
     logs = JSON.parse(logs);
+    if(!logs) logs =[]
   } catch {
     console.log(e);
     console.error("Error reading raw logs");
