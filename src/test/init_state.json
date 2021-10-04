@@ -1,0 +1,24 @@
+{
+  "nfts": {
+    "iN6mUEOYKwFZ5EbNe5jbOEOuPiMZXFNVoUK4FXbrl0": {
+      "locked": false,
+      "owners": {
+        "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc": 5,
+        "cUIl3TcFZwe7rBmOhiuf_GZ9UIl8EPTFJ1rwhvzAVzq": 3
+      }
+    },
+    "EOuPiMZXFNVoUK4FXbriN6mUEOYKe5jbOl0wFZ5EbN": {
+      "locked": false,
+      "owners": {
+        "ewZFcT3lIUcqzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7": 5,
+        "UIl8EPTFJ1rwhvzAVzqcUIl3TcFZwe7rBmOhiuf_GZ9": 3
+      }
+    }
+  },
+  "validContractSrc": [
+    "TlRFcFA5Y3JJLWZkODMtUm1HYXV4U2pHalJRWm5Ddm0xWTVmYnhJVVpoYw"
+  ],
+  "task": {
+    "prepareDistribution": []
+  }
+}

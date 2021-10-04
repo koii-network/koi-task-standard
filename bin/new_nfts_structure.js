@@ -10,22 +10,12 @@ const arweave = Arweave.init({
 });
 const main = async () => {
   const nftFromFile = JSON.parse(
-    fs.readFileSync(
-      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/newNftStructureB.json"
-    )
+    fs.readFileSync("../dist/newNftStructureB.json")
   );
-  const invalidNftsFs = JSON.parse(
-    fs.readFileSync(
-      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/invalidNfts.json"
-    )
-  );
+  const invalidNftsFs = JSON.parse(fs.readFileSync("../dist/invalidNfts.json"));
 
   const nftsSaved = Object.keys(nftFromFile);
-  const sortedNfts = JSON.parse(
-    fs.readFileSync(
-      "/Users/makdasebhatu/Desktop/koi-contract/koi-task-standard/dist/sortedTxIds.json"
-    )
-  );
+  const sortedNfts = JSON.parse(fs.readFileSync("../dist/sortedTxIds.json"));
   const fixedNfts = JSON.parse(
     fs.readFileSync(
       "/Users/makdasebhatu/Desktop/clean-contract/contracts/utils/createNFT/matchedNfts.json"

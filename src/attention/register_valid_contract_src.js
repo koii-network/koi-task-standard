@@ -4,7 +4,7 @@ export default function registerValidContractSrc(state, action) {
   const contractSrc = input.contractSrc;
   if (caller !== state.owner)
     throw new ContractError("Owner only can register valid contract source");
-  if (contractSrc !== "string") throw new ContractError("Invalid input");
+  if (typeof contractSrc !== "string") throw new ContractError("Invalid input");
   if (contractSrc.length !== 43) throw new ContractError("Invalid format");
 
   const encodeContractSrc =
