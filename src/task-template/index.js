@@ -2,11 +2,9 @@
 
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
+import registerExecutableId from "./register_executable_id";
 
-const handlers = [
-  submitDistribution,
-  audit
-];
+const handlers = [submitDistribution, audit, registerExecutableId];
 
 export async function handle(state, action) {
   const handler = handlers.find((fn) => fn.name === action.input.function);

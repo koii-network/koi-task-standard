@@ -19,5 +19,13 @@ export default [
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/task-template/index.js",
+    output: {
+      file: "dist/task-template.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   }
 ];
