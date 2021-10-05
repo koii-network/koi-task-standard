@@ -16,11 +16,11 @@ export default async function migratePreRegister(state) {
   const nonMigratedNfts = preRegisterNfts.filter(
     (nft) => !nfts.includes(nft.content.nft)
   );
-  //deduplicate nftIds
   const nftIds = [];
   nonMigratedNfts.map((nft) => {
     nftIds.push(nft.content.nft);
   });
+  //deduplicate nftIds
   const uniqueNfts = [...new Set(nftIds)];
   const MAX_REQUEST = 100;
   const CHUNK_SIZE = 2000;
@@ -67,8 +67,10 @@ export default async function migratePreRegister(state) {
     return validContractSrc.includes(contractSrc.value);
   });
   await Promise.allSettled(
-    validTransactionIds.map(async (nft) => {
-      const nftState = await SmartWeave.contracts.readContractState(nft);
+    validTransactionIds.map(async (transaction) => {
+      const nftState = await SmartWeave.contracts.readContractState(
+        transaction.node.id
+      );
       if ("balances" in nftState) {
         const owners = {};
         for (let owner in nftState.balances) {
@@ -80,10 +82,9 @@ export default async function migratePreRegister(state) {
           )
             owners[owner] = nftState.balances[owner];
         }
-        state.nfts[nft] = owners;
+        state.nfts[transaction.node.id] = owners;
       }
     })
   );
-
   return { state };
 }
