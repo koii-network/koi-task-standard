@@ -27,10 +27,11 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
+let lastBlock = 0;
 
 // You can also access and store files locally
 const logsInfo = {
-  filename: "history.log"
+  filename: "history_storecat.log"
 };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
@@ -80,14 +81,9 @@ async function getAttentionStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
-      hasSubmittedPorts = false;
-      hasProposedSlash = false;
       hasRanked = false;
       hasDistributed = false;
       hasAudited = false;
-
-      for (const nftId in nftStateMapCache)
-        nftStateMapCache[nftId].updatedAttention = false;
     }
 
     lastLogClose = logClose;

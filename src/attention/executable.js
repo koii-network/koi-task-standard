@@ -102,7 +102,7 @@ function getId(_req, res) {
 }
 function getNFTSiblings(nftState) {
   const id = nftState.id;
-  let cachedNftIds = Object.keys(nftStateMapCache)
+  let cachedNftIds = Object.keys(nftStateMapCache);
   const index = cachedNftIds.findIndex((nftId) => nftId == id);
   if (index > 0 && index < cachedNftIds.length - 1) {
     nftState.nextNFT = cachedNftIds[index + 1];
@@ -570,11 +570,11 @@ async function PublishPoRT() {
 }
 
 async function getLockedPorts() {
-  let logs=[];
+  let logs = [];
   try {
     logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
     logs = JSON.parse(logs);
-    if(!logs) logs =[]
+    if (!logs) logs = [];
   } catch {
     console.log(e);
     console.error("Error reading raw logs");
