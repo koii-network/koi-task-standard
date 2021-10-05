@@ -70,6 +70,39 @@ function getTask() {
   let response = "https://app.getstorecat.com:8888/api/v1/bounty/get";
   return response;
 }
+async function getAttentionStateAndBlock() {
+  const state = await tools.getState(namespace.taskTxId);
+  let block = await tools.getBlockHeight();
+  if (block < lastBlock) block = lastBlock;
+
+  if (!state || !state.task) console.error("State or task invalid:", state);
+  const logClose = state.task.close;
+  if (logClose > lastLogClose) {
+    if (lastLogClose !== 0) {
+      console.log("Task updated, resetting trackers");
+      hasSubmittedPorts = false;
+      hasProposedSlash = false;
+      hasRanked = false;
+      hasDistributed = false;
+      hasAudited = false;
+
+      for (const nftId in nftStateMapCache)
+        nftStateMapCache[nftId].updatedAttention = false;
+    }
+
+    lastLogClose = logClose;
+  }
+
+  if (block > lastBlock)
+    console.log(
+      block,
+      "Searching for a task, ranking and prepare distribution in",
+      logClose - block,
+      "blocks"
+    );
+  lastBlock = block;
+  return [state, block];
+}
 async function service(state, block) {
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
