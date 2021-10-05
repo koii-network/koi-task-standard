@@ -24,11 +24,11 @@ async function main() {
   let state = JSON.parse(fs.readFileSync(`src/attention/init_state.json`));
 
   const input = {
-    function: "syncOwnership",
-    txId: [
-      "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ",
-      "37Uw2P_pSbYYshxl9ceIBGOHJuUtmBEc26nC8aPQr6c"
-    ]
+    function: "migratePreRegister"
+    // txId: [
+    //   "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ",
+    //   "37Uw2P_pSbYYshxl9ceIBGOHJuUtmBEc26nC8aPQr6c"
+    // ]
   };
   //console.log(state);
   state = await interactDryRun(
@@ -39,7 +39,7 @@ async function main() {
     state,
     walletAddress
   );
-  console.log(state.state.nfts);
+  console.log(state);
 }
 
 /**
