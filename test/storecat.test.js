@@ -25,10 +25,10 @@ async function main() {
   // Load storecat contract
   const storecatSrc = fs.readFileSync(`dist/storecat.js`, "utf8");
   const storecatContractId = "q2w3e5r7";
-  const attentionInitState = JSON.parse(
-    fs.readFileSync(`src/attention/init_state.json`)
+  const storecatInitState = JSON.parse(
+    fs.readFileSync(`src/storecat/init_state.json`)
   );
-  smartest.writeContractState(storecatContractId, attentionInitState);
+  smartest.writeContractState(storecatContractId, storecatInitState);
 
   // Load koii contract
   const taskSrc = fs.readFileSync(`dist/koi_task.js`, "utf8");
@@ -38,7 +38,7 @@ async function main() {
   );
   smartest.writeContractState(taskContractId, taskInitState);
 
-  const attentionInput = {
+  const storecatInput = {
     function: "batchAction",
     batchFile: "rivOhJyE70LVRNjH7jUWGEnMHZw88VZCMkRyslhUrWs",
     voteId: "oH2XaHh0vMaJTBraw2USfOwptd3aEfBz2SQRDf5lAyo"
@@ -47,7 +47,7 @@ async function main() {
     arweave,
     storecatSrc,
     wallet,
-    attentionInput,
+    storecatInput,
     smartest.readContractState(storecatContractId),
     walletAddress,
     storecatContractId
