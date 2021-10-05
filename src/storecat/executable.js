@@ -27,10 +27,11 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
+let lastBlock = 0;
 
 // You can also access and store files locally
 const logsInfo = {
-  filename: "history.log"
+  filename: "history_storecat.log"
 };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
@@ -66,9 +67,48 @@ async function someMethod(_req, res) {
 /*
   bounty request api
 */
-function getTask () {
-  let response = 'https://app.getstorecat.com:8888/api/v1/bounty/get'
-  return response
+function getTask() {
+  let response = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  return response;
+}
+async function getAttentionStateAndBlock() {
+  const state = await tools.getState(namespace.taskTxId);
+  let block = await tools.getBlockHeight();
+  if (block < lastBlock) block = lastBlock;
+
+  if (!state || !state.task) console.error("State or task invalid:", state);
+  const logClose = state.task.close;
+  if (logClose > lastLogClose) {
+    if (lastLogClose !== 0) {
+      console.log("Task updated, resetting trackers");
+      hasRanked = false;
+      hasDistributed = false;
+      hasAudited = false;
+    }
+
+    lastLogClose = logClose;
+  }
+
+  if (block > lastBlock)
+    console.log(
+      block,
+      "Searching for a task, ranking and prepare distribution in",
+      logClose - block,
+      "blocks"
+    );
+  lastBlock = block;
+  return [state, block];
+}
+async function service(state, block) {
+  // if (canProposePorts(state, block)) await proposePorts();
+  // if (canAudit(state, block)) await audit(state);
+  // if (canSubmitBatch(state, block)) await submitBatch(state);
+  // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
+  // if (canDistributeReward(state)) await distribute();
+}
+async function witness(state, block) {
+  if (checkForVote(state, block)) await tryVote(state);
+  if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
