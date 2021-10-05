@@ -19,7 +19,9 @@ async function main() {
   // Load koi contract
   const koiSrc = fs.readFileSync(`dist/koi.js`, "utf8");
   const koiContractId = "a1s2d3f4";
-  const koiInitState = JSON.parse(fs.readFileSync(`src/koi/init_state.json`));
+  const koiInitState = JSON.parse(
+    fs.readFileSync(`src/koii-core/init_state.json`)
+  );
   smartest.writeContractState(koiContractId, koiInitState);
 
   // Load storecat contract
@@ -29,14 +31,6 @@ async function main() {
     fs.readFileSync(`src/storecat/init_state.json`)
   );
   smartest.writeContractState(storecatContractId, storecatInitState);
-
-  // Load koii contract
-  const taskSrc = fs.readFileSync(`dist/koi_task.js`, "utf8");
-  const taskContractId = "f4l5s8n9";
-  const taskInitState = JSON.parse(
-    fs.readFileSync(`src/koi_task/init_state.json`)
-  );
-  smartest.writeContractState(taskContractId, taskInitState);
 
   const storecatInput = {
     function: "batchAction",
