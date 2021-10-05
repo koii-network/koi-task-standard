@@ -22,8 +22,7 @@ export default async function migratePreRegister(state) {
   });
   //deduplicate nftIds
   const uniqueNfts = [...new Set(nftIds)];
-  const MAX_REQUEST = uniqueNfts.length < 100 ? uniqueNfts.length : 100;
-  const txInfos = await fetchTransactions(uniqueNfts, MAX_REQUEST);
+  const txInfos = await fetchTransactions(uniqueNfts);
   // Filter out transactionIds with Invalid contractSrc.
   const validTransactionIds = txInfos.filter((transaction) => {
     const contractSrc = transaction.node.tags.find(
@@ -42,8 +41,7 @@ export default async function migratePreRegister(state) {
           if (
             nftState.balances[owner] > 0 &&
             typeof owner === "string" &&
-            owner.length === 43 &&
-            !(owner.indexOf(" ") >= 0)
+            owner.length === 43
           )
             owners[owner] = nftState.balances[owner];
         }
@@ -54,12 +52,24 @@ export default async function migratePreRegister(state) {
   return { state };
 }
 
-async function getNextPage(ids, MAX_REQUEST, after) {
+async function fetchTransactions(ids) {
+  let transactions = await getNextPage(ids);
+  let txInfos = transactions.edges;
+
+  while (transactions.pageInfo.hasNextPage) {
+    const cursor = transactions.edges[transactions.edges.length - 1].cursor;
+    transactions = await getNextPage(ids, cursor);
+    txInfos = txInfos.concat(transactions.edges);
+  }
+  return txInfos;
+}
+
+async function getNextPage(ids, after) {
   const afterQuery = after ? `,after:"${after}"` : "";
   const query = `query {
     transactions(ids: ${JSON.stringify(
       ids
-    )}, sort: HEIGHT_ASC, first: ${MAX_REQUEST}${afterQuery}) {
+    )}, sort: HEIGHT_ASC, first: 100${afterQuery}) {
       pageInfo { hasNextPage }
       edges {
         node {
@@ -72,15 +82,4 @@ async function getNextPage(ids, MAX_REQUEST, after) {
   }`;
   const res = await SmartWeave.unsafeClient.api.post("graphql", { query });
   return res.data.data.transactions;
-}
-async function fetchTransactions(ids, MAX_REQUEST) {
-  let transactions = await getNextPage(ids, MAX_REQUEST);
-  let txInfos = transactions.edges;
-
-  while (transactions.pageInfo.hasNextPage) {
-    const cursor = transactions.edges[MAX_REQUEST - 1].cursor;
-    transactions = await getNextPage(ids, MAX_REQUEST, cursor);
-    txInfos = txInfos.concat(transactions.edges);
-  }
-  return txInfos;
 }
