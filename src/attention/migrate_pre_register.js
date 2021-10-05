@@ -6,23 +6,19 @@ export default async function migratePreRegister(state) {
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
-  const preRegisterDatas = contractState.preRegisterDatas;
-  const preRegisterNfts = preRegisterDatas.filter(
-    (preRegisterNft) =>
-      "nft" in preRegisterNft.content &&
-      preRegisterNft.contractId === contractId
-  );
   const nfts = Object.keys(state.nfts);
-  const nonMigratedNfts = preRegisterNfts.filter(
-    (nft) => !nfts.includes(nft.content.nft)
-  );
-  const nftIds = [];
-  nonMigratedNfts.map((nft) => {
-    nftIds.push(nft.content.nft);
-  });
-  //deduplicate nftIds
-  const uniqueNfts = [...new Set(nftIds)];
-  const txInfos = await fetchTransactions(uniqueNfts);
+  const newNfts = [];
+  for (const data of contractState.preRegisterDatas) {
+    if (
+      "content" in data &&
+      "nft" in data.content &&
+      data.contractId === contractId &&
+      !nfts.includes(data.content.nft) &&
+      !newNfts.includes(data.content.nft)
+    )
+      newNfts.push(data.content.nft);
+  }
+  const txInfos = await fetchTransactions(newNfts);
   // Filter out transactionIds with Invalid contractSrc.
   const validTransactionIds = txInfos.filter((transaction) => {
     const contractSrc = transaction.node.tags.find(
@@ -30,6 +26,7 @@ export default async function migratePreRegister(state) {
     );
     return validContractSrc.includes(contractSrc.value);
   });
+  // change to for loop
   await Promise.allSettled(
     validTransactionIds.map(async (transaction) => {
       const nftState = await SmartWeave.contracts.readContractState(

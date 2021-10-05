@@ -20,21 +20,19 @@ export default async function rankPrepDistribution(state) {
   // Get active votes
   const activeVotes = votes.filter((vote) => vote.status === "active");
   // Get accepted proposed payloads
-  proposeDatas.map((proposeData) => {
+  for (const data of proposeDatas) {
     if (activeVotes.length !== 0) {
       for (let vote of activeVotes) {
         vote.status = "passed";
-        vote.id === proposeData.txId && vote.yays > vote.nays
-          ? ((proposeData.status = "rejected"),
-            blacklist.push(proposeData.distributer))
-          : ((proposeData.status = "accepted"),
-            acceptedProposedTxIds.push(proposeData.txId));
+        vote.id === data.txId && vote.yays > vote.nays
+          ? ((data.status = "rejected"), blacklist.push(data.distributer))
+          : ((data.status = "accepted"), acceptedProposedTxIds.push(data.txId));
       }
     } else {
-      proposeData.status = "accepted";
-      acceptedProposedTxIds.push(proposeData.txId);
+      data.status = "accepted";
+      acceptedProposedTxIds.push(data.txId);
     }
-  });
+  }
   // deduplicate PoRts
   const distribution = {};
   const registeredNfts = Object.keys(nfts);
@@ -82,7 +80,7 @@ export default async function rankPrepDistribution(state) {
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
   const distributionReward = {};
-  Object.keys(distribution).map((nft) => {
+  for (const nft of Object.keys(distribution)) {
     const balances = Object.values(nfts[nft]);
     const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
     for (let owner in nfts[nft]) {
@@ -95,8 +93,7 @@ export default async function rankPrepDistribution(state) {
               distribution[nft].length * rewardPerAttention * rewardPer);
       }
     }
-  });
-
+  }
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,
