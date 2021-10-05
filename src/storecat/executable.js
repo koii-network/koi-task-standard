@@ -26,7 +26,7 @@ const arweave = Arweave.init({
 });
 
 // Define system constants
-const FOO = "BAR";
+const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 
 // You can also access and store files locally
 const logsInfo = {
@@ -60,10 +60,7 @@ async function execute(_init_state) {
 }
 
 async function someMethod(_req, res) {
-  res
-    .status(200)
-    .type("application/json")
-    .send("Hello world");
+  res.status(200).type("application/json").send("Hello world");
 }
 
 /*
@@ -124,4 +121,12 @@ function canAudit(state, block) {
     !hasAudited && // ports not submitted
     proposedData.length !== 0
   );
+}
+
+/**
+ * Awaitable rate limit
+ * @returns
+ */
+function rateLimit() {
+  return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
 }
