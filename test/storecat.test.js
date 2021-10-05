@@ -71,7 +71,7 @@ async function main() {
     (proposedPaylod) => proposedPaylod.block === state.task.open
   );
   const proposedDataId = proposedPaylods.proposedDatas[0].id;
-  const attentionInput1 = {
+  const storecatInput1 = {
     function: "audit",
     id: proposedDataId,
     descripition: "malicious_data"
@@ -80,12 +80,13 @@ async function main() {
     arweave,
     storecatSrc,
     wallet,
-    attentionInput1,
+    storecatInput1,
     smartest.readContractState(storecatContractId),
     walletAddress,
     storecatContractId
   );
 
+  /*
   const storecatInput2 = {
     function: "vote",
     voteId: proposedDataId,
@@ -113,7 +114,9 @@ async function main() {
     walletAddress,
     storecatContractId
   );
+  */
 
+  /*
   const koiInput = {
     function: "registerTask",
     taskTxId: taskContractId,
@@ -128,6 +131,7 @@ async function main() {
     walletAddress,
     koiContractId
   );
+  */
 
   // const koiInput0 = {
   //   function: "distributeReward"
