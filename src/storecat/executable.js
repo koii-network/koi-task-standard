@@ -66,9 +66,20 @@ async function someMethod(_req, res) {
 /*
   bounty request api
 */
-function getTask () {
-  let response = 'https://app.getstorecat.com:8888/api/v1/bounty/get'
-  return response
+function getTask() {
+  let response = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  return response;
+}
+async function service(state, block) {
+  // if (canProposePorts(state, block)) await proposePorts();
+  // if (canAudit(state, block)) await audit(state);
+  // if (canSubmitBatch(state, block)) await submitBatch(state);
+  // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
+  // if (canDistributeReward(state)) await distribute();
+}
+async function witness(state, block) {
+  if (checkForVote(state, block)) await tryVote(state);
+  if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
