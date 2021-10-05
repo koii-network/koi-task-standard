@@ -182,7 +182,7 @@ async function getNftSummaries(req, res) {
         }
         nftMap[id] = {
           id,
-          owners: Object.keys(attentionState.nfts[id]),
+          holders: Object.keys(attentionState.nfts[id]),
           attention: 0,
           reward: 0
         };
@@ -192,7 +192,7 @@ async function getNftSummaries(req, res) {
       for (const id in attentionState.nfts) {
         nftMap[id] = {
           id,
-          owners: Object.keys(attentionState.nfts[id]),
+          holders: Object.keys(attentionState.nfts[id]),
           attention: 0,
           reward: 0
         };
