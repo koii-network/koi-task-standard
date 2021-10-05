@@ -22,12 +22,12 @@ koii Contract is a smartweave contract,Smartweave is a new smart contract protoc
   const target = input.target;
   const qty = input.qty;
 
-  if (!target || isNaN(qty) || qty <= 0 || caller === target)
+  if (!target || !qty || caller === target)
     throw new ContractError("Invalid inputs");
-  if (typeof target !== "string")
+  if (typeof target !== "string" || typeof qty !== "number" || qty <= 0)
     throw new ContractError("Invalid input format");
-  if (target.length !== 43) {
-    throw new ContractError("Address should have 43 characters");
+  if (target.length !== 43 || target.indexOf(" ") >= 0) {
+    throw new ContractError("Address should have 43 characters and no space");
   }
   if (balances[caller] < qty) {
     throw new ContractError(
@@ -41,6 +41,7 @@ koii Contract is a smartweave contract,Smartweave is a new smart contract protoc
 
   return { state };
 }
+
 ```
 
 #### Stake
@@ -56,7 +57,9 @@ export default function stake(state, action) {
   const caller = action.caller;
   const input = action.input;
   const qty = input.qty;
-  if (isNaN(qty) || qty <= 0) throw new ContractError("Invalid input");
+  if (!qty) throw new ContractError("Invalid input");
+  if (typeof qty !== "number" || qty <= 0)
+    throw new ContractError("Invalid input format");
   if (balances[caller] < qty) {
     throw new ContractError(
       "Balance is too low to stake that amount of tokens"
@@ -69,6 +72,7 @@ export default function stake(state, action) {
     : (stakes[caller] = [{ value: qty, block: SmartWeave.block.height }]);
   return { state };
 }
+
 
 ```
 
@@ -89,18 +93,20 @@ export default function mint(state, action) {
   const target = input.target;
   const qty = input.qty;
 
-  if (!target || isNaN(qty)) throw new ContractError("Invalid Inputs");
   if (owner !== caller)
     throw new ContractError("Only the owner can mint new tokens");
+  if (!target || !qty) throw new ContractError("Invalid Inputs");
+  if (typeof target !== "string" || typeof qty !== "number" || qty <= 0)
+    throw new ContractError("Invalid input format");
+  if (target.length !== 43 || target.indexOf(" ") >= 0) {
+    throw new ContractError("Address should have 43 characters and no space");
+  }
 
   if (balances[target]) balances[target] += qty;
   else balances[target] = qty;
 
   return { state };
 }
-
-
-
 ```
 
 #### Withdraw
@@ -116,21 +122,23 @@ export default function withdraw(state, action) {
   const caller = action.caller;
   const input = action.input;
   let qty = input.qty;
+  if (!qty) throw new ContractError("Invalid input");
+  if (typeof qty !== "number" || qty <= 0)
+    throw new ContractError("Invalid input format");
   if (!(caller in stakes))
     throw new ContractError(`This ${caller}adress hasn't staked`);
-  if (isNaN(qty) || qty <= 0) throw new ContractError("Invalid inputs");
   const callerStake = stakes[caller];
-  const avaliableTokenToWithDraw = callerStake.filter(
+  const avaliableTokenToWithdraw = callerStake.filter(
     (stake) => SmartWeave.block.height > stake.block + 10080
   );
-  const total = avaliableTokenToWithDraw.reduce(
+  const total = avaliableTokenToWithdraw.reduce(
     (acc, curVal) => acc + curVal.value,
     0
   );
   if (qty > total) throw new ContractError("Stake is not ready to be released");
 
-  // If Stake is 14 days old can be withdraw
-  for (let stake of avaliableTokenToWithDraw) {
+  // If Stake is 14 days old,  Can be withdraw
+  for (let stake of avaliableTokenToWithdraw) {
     if (qty <= stake.value) {
       stake.value -= qty;
       balances[caller] += qty;
@@ -145,7 +153,6 @@ export default function withdraw(state, action) {
 
   return { state };
 }
-
 ```
 
 #### RegisterTask
@@ -174,6 +181,7 @@ export default async function registerTask(state, action) {
   if (txId !== undefined) {
     throw new ContractError(`task with ${txId}id is already registered `);
   }
+  --balances[caller]; // burn 1 koi per registration
   // Required to start caching this task state in kohaku
   await SmartWeave.contracts.readContractState(taskTxId);
   koiReward
@@ -197,8 +205,6 @@ export default async function registerTask(state, action) {
 
   return { state };
 }
-
-
 ```
 
 #### DeregisterTask

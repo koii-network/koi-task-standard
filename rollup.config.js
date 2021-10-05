@@ -4,9 +4,9 @@ import nodePolyfills from "rollup-plugin-node-polyfills";
 
 export default [
   {
-    input: "src/koi/index.js",
+    input: "src/koii-core/index.js",
     output: {
-      file: "dist/koi.js",
+      file: "dist/koii-core.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
@@ -16,6 +16,14 @@ export default [
     input: "src/attention/index.js",
     output: {
       file: "dist/attention.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/task-template/index.js",
+    output: {
+      file: "dist/task-template.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]

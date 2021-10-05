@@ -3,7 +3,7 @@ const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const kohaku = require("@_koi/kohaku");
 
-const KOII_CONTRACT_ID = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
+const KOII_CONTRACT_ID = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
@@ -13,7 +13,7 @@ const tools = new koiSdk.Node(
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
-process.env.NODE_MODE = operationMode;
+process.env.NODE_MODE = process.env.NODE_MODE || operationMode;
 
 async function main() {
   await tools.loadWallet(await tools.loadFile(process.env.WALLET_LOCATION));
@@ -51,11 +51,13 @@ async function main() {
   );
 
   // Init Kohaku
-  console.log("Initializing Koii contract for Kohaku");
-  await tools.getKoiiStateAwait();
-  const initialHeight = kohaku.getCacheHeight();
-  console.log("Kohaku initialized to height", kohaku.getCacheHeight());
-  if (initialHeight < 1) throw new Error("Failed to initialize");
+  if (taskTxId !== "test") {
+    console.log("Initializing Koii contract for Kohaku");
+    await tools.getKoiiStateAwait();
+    const initialHeight = kohaku.getCacheHeight();
+    console.log("Kohaku initialized to height", kohaku.getCacheHeight());
+    if (initialHeight < 1) throw new Error("Failed to initialize");
+  }
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
@@ -92,16 +94,7 @@ class Namespace {
   }
   async fs(method, path, ...args) {
     const basePath = "namespace/" + this.taskTxId;
-    try {
-      try {
-        await fsPromises.access("namespace");
-      } catch {
-        await fsPromises.mkdir("namespace");
-      }
-      await fsPromises.access(basePath);
-    } catch {
-      await fsPromises.mkdir(basePath);
-    }
+    await fsPromises.mkdir(basePath, { recursive: true }).catch(() => {});
     return fsPromises[method](`${basePath}/${path}`, ...args);
   }
   express(method, path, callback) {

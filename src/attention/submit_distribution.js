@@ -6,6 +6,7 @@ export default async function submitDistribution(state, action) {
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
+  //25
   if (SmartWeave.block.height > task.open + 300) {
     throw new ContractError("proposing is closed. wait for another round");
   }

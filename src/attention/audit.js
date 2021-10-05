@@ -9,6 +9,7 @@ export default function audit(state, action) {
   if (id.length !== 43) {
     throw new ContractError("Input should have 43 characters");
   }
+  //50
   if (SmartWeave.block.height > state.task.open + 600) {
     throw new ContractError("audit is closed. wait for another round");
   }

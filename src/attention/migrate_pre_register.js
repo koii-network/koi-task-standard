@@ -1,7 +1,8 @@
 export default async function migratePreRegister(state) {
-  const nfts = state.nfts;
   const mainContactId = state.koiiContract;
+  const validContractSrc = state.validContractSrcsB64;
   const contractId = SmartWeave.contract.id;
+  const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
@@ -11,22 +12,36 @@ export default async function migratePreRegister(state) {
       "nft" in preRegisterNft.content &&
       preRegisterNft.contractId === contractId
   );
-  const registeredNfts = Object.values(nfts).reduce(
-    (acc, curVal) => acc.concat(curVal),
-    []
+  const nfts = Object.keys(state.nfts);
+  const nonMigratedNfts = preRegisterNfts.filter(
+    (nft) => !nfts.includes(nft.content.nft)
   );
-
-  for (let i = 0; i < preRegisterNfts.length; i++) {
-    if (!registeredNfts.includes(preRegisterNfts[i].content.nft)) {
-      if (preRegisterNfts[i].owner in nfts) {
-        {
-          nfts[preRegisterNfts[i].owner].push(preRegisterNfts[i].content.nft);
+  //deduplicate nftIds
+  const nftIds = [];
+  nonMigratedNfts.map((nft) => {
+    nftIds.push(nft.content.nft);
+  });
+  const uniqueNfts = [...new Set(nftIds)];
+  await Promise.allSettled(
+    uniqueNfts.map(async (nft) => {
+      const txInfo = await SmartWeave.unsafeClient.transactions.get(nft);
+      const contractSrcTag = txInfo.tags.find((tag) => tag.name === tagNameB64);
+      const owners = {};
+      if (validContractSrc.includes(contractSrcTag.value)) {
+        const nftState = await SmartWeave.contracts.readContractState(nft);
+        for (let owner in nftState.balances) {
+          if (
+            nftState.balances[owner] > 0 &&
+            typeof owner === "string" &&
+            owner.length === 43 &&
+            !(owner.indexOf(" ") >= 0)
+          )
+            owners[owner] = nftState.balances[owner];
         }
-      } else {
-        nfts[preRegisterNfts[i].owner] = [preRegisterNfts[i].content.nft];
+        state.nfts[nft] = owners;
       }
-    }
-  }
+    })
+  );
 
   return { state };
 }

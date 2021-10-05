@@ -1,7 +1,6 @@
 export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
-  const score = state.reputation;
   const blacklist = state.blacklist;
   const prepareDistribution = task.prepareDistribution;
   const attentionReport = task.attentionReport;
@@ -38,6 +37,7 @@ export default async function rankPrepDistribution(state) {
   });
   // deduplicate PoRts
   const distribution = {};
+  const registeredNfts = Object.keys(nfts);
   await Promise.allSettled(
     acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
       const data = await SmartWeave.unsafeClient.transactions.getData(
@@ -53,21 +53,23 @@ export default async function rankPrepDistribution(state) {
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
       const parseDataKeys = Object.keys(parseData);
-      const registeredNfts = Object.values(nfts).reduce(
-        (acc, curVal) => acc.concat(curVal),
-        []
-      );
-      parseDataKeys.map(async (key) => {
-        if (registeredNfts.includes(key)) {
-          scoreSum += [...new Set(parseData[key])].length;
-          !(key in distribution)
-            ? (distribution[key] = [...new Set(parseData[key])])
-            : (distribution[key] = [
-                ...new Set(distribution[key].concat(parseData[key]))
-              ]);
+      parseDataKeys.map(async (nftId) => {
+        if (registeredNfts.includes(nftId)) {
+          const balances = Object.values(nfts[nftId]);
+          const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
+          if (sumNftBalances > 0) {
+            scoreSum += [...new Set(parseData[nftId])].length;
+            !(nftId in distribution)
+              ? (distribution[nftId] = [...new Set(parseData[nftId])])
+              : (distribution[nftId] = [
+                  ...new Set(distribution[nftId].concat(parseData[nftId]))
+                ]);
+          }
         }
       });
-      score[proposedPayload.distributer] = scoreSum;
+      proposedPayload.distributer in state.reputation
+        ? (state.reputation[proposedPayload.distributer] += scoreSum)
+        : (state.reputation[proposedPayload.distributer] = scoreSum);
     })
   );
 
@@ -80,27 +82,21 @@ export default async function rankPrepDistribution(state) {
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
   // Distributing Reward to owners
   const distributionReward = {};
-  await Promise.allSettled(
-    Object.keys(distribution).map(async (nftId) => {
-      const state = await SmartWeave.contracts.readContractState(nftId);
-      const balances = Object.values(state.balances).reduce(
-        (preValue, curValue) => preValue + curValue
-      );
-
-      for (let address in state.balances) {
-        if (typeof address === "string" && address.length === 43) {
-          let rewardPer = state.balances[address] / balances;
-          if (rewardPer !== 0 && !isNaN(rewardPer)) {
-            address in distributionReward
-              ? (distributionReward[address] +=
-                  distribution[nftId].length * rewardPerAttention * rewardPer)
-              : (distributionReward[address] =
-                  distribution[nftId].length * rewardPerAttention * rewardPer);
-          }
-        }
+  Object.keys(distribution).map((nft) => {
+    const balances = Object.values(nfts[nft]);
+    const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
+    for (let owner in nfts[nft]) {
+      let rewardPer = nfts[nft][owner] / balancesSum;
+      if (rewardPer > 0 && !isNaN(rewardPer)) {
+        owner in distributionReward
+          ? (distributionReward[owner] +=
+              distribution[nft].length * rewardPerAttention * rewardPer)
+          : (distributionReward[owner] =
+              distribution[nft].length * rewardPerAttention * rewardPer);
       }
-    })
-  );
+    }
+  });
+
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,
@@ -110,7 +106,7 @@ export default async function rankPrepDistribution(state) {
   attentionReport.push(attentionScore);
   // Open a new game
   task.open = SmartWeave.block.height;
-  task.close = SmartWeave.block.height + 720; // 60
+  task.close = SmartWeave.block.height + 720; //60
   const newTask = {
     block: task.open,
     proposedData: [],
