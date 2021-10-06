@@ -37,8 +37,19 @@ const logsInfo = {
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
 function setup(_init_state) {
   if (namespace.app) {
-    namespace.express("get", "/", someMethod);
+    namespace.express("get", "/", root);
+    namespace.express("get", "/id", getId);
   }
+}
+async function root(_req, res) {
+  res
+    .status(200)
+    .type("application/json")
+    .send(await tools.getState(namespace.taskTxId));
+}
+
+function getId(_req, res) {
+  res.status(200).send(namespace.taskTxId);
 }
 
 // Define the execution block (this will be triggered after setup is complete)
@@ -60,17 +71,6 @@ async function execute(_init_state) {
   }
 }
 
-async function someMethod(_req, res) {
-  res.status(200).type("application/json").send("Hello world");
-}
-
-/*
-  bounty request api
-*/
-function getTask() {
-  let response = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  return response;
-}
 async function getAttentionStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
@@ -81,6 +81,7 @@ async function getAttentionStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
+      hasRewarded = false;
       hasRanked = false;
       hasDistributed = false;
       hasAudited = false;
@@ -100,6 +101,7 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
+  if (!canScrape(state)) await getScrapingRequest();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
@@ -107,8 +109,8 @@ async function service(state, block) {
   // if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
-  if (checkForVote(state, block)) await tryVote(state);
-  if (await checkProposeSlash(state, block)) await proposeSlash(state);
+  // if (checkForVote(state, block)) await tryVote(state);
+  // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
@@ -145,7 +147,6 @@ async function audit(state) {
   );
   hasAudited = true;
 }
-
 function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
@@ -163,6 +164,21 @@ function canAudit(state, block) {
   );
 }
 
+
+async function canScrape() {
+  
+}
+/*
+  bounty request api
+  @returns scraping url, bounty, uuid
+*/
+function getTask() {
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  return url;
+}
+function getScrapingRequest() {
+
+}
 /**
  * Awaitable rate limit
  * @returns
