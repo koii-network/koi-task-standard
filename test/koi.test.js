@@ -20,28 +20,26 @@ async function main() {
 
   const wallet = JSON.parse(fs.readFileSync(walletPath));
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-  const contractSrc = fs.readFileSync(`dist/koi.js`, "utf8");
-  let state = JSON.parse(fs.readFileSync(`src/koi/init_state.json`));
+  const contractSrc = fs.readFileSync(`dist/attention.js`, "utf8");
+  let state = JSON.parse(fs.readFileSync(`src/attention/init_state.json`));
 
   const input = {
-    function: "burnKoi",
-    contractId: "rlar84ay89rp4egisterour4Task",
-    contentType: "nft",
-    contentTxId: "bitcoin-price",
-    owner: "aliraiperupa"
+    function: "migratePreRegister"
+    // txId: [
+    //   "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ",
+    //   "37Uw2P_pSbYYshxl9ceIBGOHJuUtmBEc26nC8aPQr6c"
+    // ]
   };
   //console.log(state);
-  state = (
-    await interactDryRun(
-      arweave,
-      contractSrc,
-      wallet,
-      input,
-      state,
-      walletAddress
-    )
-  ).state;
-  console.log(state.preRegisterDatas);
+  state = await interactDryRun(
+    arweave,
+    contractSrc,
+    wallet,
+    input,
+    state,
+    walletAddress
+  );
+  console.log(state);
 }
 
 /**

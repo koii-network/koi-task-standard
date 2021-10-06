@@ -44,14 +44,14 @@ export default async function submitDistribution(state, action) {
   const contractTask = tasks.find((task) => task.txId === contractId);
   if (contractTask !== undefined) {
     const rewardedBlock = contractTask.rewardedBlock;
-    const prepareDistribution = task.prepareDistribution.filter(
-      (distribution) => !distribution.isRewarded
-    );
-    prepareDistribution.map((distribution) => {
-      if (rewardedBlock.includes(distribution.block)) {
+    for (const distribution of task.prepareDistribution) {
+      if (
+        rewardedBlock.includes(distribution.block) &&
+        !distribution.isRewarded
+      ) {
         distribution.isRewarded = true;
       }
-    });
+    }
   }
   task.prepareDistribution = task.prepareDistribution.filter(
     (distribution) => !distribution.isRewarded
