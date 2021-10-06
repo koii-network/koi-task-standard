@@ -28,6 +28,7 @@ const arweave = Arweave.init({
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 let lastBlock = 0;
+const OFFSET_PER_DAY = 720
 
 // You can also access and store files locally
 const logsInfo = {
@@ -165,8 +166,17 @@ function canAudit(state, block) {
 }
 
 
-async function canScrape() {
-  
+async function canRequestScrapingUrl(state, block) {
+  const task = state.task;
+  // per day is 720 block height
+  if (block >= task.close) return false;
+  if (task.scraping === undefined) return true;
+}
+async function canScrape(state, block) {
+  const task = state.task;
+  // per day is 720 block height
+  if (block >= task.close) return false;
+  if (task.scraping === undefined) return false;
 }
 /*
   bounty request api

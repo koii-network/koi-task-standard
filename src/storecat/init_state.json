@@ -7,7 +7,7 @@
   "bestPayload": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-adsewer",
   "task": {
     "open": 101,
-    "close": 1050,
+    "close": 850,
     "scraping": {
       "uuid": "1",
       "bounty": 1,
