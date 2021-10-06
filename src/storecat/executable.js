@@ -37,8 +37,15 @@ const logsInfo = {
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
 function setup(_init_state) {
   if (namespace.app) {
-    namespace.express("get", "/", someMethod);
+    namespace.express("get", "/", root);
+    namespace.express("get", "/id", getId);
   }
+}
+async function root(_req, res) {
+  res
+    .status(200)
+    .type("application/json")
+    .send(await tools.getState(namespace.taskTxId));
 }
 
 // Define the execution block (this will be triggered after setup is complete)
@@ -58,10 +65,6 @@ async function execute(_init_state) {
       console.error("Error while performing attention task:", e);
     }
   }
-}
-
-async function someMethod(_req, res) {
-  res.status(200).type("application/json").send("Hello world");
 }
 
 /*
