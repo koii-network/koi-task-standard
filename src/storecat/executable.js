@@ -102,7 +102,8 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canScrape(state)) await getScrapingRequest();
+  if (!canRequestScrapingUrl(state)) await getScrapingRequest();
+  if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
@@ -169,8 +170,8 @@ function canAudit(state, block) {
 async function canRequestScrapingUrl(state, block) {
   const task = state.task;
   // per day is 720 block height
-  if (block >= task.close) return false;
   if (task.scraping === undefined) return true;
+  else return false;
 }
 async function canScrape(state, block) {
   const task = state.task;
@@ -185,6 +186,9 @@ async function canScrape(state, block) {
 function getTask() {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
   return url;
+}
+async function scrape() {
+  
 }
 function getScrapingRequest() {
 
