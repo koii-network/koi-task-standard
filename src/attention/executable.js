@@ -54,7 +54,6 @@ let hasVoted = false;
 let hasSubmitBatch = false;
 let hasAudited = false;
 
-let nftStateMapCache = {};
 let portsLog = [];
 
 const logsInfo = {
@@ -100,64 +99,40 @@ async function root(_req, res) {
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
-function getNFTSiblings(nftState) {
-  const id = nftState.id;
-  let cachedNftIds = Object.keys(nftStateMapCache)
-  const index = cachedNftIds.findIndex((nftId) => nftId == id);
-  if (index > 0 && index < cachedNftIds.length - 1) {
-    nftState.nextNFT = cachedNftIds[index + 1];
-    nftState.prevNFT = cachedNftIds[index - 1];
-  } else if (index > 0) {
-    nftState.prevNFT = cachedNftIds[index - 1];
-  } else if (index == 0 && cachedNftIds.length > 1) {
-    nftState.nextNFT = cachedNftIds[index + 1];
-  }
-  return nftState;
-}
+
 async function getNft(req, res) {
   try {
+    // Validate nftId
     const id = req.query.id;
-
-    if (!tools.validArId(id)) {
-      res.status(400).send({ error: "invalid txId" });
-      return;
-    }
+    if (!tools.validArId(id))
+      return res.status(400).send({ error: "invalid txId" });
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const nfts = Object.keys(attentionState.nfts);
+    const nftIndex = nfts.indexOf(id);
+    if (nftIndex === -1) return res.status(404).send(id + " is not registered");
 
     // Get NFT state
     let nftState;
-    let attentionState;
-    if (Object.prototype.hasOwnProperty.call(nftStateMapCache, id)) {
-      nftState = nftStateMapCache[id];
-      if (nftState.updatedAttention) {
-        nftState = getNFTSiblings(nftState);
-        res.status(200).send(nftState);
-        return;
-      }
-      attentionState = await tools.getState(namespace.taskTxId);
-    } else {
-      attentionState = await tools.getState(namespace.taskTxId);
-      const nfts = Object.keys(attentionState.nfts);
-      if (!nfts.includes(id))
-        return res.status(404).send(id + " is not registered");
-      try {
-        nftState = await tools.getState(id);
-      } catch (e) {
-        if (e.type !== "TX_NOT_FOUND") throw e;
-        nftState = {
-          owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
-          balances: attentionState.nfts[id],
-          tags: ["missing"],
-          createdAt: DEFAULT_CREATED_AT
-        };
-      }
-      nftState.id = id;
-      nftStateMapCache[id] = nftState;
+    try {
+      nftState = await tools.getState(id);
+    } catch (e) {
+      if (e.type !== "TX_NOT_FOUND") throw e;
+      nftState = {
+        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
+        balances: attentionState.nfts[id],
+        tags: ["missing"],
+        createdAt: DEFAULT_CREATED_AT
+      };
     }
 
-    // Calculate attention and rewards
-    nftState.updatedAttention = true;
+    // Add extra fields
+    nftState.id = id;
+    nftState.next = nfts[(nftIndex + 1 + nfts.length) % nfts.length];
+    nftState.prev = nfts[(nftIndex - 1 + nfts.length) % nfts.length];
     nftState.attention = 0;
     nftState.reward = 0;
+
+    // Calculate attention and rewards
     for (const report of attentionState.task.attentionReport) {
       if (id in report) {
         const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
@@ -165,7 +140,6 @@ async function getNft(req, res) {
         nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
       }
     }
-    nftState = getNFTSiblings(nftState);
     res.status(200).send(nftState);
   } catch (e) {
     console.error("getNft error:", e.message);
@@ -272,9 +246,6 @@ async function getAttentionStateAndBlock() {
       hasRanked = false;
       hasDistributed = false;
       hasAudited = false;
-
-      for (const nftId in nftStateMapCache)
-        nftStateMapCache[nftId].updatedAttention = false;
     }
 
     lastLogClose = logClose;
@@ -570,11 +541,11 @@ async function PublishPoRT() {
 }
 
 async function getLockedPorts() {
-  let logs=[];
+  let logs = [];
   try {
     logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
     logs = JSON.parse(logs);
-    if(!logs) logs =[]
+    if (!logs) logs = [];
   } catch {
     console.log(e);
     console.error("Error reading raw logs");
