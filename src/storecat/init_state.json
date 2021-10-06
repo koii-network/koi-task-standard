@@ -3,13 +3,21 @@
   "name": "Storecat",
   "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
   "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc",
-  "tasks": [
-    {
-      "open": 101,
-      "close": 1050,
-      "scraping": {
-        "isRewarded": false
-      }
+  "task": {
+    "open": 101,
+    "close": 1050,
+    "scraping": {
+      "uuid": "1",
+      "bounty": 1,
+      "url": "https://google.com",
+      "ranking": [
+        {
+          "payload": "",
+          "hashPayload": "",
+          "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo"
+        }
+      ],
+      "isRewarded": false
     }
-  ]
+  }
 }
