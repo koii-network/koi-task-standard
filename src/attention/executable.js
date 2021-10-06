@@ -127,7 +127,7 @@ async function getNft(req, res) {
 
     // Add extra fields
     nftState.id = id;
-    nftState.next = nfts[(nftIndex + 1 + nfts.length) % nfts.length];
+    nftState.next = nfts[(nftIndex + 1) % nfts.length];
     nftState.prev = nfts[(nftIndex - 1 + nfts.length) % nfts.length];
     nftState.attention = 0;
     nftState.reward = 0;
