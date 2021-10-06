@@ -24,28 +24,28 @@ export default async function migratePreRegister(state) {
     const contractSrc = transaction.node.tags.find(
       (tag) => tag.name === "Contract-Src"
     );
-    return validContractSrc.includes(contractSrc.value);
+    return contractSrc && validContractSrc.includes(contractSrc.value);
   });
   // change to for loop
-  await Promise.allSettled(
-    validTransactionIds.map(async (transaction) => {
-      const nftState = await SmartWeave.contracts.readContractState(
-        transaction.node.id
-      );
-      if ("balances" in nftState) {
-        const owners = {};
-        for (let owner in nftState.balances) {
-          if (
-            nftState.balances[owner] > 0 &&
-            typeof owner === "string" &&
-            owner.length === 43
-          )
-            owners[owner] = nftState.balances[owner];
-        }
-        state.nfts[transaction.node.id] = owners;
+  for (const transaction of validTransactionIds) {
+    const nftState = await SmartWeave.contracts
+      .readContractState(transaction.node.id)
+      .catch((e) => {
+        if (e.type !== "TX_NOT_FOUND") throw e;
+      });
+    if (nftState && "balances" in nftState) {
+      const owners = {};
+      for (let owner in nftState.balances) {
+        if (
+          nftState.balances[owner] > 0 &&
+          typeof owner === "string" &&
+          owner.length === 43
+        )
+          owners[owner] = nftState.balances[owner];
       }
-    })
-  );
+      state.nfts[transaction.node.id] = owners;
+    }
+  }
   return { state };
 }
 

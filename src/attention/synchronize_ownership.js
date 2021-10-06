@@ -14,9 +14,13 @@ export default async function syncOwnership(state, action) {
     const validNfts = txId.filter((nft) =>
       Object.keys(state.nfts).includes(nft)
     );
-    await Promise.allSettled(
-      validNfts.map(async (nft) => {
-        const nftState = await SmartWeave.contracts.readContractState(nft);
+    for (const nft of validNfts) {
+      const nftState = await SmartWeave.contracts
+        .readContractState(nft)
+        .catch((e) => {
+          if (e.type !== "TX_NOT_FOUND") throw e;
+        });
+      if (nftState) {
         const owners = {};
         for (let owner in nftState.balances) {
           if (
@@ -28,8 +32,8 @@ export default async function syncOwnership(state, action) {
             owners[owner] = nftState.balances[owner];
         }
         state.nfts[nft] = owners;
-      })
-    );
+      }
+    }
   }
   if (typeof txId === "string") {
     const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64

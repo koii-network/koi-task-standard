@@ -12,18 +12,21 @@ export default async function cleanPreRegister(state) {
       }
     }
   });
-
-  await Promise.allSettled(
+  await Promise.all(
     contractIds.map(async (contractId) => {
-      const contractState = await SmartWeave.contracts.readContractState(
-        contractId
-      );
-      const registeredNfts = Object.keys(contractState.nfts);
-      state.preRegisterDatas = state.preRegisterDatas.filter(
-        (preRegisterData) =>
-          !registeredNfts.includes(preRegisterData.content.nft) &&
-          preRegisterData.insertBlock + 720 > SmartWeave.block.height
-      );
+      const contractState = await SmartWeave.contracts
+        .readContractState(contractId)
+        .catch((e) => {
+          if (e.type !== "TX_NOT_FOUND") throw e;
+        });
+      if (contractState) {
+        const registeredNfts = Object.keys(contractState.nfts);
+        state.preRegisterDatas = state.preRegisterDatas.filter(
+          (preRegisterData) =>
+            !registeredNfts.includes(preRegisterData.content.nft) &&
+            preRegisterData.insertBlock + 720 > SmartWeave.block.height
+        );
+      }
     })
   );
   state.cleanPreRegisterBlock = SmartWeave.block.height + 60;
