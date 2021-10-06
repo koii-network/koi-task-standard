@@ -71,13 +71,6 @@ async function execute(_init_state) {
   }
 }
 
-/*
-  bounty request api
-*/
-function getTask() {
-  let response = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  return response;
-}
 async function getAttentionStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
@@ -108,6 +101,7 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
+  if (!canScrape(state)) await getScrapingRequest();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
@@ -153,7 +147,6 @@ async function audit(state) {
   );
   hasAudited = true;
 }
-
 function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
@@ -171,6 +164,21 @@ function canAudit(state, block) {
   );
 }
 
+
+async function canScrape() {
+  
+}
+/*
+  bounty request api
+  @returns scraping url, bounty, uuid
+*/
+function getTask() {
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  return url;
+}
+function getScrapingRequest() {
+
+}
 /**
  * Awaitable rate limit
  * @returns
