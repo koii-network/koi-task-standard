@@ -48,6 +48,10 @@ async function root(_req, res) {
     .send(await tools.getState(namespace.taskTxId));
 }
 
+function getId(_req, res) {
+  res.status(200).send(namespace.taskTxId);
+}
+
 // Define the execution block (this will be triggered after setup is complete)
 async function execute(_init_state) {
   let state, block;
@@ -84,6 +88,7 @@ async function getAttentionStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
+      hasRewarded = false;
       hasRanked = false;
       hasDistributed = false;
       hasAudited = false;
@@ -110,8 +115,8 @@ async function service(state, block) {
   // if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
-  if (checkForVote(state, block)) await tryVote(state);
-  if (await checkProposeSlash(state, block)) await proposeSlash(state);
+  // if (checkForVote(state, block)) await tryVote(state);
+  // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
