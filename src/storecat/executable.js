@@ -183,9 +183,11 @@ async function canScrape(state, block) {
   bounty request api
   @returns scraping url, bounty, uuid
 */
-function getTask() {
+function getTask(state) {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  return url;
+  let return_url = "https://gmail.com";
+  state.task.scraping.uuid = ''
+  return return_url;
 }
 async function scrape() {}
 function getScrapingRequest() {
