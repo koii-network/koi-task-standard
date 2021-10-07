@@ -24,7 +24,6 @@ const arweave = Arweave.init({
   logging: false
 });
 
-const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
 
@@ -120,8 +119,7 @@ async function getNft(req, res) {
       nftState = {
         owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
         balances: attentionState.nfts[id],
-        tags: ["missing"],
-        createdAt: DEFAULT_CREATED_AT
+        tags: ["missing"]
       };
     }
 
@@ -166,11 +164,7 @@ async function getNftSummaries(req, res) {
         const id = nftIds[i];
         if (kohaku.isContractCached(id)) {
           const nftCachedState = JSON.parse(kohaku.readContractCache(id));
-          if (
-            oldestValidTimestamp >
-            (parseInt(nftCachedState.createdAt) || DEFAULT_CREATED_AT)
-          )
-            break;
+          if (oldestValidTimestamp > parseInt(nftCachedState.createdAt)) break;
         }
         nftMap[id] = {
           id,
