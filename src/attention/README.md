@@ -4,6 +4,78 @@
 </p>
 Attention contract is one of the koii task. The aim of the attention game is to rewards content creators and publishers relative to the amount of attention they get. 1,000 KOII are minted daily and awarded proportionally to owners based on the number of views relative to the ecosystem.
 
+## Endpoints Exposed by Attention Game:
+Here is the list of endpoints exposed by attention game.
+
+**Get Id**
+----
+  Returns json data about a single user.
+
+* **URL**
+
+  /id
+
+* **Method:**
+
+  `GET`
+* **Data Params**
+
+  None
+
+
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** ` "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s" `
+ 
+
+**PoRTs Cache**
+----
+  Returns json data about a single user.
+
+* **URL**
+
+  /cache
+
+* **Method:**
+
+  `GET`
+  
+
+* **Data Params**
+
+  None
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** `Array of Ports`
+ 
+**Get NFT**
+----
+  Returns json data about a NFT 
+
+* **URL**
+
+  /nft
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+   **Required:**
+ 
+   `id=[string]`
+
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** `Details about NFT`
+
 ## How does attention game work.
 
 In attention game there are 3 players;
@@ -374,7 +446,7 @@ export default async function migratePreRegister(state) {
 
 - rank the proposed payload and prepare a distribution where then read by the koii contract to reward the content creators based on the attention they get.
 
-```bash
+```js
 export default async function rankPrepDistribution(state) {
   const votes = state.votes;
   const task = state.task;
@@ -504,7 +576,7 @@ export default async function rankPrepDistribution(state) {
 
 - It updates the ownership of the NFTs.
 
-```bash
+```js
  export default async function syncOwnership(state, action) {
   const caller = action.caller;
   const input = action.input;
