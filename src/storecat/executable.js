@@ -29,6 +29,10 @@ const arweave = Arweave.init({
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 let lastBlock = 0;
 const OFFSET_PER_DAY = 720
+let hasRewarded = false;
+let hasRanked = false;
+let hasDistributed = false;
+let hasAudited = false;
 
 // You can also access and store files locally
 const logsInfo = {
