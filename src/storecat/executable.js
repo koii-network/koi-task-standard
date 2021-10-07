@@ -27,8 +27,14 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
-let lastBlock = 0;
 const OFFSET_PER_DAY = 720
+
+let lastBlock = 0;
+let lastLogClose = 0;
+let hasRewarded = false;
+let hasRanked = false;
+let hasDistributed = false;
+let hasAudited = false;
 
 // You can also access and store files locally
 const logsInfo = {
@@ -59,7 +65,7 @@ async function execute(_init_state) {
   for (;;) {
     await rateLimit();
     try {
-      [state, block] = await getAttentionStateAndBlock();
+      [state, block] = await getStorecatStateAndBlock();
     } catch (e) {
       console.error("Error while fetching attention state and block", e);
       continue;
@@ -72,7 +78,7 @@ async function execute(_init_state) {
   }
 }
 
-async function getAttentionStateAndBlock() {
+async function getStorecatStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
@@ -102,7 +108,7 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canRequestScrapingUrl(state)) await getTask();
+  // if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
@@ -178,11 +184,18 @@ async function canRequestScrapingUrl(state, block) {
     return true;
   else return false;
 }
+/*
+  Check owner whether scrape
+  @returns boolean
+*/
 async function canScrape(state, block) {
   const task = state.task;
   // per day is 720 block height
   if (block >= task.close) return false;
-  if (task.scraping === undefined) return false;
+  // if current owner already scraped : return true
+  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
+  if (isPayloader) return false;
+  return true
 }
 /*
   bounty request api
@@ -201,10 +214,6 @@ function getTask(state) {
   @returns scraping payload, hashpayload
 */
 async function scrape(state) {
-  const payloads = state.payloads;
-  const isPayloader = payloads.filter((p) => p.owner === tools.address);
-  if (isPayloader) return false;
-  // if scraping false return false 
   let payload = {
     content: {
       Image: [],
@@ -213,8 +222,7 @@ async function scrape(state) {
     }
   };
   let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  // const storecatState = await tools.getState(namespace.taskTxId);
-  // const payloads = Object.keys(storecatState.payloads);
+  // let payload = await getPayload(state.task.url)
   const userPayload = {};
   userPayload.payload = payload;
   userPayload.hashPayload = hashPayload;
