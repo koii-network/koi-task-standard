@@ -3,8 +3,8 @@
   "name": "Storecat",
   "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
   "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc",
-  "bestPayloader": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
-  "bestPayloadHash": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+  "bestPayloader": "",
+  "bestPayloadHash": "",
   "task": {
     "open": 101,
     "close": 850,
@@ -12,14 +12,14 @@
       "uuid": "60d9cf5970d912231cc4a230",
       "bounty": 1,
       "url": "https://npmjs.org",
-      "ranking": [
-        {
-          "payload": {},
-          "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-          "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
-        }
-      ],
       "isRewarded": false
     }
-  }
+  },
+  "payloads": [
+    {
+      "payload": {},
+      "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+      "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
+    }
+  ]
 }

@@ -196,7 +196,26 @@ function getTask(state) {
   state.task.scraping.url = return_url;
   return true;
 }
-async function scrape() {}
+/*
+  scrape : get scraping payload 
+  @returns scraping payload, hashpayload
+*/
+async function scrape(state) {
+  // if scraping false return false 
+  let payload = {
+    content: {
+      Image: [],
+      Text: [],
+      Link: []
+    }
+  };
+  let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
+  state.payload = payload;
+  state.hashPayload = hashPayload;
+  state.task.scraping.ranking
+  const storecatState = await tools.getState(namespace.taskTxId);
+  const payloads = Object.keys(storecatState.payloads);
+}
 function getScrapingRequest() {
 
 }
