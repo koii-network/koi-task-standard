@@ -28,6 +28,7 @@ const arweave = Arweave.init({
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 let lastBlock = 0;
+const OFFSET_PER_DAY = 720
 
 // You can also access and store files locally
 const logsInfo = {
@@ -101,7 +102,8 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canScrape(state)) await getScrapingRequest();
+  if (!canRequestScrapingUrl(state)) await getTask();
+  if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
@@ -164,17 +166,61 @@ function canAudit(state, block) {
   );
 }
 
-
-async function canScrape() {
-  
+async function canRequestScrapingUrl(state, block) {
+  const task = state.task;
+  // per day is 720 block height
+  if (block >= task.close) return false;
+  if (
+    task.scraping === undefined ||
+    task.scraping.uuid === undefined ||
+    task.scraping.uuid === ""
+  )
+    return true;
+  else return false;
+}
+async function canScrape(state, block) {
+  const task = state.task;
+  // per day is 720 block height
+  if (block >= task.close) return false;
+  if (task.scraping === undefined) return false;
 }
 /*
   bounty request api
   @returns scraping url, bounty, uuid
 */
-function getTask() {
-  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  return url;
+function getTask(state) {
+  // let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  let return_url = "https://gmail.com";
+  state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
+  state.task.scraping.bounty = 1;
+  state.task.scraping.url = return_url;
+  return true;
+}
+/*
+  scrape : get scraping payload 
+  @returns scraping payload, hashpayload
+*/
+async function scrape(state) {
+  const payloads = state.payloads;
+  const isPayloader = payloads.filter((p) => p.owner === tools.address);
+  if (isPayloader) return false;
+  // if scraping false return false 
+  let payload = {
+    content: {
+      Image: [],
+      Text: [],
+      Link: []
+    }
+  };
+  let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
+  // const storecatState = await tools.getState(namespace.taskTxId);
+  // const payloads = Object.keys(storecatState.payloads);
+  const userPayload = {};
+  userPayload.payload = payload;
+  userPayload.hashPayload = hashPayload;
+  userPayload.owner = tools.address;
+  state.payloads.push(userPayload);
+  return true;
 }
 function getScrapingRequest() {
 

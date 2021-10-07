@@ -3,23 +3,23 @@
   "name": "Storecat",
   "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
   "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc",
-  "bestPayloader": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-  "bestPayload": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-adsewer",
+  "bestPayloader": "",
+  "bestPayloadHash": "",
   "task": {
     "open": 101,
-    "close": 1050,
+    "close": 850,
     "scraping": {
-      "uuid": "1",
+      "uuid": "60d9cf5970d912231cc4a230",
       "bounty": 1,
-      "url": "https://google.com",
-      "ranking": [
-        {
-          "payload": "",
-          "hashPayload": "",
-          "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo"
-        }
-      ],
+      "url": "https://npmjs.org",
       "isRewarded": false
     }
-  }
+  },
+  "payloads": [
+    {
+      "payload": {},
+      "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+      "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
+    }
+  ]
 }
