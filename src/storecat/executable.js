@@ -187,9 +187,7 @@ function getTask() {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
   return url;
 }
-async function scrape() {
-  
-}
+async function scrape() {}
 function getScrapingRequest() {
 
 }
