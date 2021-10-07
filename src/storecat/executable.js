@@ -102,7 +102,7 @@ async function getAttentionStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canRequestScrapingUrl(state)) await getScrapingRequest();
+  if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
   // if (canAudit(state, block)) await audit(state);
@@ -166,11 +166,16 @@ function canAudit(state, block) {
   );
 }
 
-
 async function canRequestScrapingUrl(state, block) {
   const task = state.task;
   // per day is 720 block height
-  if (task.scraping === undefined) return true;
+  if (block >= task.close) return false;
+  if (
+    task.scraping === undefined ||
+    task.scraping.uuid === undefined ||
+    task.scraping.uuid === ""
+  )
+    return true;
   else return false;
 }
 async function canScrape(state, block) {
@@ -184,10 +189,12 @@ async function canScrape(state, block) {
   @returns scraping url, bounty, uuid
 */
 function getTask(state) {
-  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  // let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
   let return_url = "https://gmail.com";
-  state.task.scraping.uuid = ''
-  return return_url;
+  state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
+  state.task.scraping.bounty = 1;
+  state.task.scraping.url = return_url;
+  return true;
 }
 async function scrape() {}
 function getScrapingRequest() {
