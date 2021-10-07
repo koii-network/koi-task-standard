@@ -214,10 +214,6 @@ function getTask(state) {
   @returns scraping payload, hashpayload
 */
 async function scrape(state) {
-  const payloads = state.payloads;
-  const isPayloader = payloads.filter((p) => p.owner === tools.address);
-  if (isPayloader) return false;
-  // if scraping false return false 
   let payload = {
     content: {
       Image: [],
@@ -226,8 +222,7 @@ async function scrape(state) {
     }
   };
   let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  // const storecatState = await tools.getState(namespace.taskTxId);
-  // const payloads = Object.keys(storecatState.payloads);
+  // let payload = await getPayload(state.task.url)
   const userPayload = {};
   userPayload.payload = payload;
   userPayload.hashPayload = hashPayload;
