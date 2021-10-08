@@ -232,7 +232,7 @@ async function getPayload(url) {
       takeScreenshot: false
     });
     console.log(html)
-    // const scrapingData = await ScraperUtil.getPayload(html);
+    const scrapingData = await ScraperUtil.getPayload(html);
     // console.log(
     //   "**************** finished scraping *******************",
     //   scrapingData

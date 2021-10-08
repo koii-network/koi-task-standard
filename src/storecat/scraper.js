@@ -37,9 +37,34 @@ const parseAndSaveAllSelctor = async ($, selector, contentType) => {
 };
 
 const getPayload = async (html) => {
-
-}
-export { 
-  parseAndSaveAllSelctor,
-  getPayload
+  let $ = await cheerio.load(html);
+  $("script").remove();
+  $("style").remove();
+  $("noscript").remove();
+  $("link").remove();
+  var payload = {
+    title: "",
+    content: "",
+    image: ""
+  };
+  var title = "";
+  // eslint-disable-next-line no-cond-assign
+  if ((title = $('meta[property="og:title"]').attr("content"))) {
+    payload.title = title;
+    // eslint-disable-next-line no-cond-assign
+  } else if ((title = $("meta[name=title]").attr("content"))) {
+    payload.title = title;
+  } else {
+    $("h1,h2,h3,h4,h5,h6,p").each(function (i, elem) {
+      if (i === 0) {
+        title = $(elem).text().trim();
+      }
+    });
+    if (!title) {
+      title = $("title").text().trim();
+    }
+    payload.title = title;
+  }
+  return payload;
 };
+export { parseAndSaveAllSelctor, getPayload };
