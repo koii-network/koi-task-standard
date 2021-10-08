@@ -113,10 +113,8 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   // if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
-  // if (canProposePorts(state, block)) await proposePorts();
   if (canAudit(state, block)) await audit(state);
-  // if (canSubmitBatch(state, block)) await submitBatch(state);
-  // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
+  if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
   // if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
@@ -146,9 +144,6 @@ function canRankPrepDistribution(state, block) {
 */
 async function audit(state) {
   const task = state.task;
-  // const activeProposedData = task.proposedPayloads.find(
-  //   (proposedData) => proposedData.block === task.open
-  // );
   const address = tools.address;
   // check payload ranking
   hasAudited = true;
