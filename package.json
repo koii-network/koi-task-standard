@@ -16,7 +16,8 @@
     "@weavery/clarity": "^0.1.5",
     "arweave": "^1.10.14",
     "bignumber.js": "^9.0.1",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "puppeteer-cluster": "^0.22.0"
   },
   "devDependencies": {
     "@_koi/sdk": "^2.4.0-beta.4",
