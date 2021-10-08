@@ -122,6 +122,24 @@ async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
+
+function canRankPrepDistribution(state, block) {
+  const task = state.task;
+  if (
+    block < task.close || // not time to rank and distribute or
+    hasRanked // we've already rank and distribute
+  )
+    return false;
+
+  // If proposed payloads are empty, just rank anyways to start next game
+  if (task.proposedPayloads.length === 0) return true;
+
+  const currentTrafficLogs = task.proposedPayloads.find(
+    (proposedTask) => proposedTask.block === task.open
+  );
+  hasRanked = currentTrafficLogs.isRanked;
+  return !hasRanked;
+}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
