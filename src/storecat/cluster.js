@@ -34,7 +34,37 @@ module.exports = {
 						}) :
 						originalQuery(parameters));
 			});
-			
+			await page.evaluateOnNewDocument(() => {
+				// Overwrite the `plugins` property to use a custom getter.
+				Object.defineProperty(navigator, 'plugins', {
+					// This just needs to have `length > 0` for the current test,
+					// but we could mock the plugins too if necessary.
+					get: () => [1, 2, 3, 4, 5],
+				});
+			});
+			// Pass the Languages Test.
+			await page.evaluateOnNewDocument(() => {
+				// Overwrite the `plugins` property to use a custom getter.
+				Object.defineProperty(navigator, 'languages', {
+					get: () => ['en-US', 'en'],
+				});
+			});
+			await page.goto(data.url);
+			const html = await page.content();
+			if (data.takeScreenshot) {
+				await page.setViewport({
+					width: 1920,
+					height: 1080
+				});
+				await page.screenshot({
+					path: data.imagePath,
+					type: 'jpeg',
+				});
+				return {
+					imagePath: data.imagePath,
+					html
+				};
+			}
 			return {
 				html
 			};
