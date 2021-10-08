@@ -84,6 +84,43 @@ const parseAndSaveAllSelctor = async ($, selector, contentType) => {
   return totalContent;
 };
 
+const getScrapData = async (html) => {
+  let $ = await cheerio.load(html);
+
+  //If element consists main tag
+  if ($("main").length) {
+    // console.log('Contains main tag');
+    $ = await cheerio.load($("main").html());
+  }
+  $("script").remove();
+  $("style").remove();
+  $("nav").remove();
+  $("head").remove();
+  $("noscript").remove();
+  $("link").remove();
+  $("meta").remove();
+  $("footer").remove();
+
+  const dataImage = await module.exports.parseAndSaveAllSelctor(
+    $,
+    "img",
+    "Image"
+  );
+  const dataLink = await module.exports.parseAndSaveAllSelctor($, "a", "Link");
+  const dataText = await module.exports.parseAndSaveAllSelctor(
+    $,
+    "h1, h2, h3, h4, h5, span, p",
+    "Text"
+  );
+  // console.log(dataImage)
+  // console.log(dataLink)
+  // console.log(dataText)
+  return {
+    Image: dataImage,
+    Link: dataLink,
+    Text: dataText
+  };
+};
 const getPayload = async (html) => {
   let $ = await cheerio.load(html);
   $("script").remove();
@@ -113,40 +150,21 @@ const getPayload = async (html) => {
     }
     payload.title = title;
   }
+  var image = "";
+  // image: meta:ogimage OR document.images[0]
+  // eslint-disable-next-line no-cond-assign
+  if ((image = $('meta[property="og:image"]').attr("content"))) {
+    payload.image = image;
+  } else {
+    $("img").each(function (i, elem) {
+      if (i === 0) {
+        image = $(this).attr("src");
+      }
+    });
+    payload.image = image;
+  }
+  payload.content = await getScrapData($("body").html());
   return payload;
 };
 
-const getScrapData = async (html) => {
-  let $ = await cheerio.load(html);
-
-  //If element consists main tag
-  if ($("main").length) {
-    // console.log('Contains main tag');
-    $ = await cheerio.load($("main").html());
-  }
-  $("script").remove();
-  $("style").remove();
-  $("nav").remove();
-  $("head").remove();
-  $("noscript").remove();
-  $("link").remove();
-  $("meta").remove();
-  $("footer").remove();
-
-  const dataImage = await parseAndSaveAllSelctor($, "img", "Image");
-  const dataLink = await parseAndSaveAllSelctor($, "a", "Link");
-  const dataText = await parseAndSaveAllSelctor(
-    $,
-    "h1, h2, h3, h4, h5, span, p",
-    "Text"
-  );
-  // console.log(dataImage)
-  // console.log(dataLink)
-  // console.log(dataText)
-  return {
-    Image: dataImage,
-    Link: dataLink,
-    Text: dataText
-  };
-};
 export { parseAndSaveAllSelctor, getPayload };
