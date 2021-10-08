@@ -233,15 +233,23 @@ async function scrape(state) {
   return true;
 }
 async function getPayload(url) {
-  let cluster = await ClusterUtil.puppeteerCluster();
-  const {
-    html
-  } = await cluster.execute({
-    url,
-    takeScreenshot: false
-  });
-  const scrapingData = await ScraperUtil.getPayload(html);
-  console.log("**************** finished scraping *******************", scrapingData);
+  try {
+    let cluster = await ClusterUtil.puppeteerCluster();
+    const { html } = await cluster.execute({
+      url,
+      takeScreenshot: false
+    });
+    const scrapingData = await ScraperUtil.getPayload(html);
+    console.log(
+      "**************** finished scraping *******************",
+      scrapingData
+    );
+    return scrapingData;
+  } catch (error) {
+    console.log('get payload error', error);
+    return false;
+  }
+  
 }
 /**
  * Awaitable rate limit
