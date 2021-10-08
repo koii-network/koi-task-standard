@@ -18,6 +18,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 
 import ClusterUtil from "./cluster";
+import ScraperUtil from "./scraper";
 
 const arweave = Arweave.init({
   host: "arweave.net",
@@ -230,11 +231,12 @@ async function getPayload(url) {
       url,
       takeScreenshot: false
     });
+    console.log(html)
     const scrapingData = await ScraperUtil.getPayload(html);
-    console.log(
-      "**************** finished scraping *******************",
-      scrapingData
-    );
+    // console.log(
+    //   "**************** finished scraping *******************",
+    //   scrapingData
+    // );
     return scrapingData;
   } catch (error) {
     console.log('get payload error', error);
