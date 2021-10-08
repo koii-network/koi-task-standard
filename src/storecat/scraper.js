@@ -31,6 +31,54 @@ const parseAndSaveAllSelctor = async ($, selector, contentType) => {
       for (let i = subSelectorsArr.length - 1; i >= 0; i--) {
         subSelector += `>${subSelectorsArr[i]}`;
       }
+      if ($(element)[0] && $(element)[0].name) {
+        const elementType = $(element)[0].name;
+        let modifiedClassNames = ""; //contains .
+        let modifiedIds = ""; //contains #
+
+        if (classNames) {
+          modifiedClassNames = `[class='${classNames}']`;
+        }
+        if (ids) {
+          modifiedIds = `[id='${ids}']`;
+        }
+        let finalSelector = `${elementType}`;
+        if (modifiedClassNames) finalSelector += `${modifiedClassNames}`;
+        if (modifiedIds) finalSelector += `${modifiedIds}`;
+        finalSelector += subSelector;
+        let found = false;
+        if ($(finalSelector).length >= 0) {
+          $(finalSelector).each(async (i, item) => {
+            if (selector === "img") {
+              content = $(item).attr("src");
+            } else if (selector === "a") {
+              content = $(item).attr("href");
+            } else {
+              content = $(item).text().trim();
+            }
+            if (!found) {
+              // finalSelectorIndex = i;
+              let finalSelectorWithIndex = `${i}$` + finalSelector;
+              if (
+                content &&
+                content.trim() !== "" &&
+                content[0] !== "#" &&
+                totalContent.filter((x) => x.text === content).length === 0
+              ) {
+                totalContent.push({
+                  text: content,
+                  type: contentType,
+                  selector: finalSelectorWithIndex,
+                  label: "sitemap " + contentType
+                });
+                found = true;
+              }
+            }
+          });
+        }
+      } else {
+        return;
+      }
     }
   });
   return totalContent;
@@ -72,22 +120,26 @@ const getScrapData = async (html) => {
   let $ = await cheerio.load(html);
 
   //If element consists main tag
-  if ($('main').length) {
+  if ($("main").length) {
     // console.log('Contains main tag');
-    $ = await cheerio.load($('main').html());
+    $ = await cheerio.load($("main").html());
   }
-  $('script').remove();
-  $('style').remove();
-  $('nav').remove();
-  $('head').remove();
-  $('noscript').remove();
-  $('link').remove();
-  $('meta').remove();
-  $('footer').remove();
+  $("script").remove();
+  $("style").remove();
+  $("nav").remove();
+  $("head").remove();
+  $("noscript").remove();
+  $("link").remove();
+  $("meta").remove();
+  $("footer").remove();
 
-  const dataImage = await parseAndSaveAllSelctor($, 'img', 'Image')
-  const dataLink = await parseAndSaveAllSelctor($, 'a', 'Link')
-  const dataText = await parseAndSaveAllSelctor($, 'h1, h2, h3, h4, h5, span, p', 'Text')
+  const dataImage = await parseAndSaveAllSelctor($, "img", "Image");
+  const dataLink = await parseAndSaveAllSelctor($, "a", "Link");
+  const dataText = await parseAndSaveAllSelctor(
+    $,
+    "h1, h2, h3, h4, h5, span, p",
+    "Text"
+  );
   // console.log(dataImage)
   // console.log(dataLink)
   // console.log(dataText)
@@ -95,6 +147,6 @@ const getScrapData = async (html) => {
     Image: dataImage,
     Link: dataLink,
     Text: dataText
-  }
-}
+  };
+};
 export { parseAndSaveAllSelctor, getPayload };
