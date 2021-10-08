@@ -11,7 +11,7 @@ const arweave = Arweave.init({
 });
 
 const walletPath = process.env.WALLET_LOCATION;
-const wallet = JSON.parse(fs.readFileSync("../wallet-new-contract.json"));
+const wallet = JSON.parse(fs.readFileSync(walletPath));
 
 //const contractId = "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"; // test attention contract
 const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // test koii Contract
