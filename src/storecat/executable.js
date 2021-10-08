@@ -35,7 +35,7 @@ const OFFSET_PER_DAY = 720
 let lastBlock = 0;
 let lastLogClose = 0;
 let hasRewarded = false;
-let hasRanked = false;
+let hasScraped = false;
 let hasDistributed = false;
 let hasAudited = false;
 
@@ -91,10 +91,10 @@ async function getStorecatStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
-      hasRewarded = false;
-      hasRanked = false;
-      hasDistributed = false;
+      hasScraped = false;
       hasAudited = false;
+      hasDistributed = false;
+      hasRewarded = false;
     }
 
     lastLogClose = logClose;
@@ -122,23 +122,6 @@ async function witness(state, block) {
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 
-function canRankPrepDistribution(state, block) {
-  const task = state.task;
-  if (
-    block < task.close || // not time to rank and distribute or
-    hasRanked // we've already rank and distribute
-  )
-    return false;
-
-  // If proposed payloads are empty, just rank anyways to start next game
-  if (task.proposedPayloads.length === 0) return true;
-
-  const currentTrafficLogs = task.proposedPayloads.find(
-    (proposedTask) => proposedTask.block === task.open
-  );
-  hasRanked = currentTrafficLogs.isRanked;
-  return !hasRanked;
-}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
@@ -153,12 +136,17 @@ function canAudit(state, block) {
   if (block >= task.close) return false;
 
   const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
-
+  // hasAudited = true;
   return (
     block < task.open + OFFSET_PER_DAY && // block in time frame
-    !hasAudited && // ports not submitted
-    isPayloader
+    !hasAudited && isPayloader
   );
+}
+
+function canWritePayloadInPermaweb(state, block) {
+  if (block < task.open + OFFSET_PER_DAY) return false;
+  if (block > task.close) return false;
+  return (hasScraped && hasAudited && !hasDistributed);
 }
 
 async function canRequestScrapingUrl(state, block) {
@@ -217,6 +205,7 @@ async function scrape(state) {
   userPayload.hashPayload = hashPayload;
   userPayload.owner = tools.address;
   state.payloads.push(userPayload);
+  hasScraped = true
   return true;
 }
 async function getPayload(url) {
