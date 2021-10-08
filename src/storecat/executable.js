@@ -127,34 +127,11 @@ async function witness(state, block) {
 */
 async function audit(state) {
   const task = state.task;
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
+  // const activeProposedData = task.proposedPayloads.find(
+  //   (proposedData) => proposedData.block === task.open
+  // );
   const address = tools.address;
-  const proposedData = activeProposedData.proposedData;
-  await Promise.allSettled(
-    proposedData.map(async (proposedData) => {
-      if (proposedData.distributer !== address) {
-        const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
-        if (!valid) {
-          const input = {
-            function: "audit",
-            id: proposedData.txId
-          };
-          const task = "submit audit";
-          const tx = await kohaku.interactWrite(
-            arweave,
-            tools.wallet,
-            namespace.taskTxId,
-            input
-          );
-
-          if (await checkTxConfirmation(tx, task))
-            console.log("audit submitted");
-        }
-      }
-    })
-  );
+  // check payload ranking
   hasAudited = true;
 }
 function canAudit(state, block) {
