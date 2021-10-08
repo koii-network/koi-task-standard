@@ -113,7 +113,7 @@ async function service(state, block) {
   // if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
-  // if (canAudit(state, block)) await audit(state);
+  if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
   // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   // if (canDistributeReward(state)) await distribute();
@@ -161,16 +161,12 @@ function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
 
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-
-  const proposedData = activeProposedData.proposedData;
+  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
 
   return (
-    block < task.open + OFFSET_BATCH_VOTE_SUBMIT && // block in time frame
+    block < task.open + OFFSET_PER_DAY && // block in time frame
     !hasAudited && // ports not submitted
-    proposedData.length !== 0
+    isPayloader
   );
 }
 
