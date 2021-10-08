@@ -67,4 +67,34 @@ const getPayload = async (html) => {
   }
   return payload;
 };
+
+const getScrapData = async (html) => {
+  let $ = await cheerio.load(html);
+
+  //If element consists main tag
+  if ($('main').length) {
+    // console.log('Contains main tag');
+    $ = await cheerio.load($('main').html());
+  }
+  $('script').remove();
+  $('style').remove();
+  $('nav').remove();
+  $('head').remove();
+  $('noscript').remove();
+  $('link').remove();
+  $('meta').remove();
+  $('footer').remove();
+
+  const dataImage = await parseAndSaveAllSelctor($, 'img', 'Image')
+  const dataLink = await parseAndSaveAllSelctor($, 'a', 'Link')
+  const dataText = await parseAndSaveAllSelctor($, 'h1, h2, h3, h4, h5, span, p', 'Text')
+  // console.log(dataImage)
+  // console.log(dataLink)
+  // console.log(dataText)
+  return {
+    Image: dataImage,
+    Link: dataLink,
+    Text: dataText
+  }
+}
 export { parseAndSaveAllSelctor, getPayload };
