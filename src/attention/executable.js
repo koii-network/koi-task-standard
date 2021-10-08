@@ -199,8 +199,15 @@ async function getNftSummaries(req, res) {
     }
 
     // Sort and send nft summaries
-    const nftSummaryArr = Object.values(nftMap);
-    if (period === "new") nftSummaryArr.reverse();
+    let nftSummaryArr = Object.values(nftMap);
+    if (period === "hot") {
+      // add index squared to sort by hot
+      const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
+      hotArr.sort(
+        (a, b) => b[0].attention + b[1] * b[1] - (a[0].attention + a[1] * a[1])
+      );
+      nftSummaryArr = hotArr.map((ele) => ele[0]);
+    } else if (period === "new") nftSummaryArr.reverse();
     else if (period !== "old")
       nftSummaryArr.sort((a, b) => b.attention - a.attention);
     res.status(200).send(nftSummaryArr);
