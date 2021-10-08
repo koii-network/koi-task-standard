@@ -115,7 +115,7 @@ async function service(state, block) {
   if (!canScrape(state, block)) await scrape();
   if (canAudit(state, block)) await audit(state);
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
-  // if (canDistributeReward(state)) await distribute();
+  if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -141,6 +141,18 @@ function canAudit(state, block) {
     block < task.open + OFFSET_PER_DAY && // block in time frame
     !hasAudited && isPayloader
   );
+}
+
+async function writePayloadInPermaweb(){
+
+}
+
+function canDistributeReward(state){
+
+}
+
+async function distribute(){
+
 }
 
 function canWritePayloadInPermaweb(state, block) {
