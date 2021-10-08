@@ -113,7 +113,7 @@ async function service(state, block) {
   // if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
   // if (canProposePorts(state, block)) await proposePorts();
-  // if (canAudit(state, block)) await audit(state);
+  if (canAudit(state, block)) await audit(state);
   // if (canSubmitBatch(state, block)) await submitBatch(state);
   // if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
   // if (canDistributeReward(state)) await distribute();
@@ -122,55 +122,46 @@ async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
+
+function canRankPrepDistribution(state, block) {
+  const task = state.task;
+  if (
+    block < task.close || // not time to rank and distribute or
+    hasRanked // we've already rank and distribute
+  )
+    return false;
+
+  // If proposed payloads are empty, just rank anyways to start next game
+  if (task.proposedPayloads.length === 0) return true;
+
+  const currentTrafficLogs = task.proposedPayloads.find(
+    (proposedTask) => proposedTask.block === task.open
+  );
+  hasRanked = currentTrafficLogs.isRanked;
+  return !hasRanked;
+}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
   const task = state.task;
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
+  // const activeProposedData = task.proposedPayloads.find(
+  //   (proposedData) => proposedData.block === task.open
+  // );
   const address = tools.address;
-  const proposedData = activeProposedData.proposedData;
-  await Promise.allSettled(
-    proposedData.map(async (proposedData) => {
-      if (proposedData.distributer !== address) {
-        const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
-        if (!valid) {
-          const input = {
-            function: "audit",
-            id: proposedData.txId
-          };
-          const task = "submit audit";
-          const tx = await kohaku.interactWrite(
-            arweave,
-            tools.wallet,
-            namespace.taskTxId,
-            input
-          );
-
-          if (await checkTxConfirmation(tx, task))
-            console.log("audit submitted");
-        }
-      }
-    })
-  );
+  // check payload ranking
   hasAudited = true;
 }
 function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
 
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-
-  const proposedData = activeProposedData.proposedData;
+  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
 
   return (
-    block < task.open + OFFSET_BATCH_VOTE_SUBMIT && // block in time frame
+    block < task.open + OFFSET_PER_DAY && // block in time frame
     !hasAudited && // ports not submitted
-    proposedData.length !== 0
+    isPayloader
   );
 }
 
