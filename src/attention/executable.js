@@ -151,8 +151,9 @@ async function getNftSummaries(req, res) {
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
 
+    const period = req.query.period; // TODO rename period to filter or sort
     const nftMap = {};
-    const days = PERIOD_MAP[req.query.period];
+    const days = PERIOD_MAP[period];
     if (days) {
       // Filter by day
       const unixNow = Math.round(Date.now() / 1000);
@@ -199,7 +200,9 @@ async function getNftSummaries(req, res) {
 
     // Sort and send nft summaries
     const nftSummaryArr = Object.values(nftMap);
-    nftSummaryArr.sort((a, b) => b.attention - a.attention);
+    if (period === "new") nftSummaryArr.reverse();
+    else if (period !== "old")
+      nftSummaryArr.sort((a, b) => b.attention - a.attention);
     res.status(200).send(nftSummaryArr);
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
