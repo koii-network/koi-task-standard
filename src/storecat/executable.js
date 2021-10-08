@@ -232,8 +232,16 @@ async function scrape(state) {
   state.payloads.push(userPayload);
   return true;
 }
-function getScrapingRequest() {
-
+async function getPayload(url) {
+  let cluster = await ClusterUtil.puppeteerCluster();
+  const {
+    html
+  } = await cluster.execute({
+    url,
+    takeScreenshot: false
+  });
+  const scrapingData = await ScraperUtil.getPayload(html);
+  console.log("**************** finished scraping *******************", scrapingData);
 }
 /**
  * Awaitable rate limit
