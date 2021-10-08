@@ -17,7 +17,7 @@ const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
 
-import ClusterUtil = require('./cluster')
+import ClusterUtil from "./cluster";
 
 const arweave = Arweave.init({
   host: "arweave.net",
