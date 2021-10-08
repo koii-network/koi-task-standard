@@ -30,7 +30,7 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
-const OFFSET_PER_DAY = 720
+const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -139,16 +139,24 @@ function canAudit(state, block) {
   // hasAudited = true;
   return (
     block < task.open + OFFSET_PER_DAY && // block in time frame
-    !hasAudited && isPayloader
+    !hasAudited &&
+    isPayloader
   );
 }
 
-async function writePayloadInPermaweb(){
-
+async function writePayloadInPermaweb() {
+  console.log("payload submit to arweave")
 }
 
-function canDistributeReward(state){
+function canDistributeReward() {
+  if (hasDistributed) return false;
 
+  // const prepareDistribution = subContractState.task.prepareDistribution;
+  // // check if there is not rewarded distributions
+  // const unrewardedDistribution = prepareDistribution.filter(
+  //   (distribution) => !distribution.isRewarded
+  // );
+  return hasScraped && hasAudited;
 }
 
 async function distribute(){
@@ -219,7 +227,7 @@ async function scrape(state) {
   userPayload.hashPayload = hashPayload;
   userPayload.owner = tools.address;
   state.payloads.push(userPayload);
-  hasScraped = true
+  hasScraped = true;
   return true;
 }
 async function getPayload(url) {
