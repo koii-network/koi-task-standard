@@ -212,6 +212,8 @@ async function scrape(state) {
   };
   let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
   // let payload = await getPayload(state.task.url)
+  // hash = md5(JSON.stringify(scrapingData))
+  // state.hashPayload = hash
   const userPayload = {};
   userPayload.payload = payload;
   userPayload.hashPayload = hashPayload;
@@ -227,12 +229,11 @@ async function getPayload(url) {
       url,
       takeScreenshot: false
     });
-    console.log(html)
     const scrapingData = await ScraperUtil.getPayload(html);
-    // console.log(
-    //   "**************** finished scraping *******************",
-    //   scrapingData
-    // );
+    console.log(
+      "**************** finished scraping *******************",
+      scrapingData
+    );
     return scrapingData;
   } catch (error) {
     console.log('get payload error', error);
