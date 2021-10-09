@@ -123,29 +123,48 @@ async function witness(state, block) {
 }
 
 /*
+  canAudit : is it possible to audit
+  return : boolean
+*/
+function canAudit(state, block) {
+  const task = state.task;
+  if (block >= task.close) return false;
+  if (block < task.open + OFFSET_PER_DAY) {
+    // string scraping require
+    return false;
+  }
+  if (hasAudited) return false;
+
+  if (state.payloads && state.payloads.length > 0) {
+    return true;
+  }
+}
+/*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
   const task = state.task;
   const address = tools.address;
   // check payload ranking
-  hasAudited = true;
-}
-function canAudit(state, block) {
-  const task = state.task;
-  if (block >= task.close) return false;
+  // const input = {
+  //   function: "audit",
+  //   id: proposedData.txId
+  // };
+  // const task = "submit audit";
+  // const tx = await kohaku.interactWrite(
+  //   arweave,
+  //   tools.wallet,
+  //   namespace.taskTxId,
+  //   input
+  // );
 
-  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
-  // hasAudited = true;
-  return (
-    block < task.open + OFFSET_PER_DAY && // block in time frame
-    !hasAudited &&
-    isPayloader
-  );
+  // if (await checkTxConfirmation(tx, task))
+  //   console.log("audit submitted");
+  hasAudited = true;
 }
 
 async function writePayloadInPermaweb() {
-  console.log("payload submit to arweave")
+  console.log("payload submit to arweave");
 }
 
 function canDistributeReward() {
