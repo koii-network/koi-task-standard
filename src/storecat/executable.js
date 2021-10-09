@@ -134,18 +134,19 @@ async function audit(state) {
 function canAudit(state, block) {
   const task = state.task;
   if (block >= task.close) return false;
+  if (block < task.open + OFFSET_PER_DAY){
+    // string scraping require
+    return false;
+  }
+  if (hasAudited) return false;
 
-  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
-  // hasAudited = true;
-  return (
-    block < task.open + OFFSET_PER_DAY && // block in time frame
-    !hasAudited &&
-    isPayloader
-  );
+  if (state.payloads && state.payloads.length > 0){
+    return true;
+  }
 }
 
 async function writePayloadInPermaweb() {
-  console.log("payload submit to arweave")
+  console.log("payload submit to arweave");
 }
 
 function canDistributeReward() {
