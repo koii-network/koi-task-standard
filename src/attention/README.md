@@ -70,11 +70,73 @@ Here is the list of endpoints exposed by attention game.
  
    `id=[string]`
 
+**Get NFT_summaries**
+----
+  Returns json data about a attention and rewards earned by all  NFTs.
+
+* **URL**
+
+  /nft-summaries
+
+* **Method:**
+
+  `GET`
+  
 
 * **Success Response:**
 
   * **Code:** 200 <br />
-    **Content:** `Details about NFT`
+    **Content:** `Json array containing attention and rewards earned by NFTs`
+
+**Submit PoRT**
+----
+ This endpoint is used to submit Proofs of Real Traffic 
+
+* **URL**
+
+  /submit-port
+
+* **Method:**
+
+  `POST`
+  
+
+* **Data Params**
+
+  ```
+  {
+  x-request-signature 
+  request-public-key
+  }
+  ```
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+ 
+**Get Realtime attention**
+----
+  Returns realtime attention for a NFT
+
+* **URL**
+
+  /realtime-attention
+
+* **Method:**
+
+  `GET`
+
+  **URL Params**
+
+   **Required:**
+ 
+   `id=[string]`
+  
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** `Json array containing attention and rewards earned by NFTs`
 
 ## How does attention game work.
 
