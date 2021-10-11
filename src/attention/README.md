@@ -136,7 +136,34 @@ Here is the list of endpoints exposed by attention game.
 * **Success Response:**
 
   * **Code:** 200 <br />
-    **Content:** `Json array containing attention and rewards earned by NFTs`
+    **Content:** `Number of NFT views from last 24 hours`
+**Submit Vote **
+----
+ This endpoint  is for witness node where they submit their vote to service nodes if a vote is triggered after auditing.
+
+* **URL**
+
+  /submit-vote
+
+* **Method:**
+
+  `POST`
+  
+
+* **Data Params**
+
+  ```
+  {
+  vote
+  sender address
+  signature
+  owner
+  }
+  ```
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
 
 ## How does attention game work.
 
