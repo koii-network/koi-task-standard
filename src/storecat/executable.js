@@ -169,12 +169,6 @@ async function writePayloadInPermaweb() {
 
 function canDistributeReward() {
   if (hasDistributed) return false;
-
-  // const prepareDistribution = subContractState.task.prepareDistribution;
-  // // check if there is not rewarded distributions
-  // const unrewardedDistribution = prepareDistribution.filter(
-  //   (distribution) => !distribution.isRewarded
-  // );
   return hasScraped && hasAudited;
 }
 
@@ -189,14 +183,6 @@ function canWritePayloadInPermaweb(state, block) {
 }
 
 async function canRequestScrapingUrl(state, block) {
-  // const task = state.task;
-  // find a task from tasks
-  const task = state.tasks.find((t) => !t.isClose);
-  if (!task) {
-    console.log("There is no task for scraping");
-    return false;
-  }
-  // per day is 720 block height
   if (block >= task.close) return false;
   if (
     task.scraping === undefined ||
@@ -211,7 +197,12 @@ async function canRequestScrapingUrl(state, block) {
   @returns boolean
 */
 async function canScrape(state, block) {
-  const task = state.task;
+  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  if (taskIndex < 0) {
+    console.log("There is no task for scraping");
+    return false;
+  }
+  const task = state.tasks[taskIndex];
   // per day is 720 block height
   if (block >= task.close) return false;
   // if current owner already scraped : return true
