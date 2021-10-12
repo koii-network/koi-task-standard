@@ -201,7 +201,7 @@ async function canScrape(state, block) {
   // if current owner already scraped : return true
   const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
   if (isPayloader) return false;
-  return true
+  return true;
 }
 /*
   bounty request api
@@ -237,6 +237,18 @@ async function scrape(state) {
   userPayload.owner = tools.address;
   state.payloads.push(userPayload);
   hasScraped = true;
+  // call interactWrite function
+  // updatePayload
+  const input = {
+    function: "audit",
+    id: proposedData.txId
+  };
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
   return true;
 }
 async function getPayload(url) {
