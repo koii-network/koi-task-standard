@@ -24,7 +24,6 @@ const arweave = Arweave.init({
   logging: false
 });
 
-const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
 
@@ -119,8 +118,7 @@ async function getNft(req, res) {
       nftState = {
         owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
         balances: attentionState.nfts[id],
-        tags: ["missing"],
-        createdAt: DEFAULT_CREATED_AT
+        tags: ["missing"]
       };
     }
 
@@ -152,8 +150,9 @@ async function getNftSummaries(req, res) {
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
 
+    const period = req.query.period; // TODO rename period to filter or sort
     const nftMap = {};
-    const days = PERIOD_MAP[req.query.period];
+    const days = PERIOD_MAP[period];
     if (days) {
       // Filter by day
       const unixNow = Math.round(Date.now() / 1000);
@@ -165,11 +164,7 @@ async function getNftSummaries(req, res) {
         const id = nftIds[i];
         if (kohaku.isContractCached(id)) {
           const nftCachedState = JSON.parse(kohaku.readContractCache(id));
-          if (
-            oldestValidTimestamp >
-            (parseInt(nftCachedState.createdAt) || DEFAULT_CREATED_AT)
-          )
-            break;
+          if (oldestValidTimestamp > parseInt(nftCachedState.createdAt)) break;
         }
         nftMap[id] = {
           id,
@@ -203,8 +198,17 @@ async function getNftSummaries(req, res) {
     }
 
     // Sort and send nft summaries
-    const nftSummaryArr = Object.values(nftMap);
-    nftSummaryArr.sort((a, b) => b.attention - a.attention);
+    let nftSummaryArr = Object.values(nftMap);
+    if (period === "hot") {
+      // add index squared to sort by hot
+      const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
+      hotArr.sort(
+        (a, b) => b[0].attention + b[1] * b[1] - (a[0].attention + a[1] * a[1])
+      );
+      nftSummaryArr = hotArr.map((ele) => ele[0]);
+    } else if (period === "new") nftSummaryArr.reverse();
+    else if (period !== "old")
+      nftSummaryArr.sort((a, b) => b.attention - a.attention);
     res.status(200).send(nftSummaryArr);
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
