@@ -16,6 +16,13 @@ const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
+const axios = require('axios').default;
+const sharp = require('sharp');
+const extractFrames = require('ffmpeg-extract-frames')
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
+const puppeteer = require('puppeteer');
 
 const arweave = Arweave.init({
   host: "arweave.net",
@@ -36,85 +43,194 @@ const logsInfo = {
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
 function setup(_init_state) {
   if (namespace.app) {
-    namespace.express("get", "/", someMethod);
+    namespace.express("get", "/", helloWorld);
+    namespace.express("post", "/generateCardWithData", generateCard);
   }
+}
+
+/**
+ * Awaitable rate limit
+ * @returns
+ */
+ function rateLimit() {
+  return new Promise((resolve) => setTimeout(resolve, 5000));
 }
 
 // Define the execution block (this will be triggered after setup is complete)
 async function execute(_init_state) {
+  console.log('starting')
   let state, block;
   for (;;) {
-    await rateLimit();
     try {
-      [state, block] = await getAttentionStateAndBlock();
+      // await setTimeout(async () => {
+      //   console.log('ss')
+      // }, 5000)
+      await rateLimit()
+      console.log('still running')
+      // [nodes] = await getRegisteredNodeList();
+      // auditNodes();
     } catch (e) {
-      console.error("Error while fetching attention state and block", e);
+      console.error("Error", e);
       continue;
-    }
-    try {
-      await (namespace.app ? service : witness)(state, block);
-    } catch (e) {
-      console.error("Error while performing attention task:", e);
     }
   }
 }
 
-async function someMethod(_req, res) {
+async function helloWorld(_req, res) {
   res
     .status(200)
     .type("application/json")
-    .send("Hello world");
+    .send("Hello world Soma");
 }
 
-/*
-  An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
-*/
-async function audit(state) {
-  const task = state.task;
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-  const address = tools.address;
-  const proposedData = activeProposedData.proposedData;
-  await Promise.allSettled(
-    proposedData.map(async (proposedData) => {
-      if (proposedData.distributer !== address) {
-        const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
-        if (!valid) {
-          const input = {
-            function: "audit",
-            id: proposedData.txId
-          };
-          const task = "submit audit";
-          const tx = await kohaku.interactWrite(
-            arweave,
-            tools.wallet,
-            namespace.taskTxId,
-            input
-          );
+async function generateCard(_req, res) {
+  console.log("generating card from data", _req.body);
+  const data = _req.body;
+  data.reward = 0;
+  data.attention = 0;
+  gatewayURI = "arweave.net"
+  data.imgSrc = `https://${gatewayURI}/${data.id}`;
+  data.data.media = data.media.url.replace(/^data:image\/[a-z]+;base64,/, "");
 
-          if (await checkTxConfirmation(tx, task))
-            console.log("audit submitted");
-        }
-      }
+  createThumbnail(data.data, true).then(thumb => {
+    res.sendStatus(200)
+    res.json(thumb)
+  }).catch((err) => {
+    console.error(err);
+  });
+}
+
+async function createThumbnail (data, hasImg) {
+  // NFT thumbnail upload
+  const imagePath = "./thumbnails/" + data.id + ".png";
+  console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
+  async function createThumbnail (data, hasImg) {
+    // NFT thumbnail upload
+    const imagePath = "./thumbnails/" + data.id + ".png";
+    console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
+    // Upload video thumbnail
+    if (data.contentType === "video/mp4") {
+      extractFrames({
+        input: 'https://' + gatewayURI + '/' + data.id,
+        output: './thumbnails/' + data.id + '.jpg',
+        offsets: [
+          0000
+        ]
+      })
+      .then (async (output) =>{
+        const resize = await sharp(output)
+          .resize(500, 500, {
+            kernel: sharp.kernel.nearest,
+            fit: 'contain',
+            position: 'centre',
+            background: { r: 0, g: 0, b: 0, alpha: 1 }
+          })
+          .toFormat('png')
+          .toBuffer();
+          syncImageToS3(data.id + ".png", resize)
+          fs.unlink(output, (err) => {
+            if (err) throw err;
+            console.log(output, ' was deleted');
+          });
+          
+      }).catch((err) => {
+        console.error(err);
+      })
+        .then(async () => {
+          await generateanduploadHTML(data)         
+      })
+
+    // upload text/html thumbnail
+    } else if (data.contentType === "text/html") {
+      (async () => {
+        const browser = await puppeteer.launch({
+          slowMo: 1000,
+          args: ["--no-sandbox"]
+        });
+        const page = await browser.newPage();
+        await page.goto(data.imgSrc , {
+          waitUntil: 'load',
+        });
+        await page.screenshot({ path: imagePath })
+        .then (async (path) =>{
+          const resize = await sharp(path)
+            .resize(500, 500, {
+              kernel: sharp.kernel.nearest,
+              fit: 'contain',
+              position: 'centre',
+              background: { r: 0, g: 0, b: 0, alpha: 1 }
+            })
+            .toFormat('png')
+            .toBuffer();
+            syncImageToS3(data.id + ".png", resize)
+            fs.unlink(imagePath, (err) => {
+              if (err) throw err;
+              console.log(imagePath, ' was deleted');
+            });
+            
+        }).catch((err) => {
+          console.error(err);
+        })
+          .then(async () => {
+          await generateanduploadHTML(data)
+        });
+        await browser.close();
+      })();
+
+// upload POST image thumbnail  
+  } else if (hasImg) {
+    var buff = new Buffer(data.media, 'base64');
+    fs.writeFileSync(imagePath, buff);
+     const resize = await sharp(buff)
+        .resize(500, 500, {
+          kernel: sharp.kernel.nearest,
+          fit: 'contain',
+          position: 'centre',
+          background: { r: 0, g: 0, b: 0, alpha: 1 }
+        })
+        .toFormat('png')
+        .toBuffer();
+        syncImageToS3(data.id + ".png", resize)
+        
+    .catch((err) => {
+      console.error(err);
     })
-  );
-  hasAudited = true;
+      .then(async () => {
+       await generateanduploadHTML(data)
+      })
+      fs.unlink(imagePath, (err) => {
+        if (err) throw err;
+        console.log(imagePath, ' was deleted');
+      });    
+  // upload image thumbnail  
+  } else {
+    axios({
+      method: 'get',
+      url: "https://" + gatewayURI  + "/" + data.id,
+      responseType: 'arraybuffer'
+    })
+    
+      .then(async (response) => {
+      // console.log(response.data)
+       const resize = await sharp(response.data)
+        .resize(500, 500, {
+          kernel: sharp.kernel.nearest,
+          fit: 'contain',
+          position: 'centre',
+          background: { r: 0, g: 0, b: 0, alpha: 1 }
+        })
+        .toFormat('png')
+        .toBuffer();
+        syncImageToS3(data.id + ".png", resize)
+        
+    }).catch((err) => {
+      console.error(err);
+    })
+      .then(async () => {
+        await generateanduploadHTML(data)
+      });
+  }
+};      
 }
 
-function canAudit(state, block) {
-  const task = state.task;
-  if (block >= task.close) return false;
 
-  const activeProposedData = task.proposedPayloads.find(
-    (proposedData) => proposedData.block === task.open
-  );
-
-  const proposedData = activeProposedData.proposedData;
-
-  return (
-    block < task.open + OFFSET_BATCH_VOTE_SUBMIT && // block in time frame
-    !hasAudited && // ports not submitted
-    proposedData.length !== 0
-  );
-}
