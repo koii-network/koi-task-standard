@@ -12,10 +12,16 @@
     "deploy_executable": "node ./bin/deploy_executable.js"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@weavery/clarity": "^0.1.5",
     "arweave": "^1.10.14",
+    "axios": "^0.23.0",
     "bignumber.js": "^9.0.1",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "ffmpeg-extract-frames": "^2.0.2",
+    "fs": "^0.0.1-security",
+    "puppeteer": "^10.4.0",
+    "sharp": "^0.29.1"
   },
   "devDependencies": {
     "@_koi/sdk": "^2.3.3",

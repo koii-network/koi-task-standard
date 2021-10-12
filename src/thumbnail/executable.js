@@ -12,11 +12,11 @@ namespace {
 */
 
 // Import SDK modules if you want to use them (optional)
+const fs = require("fs");
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
-const axios = require('axios').default;
 const sharp = require('sharp');
 const extractFrames = require('ffmpeg-extract-frames')
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
@@ -101,10 +101,6 @@ async function generateCard(_req, res) {
 }
 
 async function createThumbnail (data, hasImg) {
-  // NFT thumbnail upload
-  const imagePath = "./thumbnails/" + data.id + ".png";
-  console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
-  async function createThumbnail (data, hasImg) {
     // NFT thumbnail upload
     const imagePath = "./thumbnails/" + data.id + ".png";
     console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
@@ -231,6 +227,5 @@ async function createThumbnail (data, hasImg) {
       });
   }
 };      
-}
 
 
