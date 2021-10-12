@@ -189,7 +189,13 @@ function canWritePayloadInPermaweb(state, block) {
 }
 
 async function canRequestScrapingUrl(state, block) {
-  const task = state.task;
+  // const task = state.task;
+  // find a task from tasks
+  const task = state.tasks.find((t) => !t.isClose);
+  if (!task) {
+    console.log("There is no task for scraping");
+    return false;
+  }
   // per day is 720 block height
   if (block >= task.close) return false;
   if (
