@@ -122,12 +122,55 @@ async function witness(state, block) {
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 
+/**
+ *
+ * @param {string} txId // Transaction ID
+ * @param {*} task
+ * @returns {bool} Whether transaction was found (true) or timedout (false)
+ */
+ async function checkTxConfirmation(txId, task) {
+  const MS_TO_MIN = 60000;
+  const TIMEOUT_TX = 60 * MS_TO_MIN;
+
+  const start = new Date().getTime() - 1;
+  const update_period = MS_TO_MIN * 5;
+  const timeout = start + TIMEOUT_TX;
+  let next_update = start + update_period;
+  console.log(`Waiting for "${task}" TX to be mined`);
+  for (;;) {
+    const now = new Date().getTime();
+    const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+    if (now > timeout) {
+      console.log(`${task}" timed out after waiting ${elapsed_mins}m`);
+      return false;
+    }
+    if (now > next_update) {
+      next_update = now + update_period;
+      console.log(`${elapsed_mins}m waiting for "${task}" TX to be mined `);
+    }
+    try {
+      await tools.getTransaction(txId);
+      console.log(`Transaction found in ${elapsed_mins}m`);
+      return true;
+    } catch (e) {
+      if (e.type === "TX_FAILED") {
+        console.error(e.type, "while checking tx confirmation");
+        return false;
+      }
+    }
+    await rateLimit();
+  }
+}
+
 /*
   canAudit : is it possible to audit
   return : boolean
 */
 function canAudit(state, block) {
-  const task = state.task;
+  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  if(taskIndex < 0) return false;
+  const task = state.tasks[taskIndex];
+
   if (block >= task.close) return false;
   if (block < task.open + OFFSET_PER_DAY) {
     // string scraping require
@@ -143,22 +186,24 @@ function canAudit(state, block) {
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
-  const task = state.task;
+  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  if(taskIndex < 0) return false;
+  const task = state.tasks[taskIndex];
   const address = tools.address;
   // check payload ranking
-  // const input = {
-  //   function: "audit",
-  //   id: proposedData.txId
-  // };
-  // const task = "submit audit";
-  // const tx = await kohaku.interactWrite(
-  //   arweave,
-  //   tools.wallet,
-  //   namespace.taskTxId,
-  //   input
-  // );
+  const input = {
+    function: "audit",
+    id: proposedData.txId
+  };
+  const task = "submit audit";
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
 
-  // if (await checkTxConfirmation(tx, task))
+  if (await checkTxConfirmation(tx, task))
   //   console.log("audit submitted");
   hasAudited = true;
 }
