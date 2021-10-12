@@ -66,7 +66,7 @@ function getId(_req, res) {
 async function execute(_init_state) {
   let state, block;
   for (;;) {
-    await rateLimit();
+    await rateLimit(); // should check scraping item existing
     try {
       [state, block] = await getStorecatStateAndBlock();
     } catch (e) {
@@ -111,7 +111,7 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  // if (!canRequestScrapingUrl(state)) await getTask();
+  if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape();
   if (canAudit(state, block)) await audit(state);
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
@@ -189,7 +189,13 @@ function canWritePayloadInPermaweb(state, block) {
 }
 
 async function canRequestScrapingUrl(state, block) {
-  const task = state.task;
+  // const task = state.task;
+  // find a task from tasks
+  const task = state.tasks.find((t) => !t.isClose);
+  if (!task) {
+    console.log("There is no task for scraping");
+    return false;
+  }
   // per day is 720 block height
   if (block >= task.close) return false;
   if (

@@ -5,19 +5,20 @@
   "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc",
   "bestPayloader": "",
   "bestPayloadHash": "",
-  "task": {
+  "tasks": [{
     "open": 101,
     "close": 850,
     "uuid": "60d9cf5970d912231cc4a230",
     "bounty": 1,
     "url": "https://npmjs.org",
-    "isReward": false
-  },
-  "payloads": [
-    {
-      "payload": {},
-      "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-      "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
-    }
-  ]
+    "isClose": false,
+    "isReward": false,
+    "payloads": [
+      {
+        "payload": {},
+        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
+      }
+    ]
+  }]
 }
