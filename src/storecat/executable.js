@@ -122,6 +122,46 @@ async function witness(state, block) {
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
 }
 
+/**
+ *
+ * @param {string} txId // Transaction ID
+ * @param {*} task
+ * @returns {bool} Whether transaction was found (true) or timedout (false)
+ */
+ async function checkTxConfirmation(txId, task) {
+  const MS_TO_MIN = 60000;
+  const TIMEOUT_TX = 60 * MS_TO_MIN;
+
+  const start = new Date().getTime() - 1;
+  const update_period = MS_TO_MIN * 5;
+  const timeout = start + TIMEOUT_TX;
+  let next_update = start + update_period;
+  console.log(`Waiting for "${task}" TX to be mined`);
+  for (;;) {
+    const now = new Date().getTime();
+    const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+    if (now > timeout) {
+      console.log(`${task}" timed out after waiting ${elapsed_mins}m`);
+      return false;
+    }
+    if (now > next_update) {
+      next_update = now + update_period;
+      console.log(`${elapsed_mins}m waiting for "${task}" TX to be mined `);
+    }
+    try {
+      await tools.getTransaction(txId);
+      console.log(`Transaction found in ${elapsed_mins}m`);
+      return true;
+    } catch (e) {
+      if (e.type === "TX_FAILED") {
+        console.error(e.type, "while checking tx confirmation");
+        return false;
+      }
+    }
+    await rateLimit();
+  }
+}
+
 /*
   canAudit : is it possible to audit
   return : boolean
@@ -167,39 +207,7 @@ async function audit(state) {
   //   console.log("audit submitted");
   hasAudited = true;
 }
-/**
- *
- * @param {string} txId // Transaction ID
- * @param {*} task
- * @returns {bool} Whether transaction was found (true) or timedout (false)
- */
- async function checkTxConfirmation(txId, task) {
-  const MS_TO_MIN = 60000;
-  const TIMEOUT_TX = 60 * MS_TO_MIN;
 
-  const start = new Date().getTime() - 1;
-  const update_period = MS_TO_MIN * 5;
- 
-  for (;;) {
-    const now = new Date().getTime();
-    const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
-    if (now > next_update) {
-      next_update = now + update_period;
-      console.log(`${elapsed_mins}m waiting for "${task}" TX to be mined `);
-    }
-    try {
-      await tools.getTransaction(txId);
-      console.log(`Transaction found in ${elapsed_mins}m`);
-      return true;
-    } catch (e) {
-      if (e.type === "TX_FAILED") {
-        console.error(e.type, "while checking tx confirmation");
-        return false;
-      }
-    }
-    await rateLimit();
-  }
-}
 async function writePayloadInPermaweb() {
   console.log("payload submit to arweave");
 }
