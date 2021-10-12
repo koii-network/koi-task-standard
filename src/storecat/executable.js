@@ -127,7 +127,7 @@ async function witness(state, block) {
   return : boolean
 */
 function canAudit(state, block) {
-  const task = state.task;
+  const task = state.tasks.find((t) => !t.isClose);
   if (block >= task.close) return false;
   if (block < task.open + OFFSET_PER_DAY) {
     // string scraping require
@@ -143,7 +143,7 @@ function canAudit(state, block) {
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
-  const task = state.task;
+  const task = state.tasks.find((t) => !t.isClose);
   const address = tools.address;
   // check payload ranking
   // const input = {
