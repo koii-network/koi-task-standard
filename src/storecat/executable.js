@@ -182,15 +182,8 @@ function canWritePayloadInPermaweb(state, block) {
   return (hasScraped && hasAudited && !hasDistributed);
 }
 
-async function canRequestScrapingUrl(state, block) {
-  if (block >= task.close) return false;
-  if (
-    task.scraping === undefined ||
-    task.scraping.uuid === undefined ||
-    task.scraping.uuid === ""
-  )
-    return true;
-  else return false;
+async function canRequestScrapingUrl() {
+  return true;
 }
 /*
   Check owner whether scrape
