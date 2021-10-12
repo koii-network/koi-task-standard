@@ -169,12 +169,6 @@ async function writePayloadInPermaweb() {
 
 function canDistributeReward() {
   if (hasDistributed) return false;
-
-  // const prepareDistribution = subContractState.task.prepareDistribution;
-  // // check if there is not rewarded distributions
-  // const unrewardedDistribution = prepareDistribution.filter(
-  //   (distribution) => !distribution.isRewarded
-  // );
   return hasScraped && hasAudited;
 }
 
@@ -188,36 +182,26 @@ function canWritePayloadInPermaweb(state, block) {
   return (hasScraped && hasAudited && !hasDistributed);
 }
 
-async function canRequestScrapingUrl(state, block) {
-  // const task = state.task;
-  // find a task from tasks
-  const task = state.tasks.find((t) => !t.isClose);
-  if (!task) {
-    console.log("There is no task for scraping");
-    return false;
-  }
-  // per day is 720 block height
-  if (block >= task.close) return false;
-  if (
-    task.scraping === undefined ||
-    task.scraping.uuid === undefined ||
-    task.scraping.uuid === ""
-  )
-    return true;
-  else return false;
+async function canRequestScrapingUrl() {
+  return true;
 }
 /*
   Check owner whether scrape
   @returns boolean
 */
 async function canScrape(state, block) {
-  const task = state.task;
+  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  if (taskIndex < 0) {
+    console.log("There is no task for scraping");
+    return false;
+  }
+  const task = state.tasks[taskIndex];
   // per day is 720 block height
   if (block >= task.close) return false;
   // if current owner already scraped : return true
   const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
   if (isPayloader) return false;
-  return true
+  return true;
 }
 /*
   bounty request api
@@ -253,6 +237,18 @@ async function scrape(state) {
   userPayload.owner = tools.address;
   state.payloads.push(userPayload);
   hasScraped = true;
+  // call interactWrite function
+  // updatePayload
+  const input = {
+    function: "audit",
+    id: proposedData.txId
+  };
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
   return true;
 }
 async function getPayload(url) {
