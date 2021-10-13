@@ -162,20 +162,15 @@ async function witness(state, block) {
   return : boolean
 */
 function canAudit(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if(taskIndex < 0) return false;
-  const task = state.tasks[taskIndex];
+  let task = {};
+  state.tasks.some((t) => {
+    if (block >= task.close && !task.hasAudit && task.payloads.length > 0) {
+      task = t;
+      return true;
+    }
+  })
 
-  if (block >= task.close) return false;
-  if (block < task.open + OFFSET_PER_DAY) {
-    // string scraping require
-    return false;
-  }
-  if (hasAudited) return false;
-
-  if (state.payloads && state.payloads.length > 0) {
-    return true;
-  }
+  return (task.hasOwnProperty('open'));
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)

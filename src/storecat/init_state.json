@@ -9,7 +9,8 @@
     "uuid": "60d9cf5970d912231cc4a230",
     "bounty": 1,
     "url": "https://npmjs.org",
-    "isReward": false,
+    "hasAudit": false,
+    "hasReward": false,
     "payloads": [
       {
         "payload": {},
