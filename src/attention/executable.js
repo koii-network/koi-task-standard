@@ -201,10 +201,10 @@ async function getNftSummaries(req, res) {
     // Sort and send nft summaries
     let nftSummaryArr = Object.values(nftMap);
     if (period === "hot") {
-      // add index squared to sort by hot
+      // add index to sort by hot
       const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
       hotArr.sort(
-        (a, b) => b[0].attention + b[1] * b[1] - (a[0].attention + a[1] * a[1])
+        (a, b) => b[0].attention + b[1] - (a[0].attention + a[1])
       );
       nftSummaryArr = hotArr.map((ele) => ele[0]);
     } else if (period === "new") nftSummaryArr.reverse();
