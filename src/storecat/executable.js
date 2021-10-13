@@ -167,7 +167,7 @@ async function witness(state, block) {
   return : boolean
 */
 function canAudit(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if(taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
 
@@ -186,7 +186,7 @@ function canAudit(state, block) {
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if(taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
   const address = tools.address;
@@ -235,7 +235,7 @@ async function canRequestScrapingUrl() {
   @returns boolean
 */
 async function canScrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
@@ -252,12 +252,25 @@ async function canScrape(state, block) {
   bounty request api
   @returns scraping url, bounty, uuid
 */
-function getTask(state) {
+async function getTask(state) {
   // let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  let return_url = "https://gmail.com";
-  state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
-  state.task.scraping.bounty = 1;
-  state.task.scraping.url = return_url;
+  const data = await fetch(url)
+  console.log(data);
+
+  // let return_url = "https://gmail.com";
+  // state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
+  // state.task.scraping.bounty = 1;
+  // state.task.scraping.url = return_url;
+
+  // call interactWrite func update task
+  let task = {
+    "uuid": data.uuid,
+    "bounty": Number(data.bounty),
+    "url": data.url,
+    "isReward": false,
+    "payloads": []
+  }
+  state.tasks.push(task)
   return true;
 }
 /*
