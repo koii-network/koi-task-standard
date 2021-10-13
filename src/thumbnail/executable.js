@@ -44,7 +44,8 @@ const logsInfo = {
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", helloWorld);
-    namespace.express("post", "/generateCardWithData", generateCard);
+    namespace.express("get", "/generateCard/:id", generateCard);
+    namespace.express("post", "/generateCardWithData", generateCardWithData);
   }
 }
 
@@ -84,6 +85,32 @@ async function helloWorld(_req, res) {
 }
 
 async function generateCard(_req, res) {
+  if (!_req.params.id) {
+    console.log("no id found", _req.id, req);
+    res.status(500).send({ success: false });
+    return;
+  }
+
+  let data;
+  try {
+    data = await ktools.getNftState(_req.params.id);
+  } catch (e) {
+    console.log("NFT not found or error getting data: ", e);
+    res.status(500).send({ success: false });
+    return;
+  }
+  gatewayURI = "arweave.net"
+  console.log("trying to create card with ", data);
+  data.imgSrc = `https://${gatewayURI}/${data.id}`;
+
+  let thumb = await createThumbnail(data);
+  console.log('thumbnail created', thumb);
+  res.send(thumb);
+}
+
+
+async function generateCardWithData(_req, res) {
+ 
   console.log("generating card from data", _req.body);
   const data = _req.body;
   data.reward = 0;

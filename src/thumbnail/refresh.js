@@ -1,6 +1,6 @@
 const { ktools } = require("../helper");
 const fetch = require("node-fetch");
-const api = process.env.LOCAL_API || "http://localhost:3000";
+const api = process.env.LOCAL_API || "http://localhost:8887";
 
 runSync();
 
