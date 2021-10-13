@@ -1,8 +1,6 @@
 {
   "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
   "name": "Storecat",
-  "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
-  "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc",
   "bestPayloader": "",
   "bestPayloadHash": "",
   "tasks": [{
@@ -16,8 +14,11 @@
       {
         "payload": {},
         "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
+        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
+        "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
       }
     ]
-  }]
+  }],
+  "executableId": "v5wDE7ZsHYtaCHb0z_2e3_RkJWvyEwzze5RZkje_Z00",
+  "koiiContract": "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"
 }
