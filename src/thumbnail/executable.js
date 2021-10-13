@@ -12,8 +12,10 @@ namespace {
 */
 
 // Import SDK modules if you want to use them (optional)
+
 const fs = require("fs");
 const Arweave = require("arweave");
+const { ktools } = require("./src/thumbnail/helper");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
