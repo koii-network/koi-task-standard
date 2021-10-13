@@ -1,8 +1,6 @@
 {
   "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
   "name": "Storecat",
-  "bestPayloader": "",
-  "bestPayloadHash": "",
   "tasks": [{
     "open": 101,
     "close": 850,
