@@ -102,7 +102,7 @@ async function generateCard(_req, res) {
 
 async function createThumbnail (data, hasImg) {
     // NFT thumbnail upload
-    const imagePath = "./thumbnails/" + data.id + ".png";
+    const imagePath = "./src/thumbnail/" + data.id + ".png";
     console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
     // Upload video thumbnail
     if (data.contentType === "video/mp4") {
@@ -185,19 +185,18 @@ async function createThumbnail (data, hasImg) {
           background: { r: 0, g: 0, b: 0, alpha: 1 }
         })
         .toFormat('png')
-        .toBuffer();
-        syncImageToS3(data.id + ".png", resize)
-        
+        .toBuffer()
+        // syncImageToIPFS(data.id + ".png", resize)       
     .catch((err) => {
       console.error(err);
-    })
+    }) 
       .then(async () => {
-       await generateanduploadHTML(data)
-      })
+      console.log("thumbnail" + data.id + ".png has been resize and created");
       fs.unlink(imagePath, (err) => {
         if (err) throw err;
         console.log(imagePath, ' was deleted');
       });    
+    })
   // upload image thumbnail  
   } else {
     axios({
