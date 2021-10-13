@@ -167,7 +167,7 @@ async function witness(state, block) {
   return : boolean
 */
 function canAudit(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if(taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
 
@@ -186,7 +186,7 @@ function canAudit(state, block) {
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if(taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
   const address = tools.address;
@@ -235,7 +235,7 @@ async function canRequestScrapingUrl() {
   @returns boolean
 */
 async function canScrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isClose);
+  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
@@ -263,16 +263,14 @@ async function getTask(state) {
   // state.task.scraping.url = return_url;
 
   // call interactWrite func update task
-  // let task = {
-  //   "open": 101,
-  //   "close": 850,
-  //   "uuid": "60d9cf5970d912231cc4a230",
-  //   "bounty": 1,
-  //   "url": "https://npmjs.org",
-  //   "isClose": false,
-  //   "isReward": false,
-  //   "payloads": []
-  // }
+  let task = {
+    "uuid": data.uuid,
+    "bounty": Number(data.bounty),
+    "url": data.url,
+    "isReward": false,
+    "payloads": []
+  }
+  state.tasks.push(task)
   return true;
 }
 /*
