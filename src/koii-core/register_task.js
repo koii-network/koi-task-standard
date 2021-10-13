@@ -5,7 +5,7 @@ export default async function registerTask(state, action) {
   const taskName = input.taskName;
   const taskTxId = input.taskTxId;
   const koiReward = input.koiReward;
-  if (caller !== state.owner) {
+  if (caller !== SmartWeave.contract.owner) {
     throw new ContractError("Only owner can register a task");
   }
   if (!taskTxId || !taskName) throw new ContractError("Invalid inputs");

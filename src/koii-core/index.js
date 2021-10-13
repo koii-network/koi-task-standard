@@ -6,7 +6,6 @@ import stake from "./stake";
 import transfer from "./transfer";
 import withdraw from "./withdraw";
 import burnKoi from "./burn_koi";
-import cleanPreRegister from "./clean_preRegister";
 
 const handlers = [
   burnKoi,
@@ -16,8 +15,7 @@ const handlers = [
   registerTask,
   stake,
   transfer,
-  withdraw,
-  cleanPreRegister
+  withdraw
 ];
 
 export async function handle(state, action) {

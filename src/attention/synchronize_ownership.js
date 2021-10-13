@@ -1,12 +1,11 @@
 export default async function syncOwnership(state, action) {
   const caller = action.caller;
   const input = action.input;
-  const validContractSrc = state.validContractSrcsB64;
   const txId = input.txId;
   if (!txId) throw new ContractError("Invalid inputs");
   if (!Array.isArray(txId) && typeof txId !== "string")
     throw new ContractError("Invalid inputs format");
-  if (Array.isArray(txId) && caller !== state.owner)
+  if (Array.isArray(txId) && caller !== SmartWeave.contract.owner)
     throw new ContractError("Owner can only update in batch");
 
   if (Array.isArray(txId)) {
@@ -36,23 +35,21 @@ export default async function syncOwnership(state, action) {
     }
   }
   if (typeof txId === "string") {
-    const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64
-    const txInfo = await SmartWeave.unsafeClient.transactions.get(txId);
-    const contractSrcTag = txInfo.tags.find((tag) => tag.name === tagNameB64);
-    if (validContractSrc.includes(contractSrcTag.value)) {
-      const owners = {};
-      const nftState = await SmartWeave.contracts.readContractState(txId);
-      for (let owner in nftState.balances) {
-        if (
-          nftState.balances[owner] > 0 &&
-          typeof owner === "string" &&
-          owner.length === 43 &&
-          !(owner.indexOf(" ") >= 0)
-        )
-          owners[owner] = nftState.balances[owner];
-      }
-      state.nfts[txId] = owners;
+    if (!Object.keys(state.nfts).includes(txId)) {
+      throw new ContractError("Can't update ownership for not registered NFTs");
     }
+    const nftState = await SmartWeave.contracts.readContractState(txId);
+    const owners = {};
+    for (let owner in nftState.balances) {
+      if (
+        nftState.balances[owner] > 0 &&
+        typeof owner === "string" &&
+        owner.length === 43 &&
+        !(owner.indexOf(" ") >= 0)
+      )
+        owners[owner] = nftState.balances[owner];
+    }
+    state.nfts[txId] = owners;
   }
   return { state };
 }

@@ -18,6 +18,7 @@ export default async function migratePreRegister(state) {
     )
       newNfts.push(data.content.nft);
   }
+
   const txInfos = await fetchTransactions(newNfts);
   // Filter out transactionIds with Invalid contractSrc.
   const validTransactionIds = txInfos.filter((transaction) => {
@@ -26,7 +27,6 @@ export default async function migratePreRegister(state) {
     );
     return contractSrc && validContractSrc.includes(contractSrc.value);
   });
-  // change to for loop
   for (const transaction of validTransactionIds) {
     const nftState = await SmartWeave.contracts
       .readContractState(transaction.node.id)

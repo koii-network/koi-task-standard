@@ -13,21 +13,26 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-//const contractId = "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"; // test attention contract
-const contractId = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"; // test koii Contract
+const contractId = "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"; // test attention contract
+//const contractId = "D2HbbY4dnpC17_YF8dtdQZadR6Erp7Pk4qtZOfa9vzQ"; // test koii Contract
 //const contractId = "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"; // attention in production
-//const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"; // koii Contract in production
+//const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 //const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
 // const input = {
 //   function: "cleanPreRegister"
 // };
 // const input = {
+//   function: "mint",
+//   qty: 10000,
+//   target: "DFocTjuIRI7KPbbB2rb24pmrf10Fv_kB7DYLwUzBhS4"
+// };
+// const input = {
 //   function: "syncOwnership",
 //   txId: "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"
 // };
-// const input = {
-//   function: "migratePreRegister"
-// };
+const input = {
+  function: "migratePreRegister"
+};
 // const input = {
 //   function: "transfer",
 //   target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
@@ -36,14 +41,14 @@ const contractId = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"; // test koii C
 // const input = {
 //   function: "rankPrepDistribution"
 // };
-const input = {
-  function: "registerTask",
-  taskName: "Attention_Game",
-  taskTxId: "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"
-};
+// const input = {
+//   function: "registerTask",
+//   taskName: "Attention_Game",
+//   taskTxId: "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"
+// };
 // const input = {
 //   function: "burnKoi",
-//   contractId: "COrDoKhQwlplYWgShhTF4YpFtFQRFJ1gunZGCx36Xa0",
+//   contractId: "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094",
 //   contentType: "nft",
 //   contentTxId: "hAvOySHDaBo9KE4m3cvDhlC4yUh_VjR6rhUIS2c47bs"
 // };

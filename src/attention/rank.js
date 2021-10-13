@@ -13,10 +13,8 @@ export default async function rankPrepDistribution(state) {
   const currentProposed = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
-
   const proposeDatas = currentProposed.proposedData;
   const acceptedProposedTxIds = [];
-
   // Get active votes
   const activeVotes = votes.filter((vote) => vote.status === "active");
   // Get accepted proposed payloads
@@ -36,41 +34,39 @@ export default async function rankPrepDistribution(state) {
   // deduplicate PoRts
   const distribution = {};
   const registeredNfts = Object.keys(nfts);
-  await Promise.all(
-    acceptedProposedTxIds.map(async (acceptedProposedTxId) => {
-      const data = await SmartWeave.unsafeClient.transactions
-        .getData(acceptedProposedTxId, {
-          decode: true,
-          string: true
-        })
-        .catch((e) => {});
-      if (data) {
-        const proposedPayload = proposeDatas.find(
-          (proposeData) => proposeData.txId === acceptedProposedTxId
-        );
-        let scoreSum = 0;
-        const parseData = JSON.parse(data.split());
-        const parseDataKeys = Object.keys(parseData);
-        parseDataKeys.forEach((nftId) => {
-          if (registeredNfts.includes(nftId)) {
-            const balances = Object.values(nfts[nftId]);
-            const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
-            if (sumNftBalances > 0) {
-              scoreSum += [...new Set(parseData[nftId])].length;
-              !(nftId in distribution)
-                ? (distribution[nftId] = [...new Set(parseData[nftId])])
-                : (distribution[nftId] = [
-                    ...new Set(distribution[nftId].concat(parseData[nftId]))
-                  ]);
-            }
+  for (const acceptedProposedTxId of acceptedProposedTxIds) {
+    const data = await SmartWeave.unsafeClient.transactions
+      .getData(acceptedProposedTxId, {
+        decode: true,
+        string: true
+      })
+      .catch((e) => {});
+    if (data) {
+      const proposedPayload = proposeDatas.find(
+        (proposeData) => proposeData.txId === acceptedProposedTxId
+      );
+      let scoreSum = 0;
+      const parseData = JSON.parse(data.split());
+      const parseDataKeys = Object.keys(parseData);
+      parseDataKeys.forEach((nftId) => {
+        if (registeredNfts.includes(nftId)) {
+          const balances = Object.values(nfts[nftId]);
+          const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
+          if (sumNftBalances > 0) {
+            scoreSum += [...new Set(parseData[nftId])].length;
+            !(nftId in distribution)
+              ? (distribution[nftId] = [...new Set(parseData[nftId])])
+              : (distribution[nftId] = [
+                  ...new Set(distribution[nftId].concat(parseData[nftId]))
+                ]);
           }
-        });
-        proposedPayload.distributer in state.reputation
-          ? (state.reputation[proposedPayload.distributer] += scoreSum)
-          : (state.reputation[proposedPayload.distributer] = scoreSum);
-      }
-    })
-  );
+        }
+      });
+      proposedPayload.distributer in state.reputation
+        ? (state.reputation[proposedPayload.distributer] += scoreSum)
+        : (state.reputation[proposedPayload.distributer] = scoreSum);
+    }
+  }
 
   let totalAttention = 0;
   const attentionScore = {};

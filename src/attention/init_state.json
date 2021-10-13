@@ -1,5 +1,4 @@
 {
-  "owner": "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
   "name": "Attention_Game",
   "nfts": {
     "9sks98MmhD-pVv23xpAp9XZ_pvJqNahCkSqJ-g2IeOk": {
@@ -67227,15 +67226,7 @@
     "proposedPayloads": [
       {
         "block": 780932,
-        "proposedData": [
-          {
-            "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4",
-            "distributer": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-            "cacheUrl": "https://mainnet.koii.live",
-            "blockHeight": 781117,
-            "status": "pending"
-          }
-        ],
+        "proposedData": [],
         "isRanked": false
       }
     ]
@@ -67245,9 +67236,11 @@
   },
   "blacklist": [],
   "validContractSrcsB64": [
-    "I8xgq3361qpR8_DvqcGpkCYAUTMktyAgvkm6kGhJzEQ","NTEpP9crI-fd83-RmGauxSjGjRQZnCvm1Y5fbxIUZhc","46pfUHiTdlIfksVmtBWO4yc1uXtmCvvr-HLOopRs2Go",
+    "I8xgq3361qpR8_DvqcGpkCYAUTMktyAgvkm6kGhJzEQ",
+    "NTEpP9crI-fd83-RmGauxSjGjRQZnCvm1Y5fbxIUZhc",
+    "46pfUHiTdlIfksVmtBWO4yc1uXtmCvvr-HLOopRs2Go",
     "r_ibeOTHJW8McJvivPJjHxjMwkYfAKRjs-LjAeaBcLc"
   ],
-  "executableId": "v5wDE7ZsHYtaCHb0z_2e3_RkJWvyEwzze5RZkje_Z00",
-  "koiiContract": "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"
+  "executableId": "2ySKlXHFExyZ1Hi9WAS6S_QQU6hUbFVy9R46H0JVCbQ",
+  "koiiContract": "D2HbbY4dnpC17_YF8dtdQZadR6Erp7Pk4qtZOfa9vzQ"
 }

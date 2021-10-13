@@ -66,12 +66,7 @@ export default async function proposeSlash(state, action) {
     validBundlers.splice(index, 1);
   }
   blacklist.push(bundlerAddress);
-  if (vote.userVote === "true") {
-    suspectedVote.yays += 1;
-  }
-  if (vote.userVote === "false") {
-    suspectedVote.nays += 1;
-  }
+  vote.userVote ? (suspectedVote.yays += 1) : (suspectedVote.nays += 1);
   votersList.push(voterAddress);
   return { state };
 }
