@@ -34,15 +34,14 @@ const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
-let hasRewarded = false;
 let hasScraped = false;
 let hasDistributed = false;
 let hasAudited = false;
 
 // You can also access and store files locally
-const logsInfo = {
-  filename: "history_storecat.log"
-};
+// const logsInfo = {
+//   filename: "history_storecat.log"
+// };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
 function setup(_init_state) {
@@ -91,10 +90,6 @@ async function getStorecatStateAndBlock() {
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
-      hasScraped = false;
-      hasAudited = false;
-      hasDistributed = false;
-      hasRewarded = false;
     }
 
     lastLogClose = logClose;
@@ -195,7 +190,7 @@ async function audit(state) {
     function: "audit",
     id: proposedData.txId
   };
-  const task = "submit audit";
+  const task_name = "submit audit";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
@@ -203,7 +198,7 @@ async function audit(state) {
     input
   );
 
-  if (await checkTxConfirmation(tx, task))
+  if (await checkTxConfirmation(tx, task_name))
   //   console.log("audit submitted");
   hasAudited = true;
 }
