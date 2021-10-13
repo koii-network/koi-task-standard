@@ -252,12 +252,27 @@ async function canScrape(state, block) {
   bounty request api
   @returns scraping url, bounty, uuid
 */
-function getTask(state) {
+async function getTask(state) {
   // let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  let return_url = "https://gmail.com";
-  state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
-  state.task.scraping.bounty = 1;
-  state.task.scraping.url = return_url;
+  const data = await fetch(url)
+  console.log(data);
+
+  // let return_url = "https://gmail.com";
+  // state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
+  // state.task.scraping.bounty = 1;
+  // state.task.scraping.url = return_url;
+
+  // call interactWrite func update task
+  // let task = {
+  //   "open": 101,
+  //   "close": 850,
+  //   "uuid": "60d9cf5970d912231cc4a230",
+  //   "bounty": 1,
+  //   "url": "https://npmjs.org",
+  //   "isClose": false,
+  //   "isReward": false,
+  //   "payloads": []
+  // }
   return true;
 }
 /*
