@@ -15,7 +15,7 @@ namespace {
 
 const fs = require("fs");
 const Arweave = require("arweave");
-const { ktools } = require("./src/thumbnail/helper");
+const { ktools } = require("/src/thumbnail/helper");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
@@ -137,7 +137,7 @@ async function createThumbnail (data, hasImg) {
     if (data.contentType === "video/mp4") {
       extractFrames({
         input: 'https://' + gatewayURI + '/' + data.id,
-        output: './thumbnails/' + data.id + '.jpg',
+        output: imagePath,
         offsets: [
           0000
         ]
@@ -152,7 +152,7 @@ async function createThumbnail (data, hasImg) {
           })
           .toFormat('png')
           .toBuffer();
-          syncImageToS3(data.id + ".png", resize)
+          // syncImagetoIPFS(data.id + ".png", resize)
           fs.unlink(output, (err) => {
             if (err) throw err;
             console.log(output, ' was deleted');
@@ -162,7 +162,7 @@ async function createThumbnail (data, hasImg) {
         console.error(err);
       })
         .then(async () => {
-          await generateanduploadHTML(data)         
+          // await generateanduploadHTML(data)         
       })
 
     // upload text/html thumbnail
@@ -187,7 +187,7 @@ async function createThumbnail (data, hasImg) {
             })
             .toFormat('png')
             .toBuffer();
-            syncImageToS3(data.id + ".png", resize)
+            // syncImageToIPFS(data.id + ".png", resize)
             fs.unlink(imagePath, (err) => {
               if (err) throw err;
               console.log(imagePath, ' was deleted');
@@ -197,7 +197,7 @@ async function createThumbnail (data, hasImg) {
           console.error(err);
         })
           .then(async () => {
-          await generateanduploadHTML(data)
+          // await generateanduploadHTML(data)
         });
         await browser.close();
       })();
@@ -245,13 +245,13 @@ async function createThumbnail (data, hasImg) {
         })
         .toFormat('png')
         .toBuffer();
-        syncImageToS3(data.id + ".png", resize)
+        // syncImageToIPFS(data.id + ".png", resize)
         
     }).catch((err) => {
       console.error(err);
     })
       .then(async () => {
-        await generateanduploadHTML(data)
+        // await generateanduploadHTML(data)
       });
   }
 };      
