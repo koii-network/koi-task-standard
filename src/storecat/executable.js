@@ -198,9 +198,9 @@ async function audit(state) {
     input
   );
 
-  if (await checkTxConfirmation(tx, task_name))
+  await checkTxConfirmation(tx, task_name);
   //   console.log("audit submitted");
-  hasAudited = true;
+  return hasAudited = true;
 }
 
 async function writePayloadInPermaweb() {
@@ -248,8 +248,8 @@ async function canScrape(state, block) {
   @returns scraping url, bounty, uuid
 */
 async function getTask(state) {
-  // let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
-  const data = await fetch(url)
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+  const data = await fetch(url);
   console.log(data);
 
   // let return_url = "https://gmail.com";
@@ -258,14 +258,25 @@ async function getTask(state) {
   // state.task.scraping.url = return_url;
 
   // call interactWrite func update task
-  let task = {
-    "uuid": data.uuid,
-    "bounty": Number(data.bounty),
-    "url": data.url,
-    "isReward": false,
-    "payloads": []
-  }
-  state.tasks.push(task)
+  // let task = {
+  //   "uuid": data.uuid,
+  //   "bounty": Number(data.bounty),
+  //   "url": data.url,
+  //   "isReward": false,
+  //   "payloads": []
+  // }
+  const input = {
+    function: "addScrapingRequest",
+    scrapingRequest: data
+  };
+  const task_name = "submit audit";
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
+  if (await checkTxConfirmation(tx, task_name))
   return true;
 }
 /*
