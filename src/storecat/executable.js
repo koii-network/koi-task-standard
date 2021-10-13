@@ -107,8 +107,8 @@ async function getStorecatStateAndBlock() {
 }
 async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getTask();
-  if (!canScrape(state, block)) await scrape();
-  if (canAudit(state, block)) await audit(state);
+  if (!canScrape(state, block)) await scrape(state);
+  if (canAudit(state, block)) await audit(state, block);
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
   if (canDistributeReward(state)) await distribute();
 }
@@ -175,27 +175,29 @@ function canAudit(state, block) {
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
-async function audit(state) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if(taskIndex < 0) return false;
-  const task = state.tasks[taskIndex];
-  const address = tools.address;
-  // check payload ranking
-  const input = {
-    function: "audit",
-    id: proposedData.txId
-  };
-  const task_name = "submit audit";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
-
-  await checkTxConfirmation(tx, task_name);
-  //   console.log("audit submitted");
-  return hasAudited = true;
+async function audit(state, block) {
+  let task = {};
+  state.tasks.some((t) => {
+    if (block >= task.close && !task.hasAudit && task.payloads.length > 0) {
+      task = t;
+      return true;
+    }
+  })
+  if(task.hasOwnProperty('open')) {
+    // check payload ranking
+    const input = {
+      function: "audit",
+    };
+    const task_name = "submit audit";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    console.log("audit submitted");
+  }
 }
 
 async function writePayloadInPermaweb() {
