@@ -163,7 +163,7 @@ async function witness(state, block) {
 */
 function canAudit(state, block) {
   const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if(taskIndex < 0) return false;
+  if (taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
 
   if (block >= task.close) return false;
@@ -171,20 +171,18 @@ function canAudit(state, block) {
     // string scraping require
     return false;
   }
-  if (hasAudited) return false;
 
   if (state.payloads && state.payloads.length > 0) {
     return true;
   }
+  return false;
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
 async function audit(state) {
   const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if(taskIndex < 0) return false;
-  const task = state.tasks[taskIndex];
-  const address = tools.address;
+  if (taskIndex < 0) return false;
   // check payload ranking
   const input = {
     function: "audit",
