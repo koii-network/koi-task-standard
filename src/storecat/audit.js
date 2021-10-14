@@ -34,8 +34,20 @@ export default async function audit(state, action) {
       return true;
     }
   })
-  // if(task.hasOwnProperty('open')) {
-  //   await (getWinner(task));
-  // }
+  if(task.hasOwnProperty('open')) {
+    // get Top count of hash
+    let topHash = "";
+    let topCt = 0;
+    let topPayload = {};
+    task.payloadHashs.forEach(( hash ) => {
+      if(hash.count > topCt) {
+        topCt = hash.count;
+        topHash = hash.hash;
+        topPayload = hash.payload;
+      }
+    })
+
+    
+  }
   return { state };
 }
