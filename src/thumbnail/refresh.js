@@ -1,4 +1,5 @@
-const { ktools } = require("./helper");
+const kweb = require("@_koi/sdk/web");
+const ktools = new kweb.Web();
 const fetch = require("node-fetch");
 const api = process.env.LOCAL_API || "http://localhost:8887";
 

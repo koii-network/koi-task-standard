@@ -15,7 +15,8 @@ namespace {
 
 const fs = require("fs");
 const Arweave = require("arweave");
-const { ktools } = require("./helper");
+const kweb = require("@_koi/sdk/web");
+const ktools = new kweb.Web();
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 const crypto = require("crypto");
@@ -228,12 +229,12 @@ async function createThumbnail (data, hasImg) {
     })
   // upload image thumbnail  
   } else {
+    console.log(data)
     axios({
       method: 'get',
       url: "https://" + gatewayURI  + "/" + data.id,
       responseType: 'arraybuffer'
     })
-    
       .then(async (response) => {
       // console.log(response.data)
        const resize = await sharp(response.data)
