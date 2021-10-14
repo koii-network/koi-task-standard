@@ -26,7 +26,6 @@
 
 export default async function audit(state, action) {
   const tasks = state.tasks;
-  const caller = action.caller;
   
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
   let task = {};
@@ -60,9 +59,12 @@ export default async function audit(state, action) {
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
-    }else {
+      // 1 discount bounty from requester
+      // 2 set bounty to winner - top 8 nodes
+      // update task
+    } else {
       // not possible audit - update close
-
+      task.close = task.close + 720;
     }
   }
   return { state };
