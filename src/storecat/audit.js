@@ -61,6 +61,14 @@ export default async function audit(state, action) {
       // set bounty process
       // 1 discount bounty from requester
       // 2 set bounty to winner - top 8 nodes
+      let deeper = 0;
+      task.payloadHashs.forEach(( hash ) => {
+        if (hash.hash == topHash && deeper < 8) {
+          deeper ++;
+          // pay bounty to winner
+          
+        }
+      })
       // update task
     } else {
       // not possible audit - update close
