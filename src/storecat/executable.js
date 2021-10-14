@@ -107,8 +107,8 @@ async function getStorecatStateAndBlock() {
 }
 async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getTask();
-  if (!canScrape(state, block)) await scrape();
-  if (canAudit(state, block)) await audit(state);
+  if (!canScrape(state, block)) await scrape(state);
+  if (canAudit(state, block)) await audit(state, block);
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
   if (canDistributeReward(state)) await distribute();
 }
@@ -176,7 +176,6 @@ function canAudit(state, block) {
     return true;
   }
   return false;
-}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
