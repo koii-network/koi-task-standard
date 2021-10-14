@@ -219,14 +219,14 @@ function canWritePayloadInPermaweb(state, block) {
   return (hasScraped && hasAudited && !hasDistributed);
 }
 
-async function canRequestScrapingUrl() {
+function canRequestScrapingUrl() {
   return true;
 }
 /*
   Check owner whether scrape
   @returns boolean
 */
-async function canScrape(state, block) {
+function canScrape(state, block) {
   const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
@@ -236,7 +236,7 @@ async function canScrape(state, block) {
   // per day is 720 block height
   if (block >= task.close) return false;
   // if current owner already scraped : return true
-  const isPayloader = state.payloads.filter((p) => p.owner === tools.address);
+  const isPayloader = task.payloads.filter((p) => p.owner === tools.address);
   if (isPayloader) return false;
   return true;
 }
