@@ -1,8 +1,5 @@
-import { SmartWeave } from "@weavery/clarity";
-
 export default function addScrapingRequest(state, action) {
   const tasks = state.tasks;
-  const caller = action.caller;
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
 
