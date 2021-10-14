@@ -1,3 +1,5 @@
+import { SmartWeave } from "@weavery/clarity";
+
 export default function addScrapingRequest(state, action) {
   const tasks = state.tasks;
   const caller = action.caller;
@@ -6,10 +8,15 @@ export default function addScrapingRequest(state, action) {
 
   // call interactWrite func update task
   let task = {
-    "uuid": scrapingRequest.uuid,
-    "bounty": Number(scrapingRequest.bounty) || 1,
-    "url": scrapingRequest.url,
-    "isReward": false,
-    "payloads": []
+    open: SmartWeave.block.height,
+    close: SmartWeave.block.height + 720,
+    uuid: scrapingRequest.uuid,
+    bounty: Number(scrapingRequest.bounty) || 1,
+    url: scrapingRequest.url,
+    hasAudit: false,
+    hasReward: false,
+    payloads: []
   }
+  tasks.push(task);
+  return { state };
 }
