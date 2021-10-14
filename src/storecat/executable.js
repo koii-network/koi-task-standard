@@ -254,19 +254,11 @@ async function getTask(state) {
   // state.task.scraping.bounty = 1;
   // state.task.scraping.url = return_url;
 
-  // call interactWrite func update task
-  // let task = {
-  //   "uuid": data.uuid,
-  //   "bounty": Number(data.bounty),
-  //   "url": data.url,
-  //   "isReward": false,
-  //   "payloads": []
-  // }
   const input = {
     function: "addScrapingRequest",
     scrapingRequest: data
   };
-  const task_name = "submit audit";
+  const task_name = "add scraping request";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
