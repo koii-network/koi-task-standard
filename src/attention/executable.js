@@ -603,10 +603,12 @@ async function verifySignature(log) {
 
 async function lockPorts() {
   try {
-    let redisPorts = await namespace.redisGet(logsInfo.redisPortsKey);
-    await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
-    portsLog = [];
-    return;
+    let redisPorts = JSON.stringify(portsLog);
+    if (redisPorts) {
+      await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
+      portsLog = [];
+      return;
+    }
   } catch (e) {
     console.log(e);
     console.log("Unable to lock Ports ", e);
