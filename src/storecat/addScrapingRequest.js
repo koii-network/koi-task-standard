@@ -15,7 +15,8 @@ export default function addScrapingRequest(state, action) {
     url: scrapingRequest.url,
     hasAudit: false,
     hasReward: false,
-    payloads: []
+    payloads: [],
+    payloadHashs: []
   }
   tasks.push(task);
   return { state };
