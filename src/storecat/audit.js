@@ -23,10 +23,10 @@ async function getWinner(task) {
 export default async function audit(state, action) {
   const tasks = state.tasks;
   const caller = action.caller;
-  const input = action.input;
-
+  
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
   let task = {};
+  let block = SmartWeave.block.height;
   state.tasks.some((t) => {
     if (block >= task.close && !task.hasAudit && task.payloads.length > 0) {
       // if(t.payloads.length > 0)
@@ -34,15 +34,8 @@ export default async function audit(state, action) {
       return true;
     }
   })
-  if(task.hasOwnProperty('open')) {
-    await (getWinner(task));
-  }
-  if (SmartWeave.block.height > state.task.open + 600) {
-    throw new ContractError("audit is closed. wait for another round");
-  }
-  const triggeredVote = votes.find((vote) => vote.id == id);
-  if (triggeredVote !== undefined) {
-    throw new ContractError(`Vote is triggered with ${id} id`);
-  }
+  // if(task.hasOwnProperty('open')) {
+  //   await (getWinner(task));
+  // }
   return { state };
 }
