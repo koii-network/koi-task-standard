@@ -57,33 +57,36 @@ export default async function audit(state, action) {
       }
     })
 
+    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
+      throw new ContractError("Address should have 43 characters and no space");
+    }
     const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-    const stakes = koiiState.stakes;
-    if (!(caller in stakes)) {
-      throw new ContractError(
-        "Submittion of PoRTs require minimum stake of 5 koii"
-      );
-    }
-    const callerStakeAmt = stakes[caller].reduce(
-      (acc, curVal) => acc + curVal.value,
-      0
-    );
-    if (callerStakeAmt < 5) {
-      throw new ContractError("Stake amount is not enough");
-    }
+    const balances = koiiState.balances;
+
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
+      // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
-      task.payloads.forEach(( hash ) => {
+      task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
-          deeper ++;
+          deeper++;
           // pay bounty to winner
-          hash.owner
+          let qty = Number(task.bounty * Math.pow(2, deeper * -1));
+          if (balances[hash.owner]) balances[hash.owner] += qty;
+          else balances[hash.owner] = qty;
+          console.log(
+            "set bounty target - " +
+              hash.owner +
+              ", deep : " +
+              deeper +
+              ", bounty : " +
+              qty
+          );
         }
-      })
+      });
       // update task
     } else {
       // not possible audit - update close
