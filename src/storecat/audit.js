@@ -26,6 +26,7 @@
 
 export default async function audit(state, action) {
   const tasks = state.tasks;
+  const koiiContract = state.koiiContract;
   
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
   let task = {};
@@ -56,17 +57,31 @@ export default async function audit(state, action) {
       }
     })
 
+    const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+    const stakes = koiiState.stakes;
+    if (!(caller in stakes)) {
+      throw new ContractError(
+        "Submittion of PoRTs require minimum stake of 5 koii"
+      );
+    }
+    const callerStakeAmt = stakes[caller].reduce(
+      (acc, curVal) => acc + curVal.value,
+      0
+    );
+    if (callerStakeAmt < 5) {
+      throw new ContractError("Stake amount is not enough");
+    }
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
-      task.payloadHashs.forEach(( hash ) => {
-        if (hash.hash == topHash && deeper < 8) {
+      task.payloads.forEach(( hash ) => {
+        if (hash.hashPayload == topHash && deeper < 8) {
           deeper ++;
           // pay bounty to winner
-          
+          hash.owner
         }
       })
       // update task
