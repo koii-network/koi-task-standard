@@ -9,7 +9,7 @@ async function runSync() {
   console.log("running");
 
   const attentionState = await ktools.getState("attention");
-  const txIdArr = Object.values(attentionState.nfts).flat();
+  const txIdArr = Object.keys(attentionState.nfts).flat();
 
   console.log("about to generate " + txIdArr.length + " social cards");
 

@@ -26,6 +26,10 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const puppeteer = require('puppeteer');
+const IPFS = require('ipfs-core');
+const CID = require('multiformats/cid');
+const { response } = require("express");
+let ipfs;
 
 const arweave = Arweave.init({
   host: "arweave.net",
@@ -44,12 +48,13 @@ const logsInfo = {
 };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
-function setup(_init_state) {
+async function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", helloWorld);
     namespace.express("get", "/generateCard/:id", generateCard);
     namespace.express("post", "/generateCardWithData", generateCardWithData);
-  }
+  } 
+  if (!ipfs) ipfs = await IPFS.create();
 }
 
 /**
@@ -57,7 +62,7 @@ function setup(_init_state) {
  * @returns
  */
  function rateLimit() {
-  return new Promise((resolve) => setTimeout(resolve, 5000));
+  return new Promise((resolve) => setTimeout(resolve, 10000));
 }
 
 // Define the execution block (this will be triggered after setup is complete)
@@ -81,10 +86,12 @@ async function execute(_init_state) {
 }
 
 async function helloWorld(_req, res) {
+  const { cid } = await ipfs.add('Hello world')
+  console.info(cid)
   res
     .status(200)
     .type("application/json")
-    .send("Hello world Soma");
+    .send("Hello world's cid is " + cid);
 }
 
 async function generateCard(_req, res) {
@@ -131,6 +138,8 @@ async function generateCardWithData(_req, res) {
 }
 
 async function createThumbnail (data, hasImg) {
+
+    const ipfs = await IPFS.create();
     // NFT thumbnail upload
     const imagePath = "./src/thumbnail/" + data.id + ".png";
     console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
@@ -153,7 +162,8 @@ async function createThumbnail (data, hasImg) {
           })
           .toFormat('png')
           .toBuffer();
-          // syncImagetoIPFS(data.id + ".png", resize)
+          const cid = ipfs.pin.add(CID.parse('QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u'))
+          console.log(cid)
           fs.unlink(output, (err) => {
             if (err) throw err;
             console.log(output, ' was deleted');
@@ -229,7 +239,6 @@ async function createThumbnail (data, hasImg) {
     })
   // upload image thumbnail  
   } else {
-    console.log(data)
     axios({
       method: 'get',
       url: "https://" + gatewayURI  + "/" + data.id,
@@ -246,14 +255,11 @@ async function createThumbnail (data, hasImg) {
         })
         .toFormat('png')
         .toBuffer();
-        // syncImageToIPFS(data.id + ".png", resize)
-        
-    }).catch((err) => {
-      console.error(err);
+        console.log(resize)
+        const { cid } = await ipfs.add("hello")
+        console.info(cid)    
     })
-      .then(async () => {
-        // await generateanduploadHTML(data)
-      });
+      
   }
 };      
 
