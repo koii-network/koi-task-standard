@@ -57,13 +57,14 @@ export default async function audit(state, action) {
       }
     })
 
-    const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-    const stakes = koiiState.stakes;
-    if (!(caller in stakes)) {
-      throw new ContractError(
-        "Submittion of PoRTs require minimum stake of 5 koii"
-      );
+    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
+      throw new ContractError("Address should have 43 characters and no space");
     }
+    const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+    const balances = koiiState.balances;
+    if (balances[task.owner]) balances[task.owner] += qty;
+    else balances[task.owner] = qty;
+
     const callerStakeAmt = stakes[caller].reduce(
       (acc, curVal) => acc + curVal.value,
       0
