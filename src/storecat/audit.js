@@ -67,6 +67,7 @@ export default async function audit(state, action) {
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
+      // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
       task.payloads.forEach((hash) => {
@@ -76,6 +77,14 @@ export default async function audit(state, action) {
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
           if (balances[hash.owner]) balances[hash.owner] += qty;
           else balances[hash.owner] = qty;
+          console.log(
+            "set bounty target - " +
+              hash.owner +
+              ", deep : " +
+              deeper +
+              ", bounty : " +
+              qty
+          );
         }
       });
       // update task
