@@ -62,29 +62,22 @@ export default async function audit(state, action) {
     }
     const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
     const balances = koiiState.balances;
-    if (balances[task.owner]) balances[task.owner] += qty;
-    else balances[task.owner] = qty;
 
-    const callerStakeAmt = stakes[caller].reduce(
-      (acc, curVal) => acc + curVal.value,
-      0
-    );
-    if (callerStakeAmt < 5) {
-      throw new ContractError("Stake amount is not enough");
-    }
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
-      task.payloads.forEach(( hash ) => {
+      task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
-          deeper ++;
+          deeper++;
           // pay bounty to winner
-          hash.owner
+          let qty = Number(task.bounty * Math.pow(2, deeper * -1));
+          if (balances[hash.owner]) balances[hash.owner] += qty;
+          else balances[hash.owner] = qty;
         }
-      })
+      });
       // update task
     } else {
       // not possible audit - update close
