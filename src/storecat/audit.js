@@ -27,7 +27,7 @@
 export default async function audit(state, action) {
   const tasks = state.tasks;
   const koiiContract = state.koiiContract;
-  
+
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
   let task = {};
   let block = SmartWeave.block.height;
@@ -49,19 +49,34 @@ export default async function audit(state, action) {
     let topHash = "";
     let topCt = 0;
     let topPayload = {};
-    task.payloadHashs.forEach(( hash ) => {
+    task.payloadHashs.forEach((hash) => {
       if(hash.count > topCt) {
         topCt = hash.count;
         topHash = hash.hash;
         topPayload = hash.payload;
       }
-    })
+    });
 
     if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
       throw new ContractError("Address should have 43 characters and no space");
     }
+
     const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
     const balances = koiiState.balances;
+
+    const input = {
+      function: "mint",
+      id: proposedData.txId
+    };
+    const task_name = "submit audit";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+
+    await checkTxConfirmation(tx, task_name);
 
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
