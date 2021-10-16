@@ -24,10 +24,9 @@
 // ]
 // }
 
-export default async function audit(state, action) {
+export default async function audit(state) {
   const tasks = state.tasks;
-  const koiiContract = state.koiiContract;
-  
+
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
   let task = {};
   let block = SmartWeave.block.height;
@@ -38,30 +37,48 @@ export default async function audit(state, action) {
       findIndex = index;
       return true;
     }
-  })
-  if(findIndex > -1)
-    task = state.tasks[findIndex];
+  });
+  if (findIndex > -1) task = state.tasks[findIndex];
   else {
     throw new ContractError("There is no task to audit");
   }
-  if(task.hasOwnProperty('open')) {
+  if (task.hasOwnProperty("open")) {
     // get Top count of hash
     let topHash = "";
     let topCt = 0;
     let topPayload = {};
-    task.payloadHashs.forEach(( hash ) => {
+    task.payloadHashs.forEach((hash) => {
       if(hash.count > topCt) {
         topCt = hash.count;
         topHash = hash.hash;
         topPayload = hash.payload;
       }
-    })
+    });
 
     if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
       throw new ContractError("Address should have 43 characters and no space");
     }
-    const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-    const balances = koiiState.balances;
+
+    // const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+    // const balances = koiiState.balances;
+
+    /*
+    const koiiContract = state.koiiContract;
+    const input = {
+      function: "mint",
+      target: targetAddress,
+      qty: qty
+    };
+    const task_name = "set bounty to winner";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      koiiContract,
+      input
+    );
+
+    await checkTxConfirmation(tx, task_name);
+    */
 
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
