@@ -201,13 +201,14 @@ async function audit(state) {
   const koiiContract = state.koiiContract;
   const input = {
     function: "mint",
-    id: koiiContract
+    target: targetAddress,
+    qty: qty
   };
   const task_name = "set bounty to winner";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
-    namespace.taskTxId,
+    koiiContract,
     input
   );
 

@@ -62,20 +62,23 @@ export default async function audit(state) {
     // const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
     // const balances = koiiState.balances;
 
+    /*
     const koiiContract = state.koiiContract;
     const input = {
       function: "mint",
-      id: koiiContract
+      target: targetAddress,
+      qty: qty
     };
     const task_name = "set bounty to winner";
     const tx = await kohaku.interactWrite(
       arweave,
       tools.wallet,
-      namespace.taskTxId,
+      koiiContract,
       input
     );
 
     await checkTxConfirmation(tx, task_name);
+    */
 
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
