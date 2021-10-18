@@ -10,6 +10,9 @@
     "url": "https://npmjs.org",
     "hasAudit": false,
     "hasReward": false,
+    "prepareDistribution": {
+      "node1": 0.5, "node2": 0.25
+    },
     "payloads": [
       {
         "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
