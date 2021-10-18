@@ -1,7 +1,19 @@
-export default function addScrapingRequest(state, action) {
+export default async function addScrapingRequest(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
+  const koiiContract = state.koiiContract;
+  const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
+  const balances = koiiState.balances;
+  if (!(scrapingRequest.owner in balances)) {
+    throw new ContractError(
+      "Scraping owner should have minimum stake of " + scrapingRequest.bounty + " koii"
+    );
+  }
+  const balanceOwner = balances[scrapingRequest.owner];
+  // if (callerStakeAmt < 5) {
+  //   throw new ContractError("Stake amount is not enough");
+  // }
 
   // call interactWrite func update task
   let task = {

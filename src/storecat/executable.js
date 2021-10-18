@@ -253,6 +253,9 @@ async function getTask(state) {
   // state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
   // state.task.scraping.bounty = 1;
   // state.task.scraping.url = return_url;
+  // state.task.scraping.owner = 'ownerAddress';
+
+  // check the owner has some koii
 
   const input = {
     function: "addScrapingRequest",
