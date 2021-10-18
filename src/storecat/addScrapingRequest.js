@@ -7,6 +7,7 @@ export default function addScrapingRequest(state, action) {
   let task = {
     open: SmartWeave.block.height,
     close: SmartWeave.block.height + 720,
+    owner: scrapingRequest.owner,
     uuid: scrapingRequest.uuid,
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.url,
