@@ -139,7 +139,6 @@ async function generateCardWithData(_req, res) {
 
 async function createThumbnail (data, hasImg) {
 
-    const ipfs = await IPFS.create();
     // NFT thumbnail upload
     const imagePath = "./src/thumbnail/" + data.id + ".png";
     console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
@@ -162,8 +161,8 @@ async function createThumbnail (data, hasImg) {
           })
           .toFormat('png')
           .toBuffer();
-          const cid = ipfs.pin.add(CID.parse('QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u'))
-          console.log(cid)
+          const { cid } = await ipfs.add(resize)
+          console.info(cid)
           fs.unlink(output, (err) => {
             if (err) throw err;
             console.log(output, ' was deleted');
@@ -198,7 +197,8 @@ async function createThumbnail (data, hasImg) {
             })
             .toFormat('png')
             .toBuffer();
-            // syncImageToIPFS(data.id + ".png", resize)
+            const { cid } = await ipfs.add(resize)
+            console.info(cid)
             fs.unlink(imagePath, (err) => {
               if (err) throw err;
               console.log(imagePath, ' was deleted');
@@ -217,7 +217,7 @@ async function createThumbnail (data, hasImg) {
   } else if (hasImg) {
     var buff = new Buffer(data.media, 'base64');
     fs.writeFileSync(imagePath, buff);
-     const resize = await sharp(buff)
+     $: resize = await sharp(buff)
         .resize(500, 500, {
           kernel: sharp.kernel.nearest,
           fit: 'contain',
@@ -226,17 +226,15 @@ async function createThumbnail (data, hasImg) {
         })
         .toFormat('png')
         .toBuffer()
-        // syncImageToIPFS(data.id + ".png", resize)       
-    .catch((err) => {
-      console.error(err);
-    }) 
-      .then(async () => {
-      console.log("thumbnail" + data.id + ".png has been resize and created");
-      fs.unlink(imagePath, (err) => {
-        if (err) throw err;
-        console.log(imagePath, ' was deleted');
-      });    
-    })
+        console.log(resize) 
+        const { cid } = await ipfs.add(resize)
+        console.info(cid)
+        console.log("thumbnail" + data.id + ".png has been resize and created");
+        fs.unlink(imagePath, (err) => {
+          if (err) throw err;
+          console.log(imagePath, ' was deleted');
+        }
+)
   // upload image thumbnail  
   } else {
     axios({
@@ -255,9 +253,11 @@ async function createThumbnail (data, hasImg) {
         })
         .toFormat('png')
         .toBuffer();
-        console.log(resize)
-        const { cid } = await ipfs.add("hello")
-        console.info(cid)    
+        console.log(resize) 
+        const { cid } = await ipfs.add(resize)
+        console.info(cid)
+
+        return cid
     })
       
   }
