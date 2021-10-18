@@ -13,10 +13,12 @@ const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 async function run() {
   //const contract = "j6fu4HX4zylBaaI1yqLumC2eLn4HBLZhOZOUwYCVeMs"; // main_contract
-  const contract = "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"; // attention contract
-
+  //const contract = "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"; // attention contract
+  const contract = "wRp566Ec2urt0suIJ5iRAhIXT2kqi6s-NPXs-3YA_tg"; // nft id
   const input = {
-    function: "migratePreRegister"
+    function: "transfer",
+    target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
+    tokenId: "1"
   };
   const oldState = await smartweave.readContract(arweave, contract);
   try {

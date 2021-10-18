@@ -2,7 +2,6 @@ export default async function migratePreRegister(state) {
   const mainContactId = state.koiiContract;
   const validContractSrc = state.validContractSrcsB64;
   const contractId = SmartWeave.contract.id;
-  //const tagNameB64 = "Q29udHJhY3QtU3Jj"; // "Contract-Src" encoded as b64
   const contractState = await SmartWeave.contracts.readContractState(
     mainContactId
   );
@@ -18,7 +17,9 @@ export default async function migratePreRegister(state) {
     )
       newNfts.push(data.content.nft);
   }
-
+  if (newNfts.length === 0) {
+    return { state };
+  }
   const txInfos = await fetchTransactions(newNfts);
   // Filter out transactionIds with Invalid contractSrc.
   const validTransactionIds = txInfos.filter((transaction) => {
@@ -27,6 +28,7 @@ export default async function migratePreRegister(state) {
     );
     return contractSrc && validContractSrc.includes(contractSrc.value);
   });
+  console.log(txInfos);
   for (const transaction of validTransactionIds) {
     const nftState = await SmartWeave.contracts
       .readContractState(transaction.node.id)
@@ -34,6 +36,7 @@ export default async function migratePreRegister(state) {
         if (e.type !== "TX_NOT_FOUND") throw e;
       });
     if (nftState && "balances" in nftState) {
+      console.log(transaction.node.id);
       const owners = {};
       for (let owner in nftState.balances) {
         if (

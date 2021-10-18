@@ -13,9 +13,9 @@ const arweave = Arweave.init({
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 
-const contractId = "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"; // test attention contract
-//const contractId = "D2HbbY4dnpC17_YF8dtdQZadR6Erp7Pk4qtZOfa9vzQ"; // test koii Contract
-//const contractId = "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"; // attention in production
+//const contractId = "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU"; // test attention contract
+//const contractId = "A1EeIXrknsb7SlBxHAboXSQIpcmTesvEykhU45uwig4"; // test koii Contract
+//const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production
 //const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 //const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
 // const input = {
@@ -23,16 +23,16 @@ const contractId = "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"; // test attent
 // };
 // const input = {
 //   function: "mint",
-//   qty: 10000,
-//   target: "DFocTjuIRI7KPbbB2rb24pmrf10Fv_kB7DYLwUzBhS4"
+//   qty: 500,
+//   target: "6E4APc5fYbTrEsX3NFkDpxoI-eaChDmRu5nqNKOn37E"
 // };
 // const input = {
 //   function: "syncOwnership",
 //   txId: "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"
 // };
-const input = {
-  function: "migratePreRegister"
-};
+// const input = {
+//   function: "migratePreRegister"
+// };
 // const input = {
 //   function: "transfer",
 //   target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
@@ -44,13 +44,13 @@ const input = {
 // const input = {
 //   function: "registerTask",
 //   taskName: "Attention_Game",
-//   taskTxId: "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094"
+//   taskTxId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU"
 // };
 // const input = {
 //   function: "burnKoi",
-//   contractId: "xqHqQxiKymk2rnj9arN2N1LtCCk1U875q4lBFlTE094",
+//   contractId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU",
 //   contentType: "nft",
-//   contentTxId: "hAvOySHDaBo9KE4m3cvDhlC4yUh_VjR6rhUIS2c47bs"
+//   contentTxId: "vNFdxL_qZU0AbtbQiBCy7yXx7XwTcNnWs28eXpomPCA"
 // };
 // const input = {
 //   function: "mint",
@@ -59,7 +59,7 @@ const input = {
 // };
 // const input = {
 //   function: "registerExecutableId",
-//   executableId: "myseSmK1blWYMcG9KeAZFOsMhBfjngKlxAIxvI9SQXI"
+//   executableId: "ER_gAIuBsI5-OVt6GrCGUPfgiu8hjtvFgEO-Eow6aoc"
 // };
 async function main() {
   console.log("Writing", input.function);
