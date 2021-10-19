@@ -1,6 +1,6 @@
 export default async function prepareDistribution(state) {
   const tasks = state.tasks;
-  const prepareDistribution = task.prepareDistribution;
+
   let task = {};
   let block = SmartWeave.block.height;
 
@@ -12,6 +12,10 @@ export default async function prepareDistribution(state) {
     }
   }
 
+  if(task.open !== undefined) {
+    const prepareDistribution = task.prepareDistribution;
+
+  }
   // tasks.some((t, index) => {
   //   if (block >= task.close && task.hasAudit) {
   //     findIndex = index;
