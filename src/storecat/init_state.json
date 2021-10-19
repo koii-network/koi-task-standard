@@ -4,11 +4,15 @@
   "tasks": [{
     "open": 101,
     "close": 850,
+    "owner": "",
     "uuid": "60d9cf5970d912231cc4a230",
     "bounty": 1,
     "url": "https://npmjs.org",
     "hasAudit": false,
     "hasReward": false,
+    "prepareDistribution": {
+      "node1": 0.5, "node2": 0.25
+    },
     "payloads": [
       {
         "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",

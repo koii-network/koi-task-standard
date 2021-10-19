@@ -28,21 +28,21 @@ export default async function audit(state) {
   const tasks = state.tasks;
 
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
-  let task = {};
   let block = SmartWeave.block.height;
-  let findIndex = -1;
-  state.tasks.some((t, index) => {
-    if (block >= task.close && !task.hasAudit && task.payloads.length > 0) {
-      // if(t.payloads.length > 0)
-      findIndex = index;
-      return true;
+
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+      matchIndex = index;
+      break;
     }
-  });
-  if (findIndex > -1) task = state.tasks[findIndex];
-  else {
+  }
+  if(matchIndex === -1)
     throw new ContractError("There is no task to audit");
   }
-  if (task.hasOwnProperty("open")) {
+  const task = tasks[matchIndex];
+  if(task.hasOwnProperty('open')) {
     // get Top count of hash
     let topHash = "";
     let topCt = 0;
@@ -85,15 +85,18 @@ export default async function audit(state) {
       // set bounty process
       // 1 discount bounty from requester
       // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
+      task.prepareDistribution.push({task.owner: task.bounty * -1})
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
+
       task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
           deeper++;
           // pay bounty to winner
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
-          if (balances[hash.owner]) balances[hash.owner] += qty;
-          else balances[hash.owner] = qty;
+          // if (balances[hash.owner]) balances[hash.owner] += qty;
+          // else balances[hash.owner] = qty;
+          task.prepareDistribution.push({hash.owner: qty})
           console.log(
             "set bounty target - " +
               hash.owner +
