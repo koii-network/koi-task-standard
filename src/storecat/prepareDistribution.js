@@ -1,8 +1,27 @@
 export default async function prepareDistribution(state) {
-  const votes = state.votes;
-  const task = state.task;
-  const blacklist = state.blacklist;
+  const tasks = state.tasks;
   const prepareDistribution = task.prepareDistribution;
-  
+  let task = {};
+  let block = SmartWeave.block.height;
+
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= task.close && task.hasAudit) {
+      task = element;
+      break;
+    }
+  }
+
+  // tasks.some((t, index) => {
+  //   if (block >= task.close && task.hasAudit) {
+  //     findIndex = index;
+  //     return true;
+  //   }
+  // })
+  // if(findIndex > -1)
+  //   task = state.tasks[findIndex];
+  // else {
+  //   throw new ContractError("There is no task to audit");
+  // }
   return { state };
 }
