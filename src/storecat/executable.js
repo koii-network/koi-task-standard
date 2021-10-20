@@ -196,21 +196,7 @@ async function audit(state) {
   );
 
   await checkTxConfirmation(tx, task_name);
-
-
-  const koiiContract = state.koiiContract;
-  const input = {
-    function: "mint",
-    target: targetAddress,
-    qty: qty
-  };
-  const task_name = "set bounty to winner";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    koiiContract,
-    input
-  );
+  // can't be called koii main task
 
   await checkTxConfirmation(tx, task_name);
   //   console.log("audit submitted");
