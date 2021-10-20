@@ -14,7 +14,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@weavery/clarity": "^0.1.5",
-    "arweave": "^1.10.14",
+    "arweave": "^1.10.18",
     "axios": "^0.23.0",
     "bignumber.js": "^9.0.1",
     "dotenv": "^10.0.0",

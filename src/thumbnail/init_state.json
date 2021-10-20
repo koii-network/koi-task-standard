@@ -1,7 +1,11 @@
 {
-  "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-  "name": "task_name",
-  "votes": [],
+  "owner": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
+  "name": "thumbnail-v2",
+  "thumbnail":[],
+  "votes": {
+    "update" : [],
+    "slash" : []
+  },
   "task": {
     "open": 770649,
     "close": 771369,

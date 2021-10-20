@@ -3,19 +3,11 @@ import commonjs from "@rollup/plugin-commonjs";
 import nodePolyfills from "rollup-plugin-node-polyfills";
 
 export default [
-  {
-    input: "src/koii-core/index.js",
-    output: {
-      file: "dist/koii-core.js",
-      format: "cjs"
-    },
-    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
-  },
 
   {
-    input: "src/attention/index.js",
+    input: "src/thumbnail/index.js",
     output: {
-      file: "dist/attention.js",
+      file: "dist/thumbnail.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]

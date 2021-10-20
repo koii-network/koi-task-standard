@@ -1,11 +1,19 @@
 // The index.js file handles compiling the pieces of the contract into a single Smartweave contract file.
 
-import submitDistribution from "./submit_distribution";
-import audit from "./audit";
+// import submitDistribution from "./submit_distribution";
+// import audit from "./audit";
+import proposeUpdate from "./proposeUpdate";
+// import proposeSlash from "./proposeSlash";
 
+
+// const handlers = [
+//   submitDistribution,
+//   audit,
+//   proposeUpdate,
+//   proposeSlash
+// ];
 const handlers = [
-  submitDistribution,
-  audit
+  proposeUpdate
 ];
 
 export async function handle(state, action) {
