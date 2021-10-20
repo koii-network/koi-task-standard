@@ -226,12 +226,13 @@ async function distribute(state, block) {
       break;
     }
   }
+  const task = tasks[matchIndex];
+  // upload completed task to arweave
+
 }
 
 function canWritePayloadInPermaweb(state, block) {
-  if (block < task.open + OFFSET_PER_DAY) return false;
-  if (block > task.close) return false;
-  return (hasScraped && hasAudited && !hasDistributed);
+  return true;
 }
 
 function canRequestScrapingUrl() {
