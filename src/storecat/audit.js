@@ -59,27 +59,6 @@ export default async function audit(state) {
       throw new ContractError("Address should have 43 characters and no space");
     }
 
-    // const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-    // const balances = koiiState.balances;
-
-    /*
-    const koiiContract = state.koiiContract;
-    const input = {
-      function: "mint",
-      target: targetAddress,
-      qty: qty
-    };
-    const task_name = "set bounty to winner";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      koiiContract,
-      input
-    );
-
-    await checkTxConfirmation(tx, task_name);
-    */
-
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
@@ -108,6 +87,7 @@ export default async function audit(state) {
         }
       });
       // update task
+      task.hasAudit = true;
     } else {
       // not possible audit - update close
       task.close = task.close + 720;
