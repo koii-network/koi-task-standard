@@ -13,7 +13,7 @@
     "deploy_task": "yarn build && node ./bin/task_deployment"
   },
   "devDependencies": {
-    "@_koi/sdk": "^2.4.1",
+    "@_koi/sdk": "^2.4.7",
     "@rollup/plugin-commonjs": "^21.0.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
     "cookie-parser": "^1.4.5",

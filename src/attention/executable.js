@@ -64,6 +64,7 @@ function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
     namespace.express("get", "/id", getId);
+    namespace.express("get", "/latest", latest);
     namespace.express("get", "/cache", servePortCache);
     namespace.express("get", "/nft", getNft);
     namespace.express("get", "/nft-summaries", getNftSummaries);
@@ -93,6 +94,16 @@ async function root(_req, res) {
     .status(200)
     .type("application/json")
     .send(await tools.getState(namespace.taskTxId));
+}
+
+async function latest(_req, res) {
+  const attentionState = await tools.getState(namespace.taskTxId);
+  const attentionReport = attentionState.task.attentionReport;
+  const latestSummary = attentionReport[attentionReport.length - 1] || {};
+  res
+    .status(200)
+    .type("application/json")
+    .send(latestSummary);
 }
 
 function getId(_req, res) {

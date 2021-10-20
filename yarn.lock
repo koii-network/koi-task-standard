@@ -2,21 +2,21 @@
 # yarn lockfile v1
 
 
-"@_koi/kohaku@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.npmjs.org/@_koi/kohaku/-/kohaku-1.0.13.tgz#8948ee8bc6c0695498e2c0c88a835a33fa22f961"
-  integrity sha512-X30umq7B3iam2BVvjw1D80Vo9+sYTd61UiSe/xnFIaAXnr6HC1GofdG89xX+H1rQqBojRo5j9JUIhYf8nSs98A==
+"@_koi/kohaku@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/@_koi/kohaku/-/kohaku-1.1.1.tgz#bfda79d48b452bba1e11403524e4e6d8e9506441"
+  integrity sha512-bb0GOQBpRr1pPExOBNYaECkqbY6qJT0TKv+4FX7ZogEnR7pQl5mdm1hyVmB6+77r7gLMpILm5N0Fj/jQNhYDHw==
   dependencies:
     smartweave "^0.4.45"
 
-"@_koi/sdk@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.4.1.tgz#f7b86d3959de85a9ab93bb29c662d79a8fcbd921"
-  integrity sha512-yDhRA3lKMhdPLvMcZEz3C8ixdzEfx+EUpys6Z4EDaolsHh9lYs8wDk4Nnx9oqtOW5IoiCI2vD7O33yjZjFA40Q==
+"@_koi/sdk@^2.4.7":
+  version "2.4.7"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.4.7.tgz#b2336d15d41c78628a0ac964ae97a18495891cd5"
+  integrity sha512-7CRfzcuuVPP1zutvCqpPSBL2K0n9PLVeYPZJ3ILN2PDIS5YlBAh8wWWS1YfOTdjJukdfwCV6F7NtqJQqcR3NiQ==
   dependencies:
-    "@_koi/kohaku" "^1.0.13"
+    "@_koi/kohaku" "^1.1.1"
     arweave "^1.10.18"
-    axios "^0.22.0"
+    axios "^0.23.0"
     dotenv "^10.0.0"
     human-crypto-keys "^0.1.4"
     node-polyfill-webpack-plugin "^1.1.4"
@@ -552,6 +552,13 @@ axios@^0.22.0:
   version "0.22.0"
   resolved "https://registry.npmjs.org/axios/-/axios-0.22.0.tgz#bf702c41fb50fbca4539589d839a077117b79b25"
   integrity sha512-Z0U3uhqQeg1oNcihswf4ZD57O3NrR1+ZXhxaROaWpDmsDTx7T2HNBV2ulBtie2hwJptu8UvgnJoK+BIqdzh/1w==
+  dependencies:
+    follow-redirects "^1.14.4"
+
+axios@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.npmjs.org/axios/-/axios-0.23.0.tgz#b0fa5d0948a8d1d75e3d5635238b6c4625b05149"
+  integrity sha512-NmvAE4i0YAv5cKq8zlDoPd1VLKAqX5oLuZKs8xkJa4qi6RGn0uhCYFjWtHHC9EM/MwOwYWOs53W+V0aqEXq1sg==
   dependencies:
     follow-redirects "^1.14.4"
 
