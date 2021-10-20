@@ -207,28 +207,32 @@ async function writePayloadInPermaweb() {
   console.log("payload submit to arweave");
 }
 
-function canDistributeReward() {
-
+function canDistributeReward(subContractState) {
   if (hasDistributed) return false;
-  return hasScraped && hasAudited;
+
+  const prepareDistribution = subContractState.task.prepareDistribution;
+  // check if there is not rewarded distributions
+  const unrewardedDistribution = prepareDistribution.filter(
+    (distribution) => !distribution.isRewarded
+  );
+  return unrewardedDistribution.length !== 0;
 }
 
-async function distribute(state, block) {
-  const tasks = state.tasks;
-
-  if(tasks.length == 0) return false;
-
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (block >= element.close && element.hasAudit) {
-      matchIndex = index;
-      break;
-    }
+async function distribute() {
+  const input = {
+    function: "distributeReward"
+  };
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    tools.contractId,
+    input
+  );
+  const task = "distributing reward to main contract";
+  if (await checkTxConfirmation(tx, task)) {
+    hasDistributed = true;
+    console.log("Distributed");
   }
-  const task = tasks[matchIndex];
-  // upload completed task to arweave
-
 }
 
 function canWritePayloadInPermaweb(state, block) {
