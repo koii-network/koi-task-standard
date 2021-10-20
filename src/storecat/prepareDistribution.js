@@ -1,3 +1,17 @@
+//   "payloads": [
+//     {
+//       "payload": {},
+//       "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+//       "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
+//       "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
+//     }
+//   ],
+// "payloadHashs": [
+//   {
+//     "payload": {},
+//     "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
+//     "count": 1
+//   }
 export default async function prepareDistribution(state) {
   const tasks = state.tasks;
 
@@ -15,6 +29,20 @@ export default async function prepareDistribution(state) {
   const task = tasks[matchIndex];
   if(task.hasOwnProperty('open')) {
     // calc top hash and prepare balance
+    let topHash = "";
+    let topCt = 0;
+    let topPayload = {};
+    task.payloadHashs.forEach((hash) => {
+      if(hash.count > topCt) {
+        topCt = hash.count;
+        topHash = hash.hash;
+        topPayload = hash.payload;
+      }
+    });
+
+    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
+      throw new ContractError("Address should have 43 characters and no space");
+    }
   }
   return { state };
 }
