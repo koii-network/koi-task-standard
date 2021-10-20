@@ -1,3 +1,7 @@
+/*
+ prepareDistribution pay task winner balance.
+*/
+
 //   "payloads": [
 //     {
 //       "payload": {},
@@ -26,7 +30,13 @@ export default async function prepareDistribution(state) {
   if(matchIndex === -1)
     throw new ContractError("There is no task to audit");
   }
+
   const task = tasks[matchIndex];
+
+  if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
+    throw new ContractError("Address should have 43 characters and no space");
+  }
+
   if(task.hasOwnProperty('open')) {
     // calc top hash and prepare balance
     let topHash = "";
@@ -40,9 +50,12 @@ export default async function prepareDistribution(state) {
       }
     });
 
-    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
-      throw new ContractError("Address should have 43 characters and no space");
+    // check the top hash is correct
+    if (topCt >= task.payloadHashs.length / 2) {
+      // set bounty process
+      // 1 discount bounty from requester
     }
+
   }
   return { state };
 }
