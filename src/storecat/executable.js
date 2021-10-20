@@ -208,12 +208,24 @@ async function writePayloadInPermaweb() {
 }
 
 function canDistributeReward() {
+
   if (hasDistributed) return false;
   return hasScraped && hasAudited;
 }
 
-async function distribute(){
+async function distribute(state, block) {
+  const tasks = state.tasks;
 
+  if(tasks.length == 0) return false;
+
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && element.hasAudit) {
+      matchIndex = index;
+      break;
+    }
+  }
 }
 
 function canWritePayloadInPermaweb(state, block) {
