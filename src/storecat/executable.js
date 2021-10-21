@@ -34,9 +34,6 @@ const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
-let hasScraped = false;
-let hasDistributed = false;
-let hasAudited = false;
 
 // You can also access and store files locally
 // const logsInfo = {
@@ -208,7 +205,6 @@ async function writePayloadInPermaweb() {
 }
 
 function canDistributeReward(state) {
-  if (hasDistributed) return false;
 
   const prepareDistribution = subContractState.task.prepareDistribution;
   // check if there is not rewarded distributions
@@ -245,6 +241,7 @@ async function bundleAndExport(data) {
 
   myTx.addTag('owner', data.owner);
   myTx.addTag('task', 'storecat');
+  myTx.addTag('url', data.url);
   myTx.addTag('created', Math.floor(Date.now() / 1000));
   await arweave.transactions.sign(myTx, tools.wallet);
   const result = await arweave.transactions.post(myTx);
