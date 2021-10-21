@@ -260,7 +260,7 @@ async function bundleAndExport(data) {
 async function canWritePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
-  if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
+  if(tasks.length == 0) return false;
   
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
@@ -270,15 +270,15 @@ async function canWritePayloadInPermaweb(state, block) {
       break;
     }
   }
-  if(matchIndex === -1)
-    throw new ContractError("There is no task to audit");
+  if(matchIndex === -1) {
+    return false;
   }
   const task = tasks[matchIndex];
   const bundle = {
     owner: task.owner,
     uuid: task.uuid,
     url: task.url,
-    payloads: topPayload// it should be changed with top Payload
+    payloads: topPayload // it should be changed with top Payload
   }
   const tId = await bundleAndExport(bundle);
   if(tId) {

@@ -27,7 +27,7 @@ export default async function prepareDistribution(state) {
       break;
     }
   }
-  if(matchIndex === -1)
+  if(matchIndex === -1) {
     throw new ContractError("There is no task to audit");
   }
 

@@ -38,7 +38,7 @@ export default async function audit(state) {
       break;
     }
   }
-  if(matchIndex === -1)
+  if(matchIndex === -1) {
     throw new ContractError("There is no task to audit");
   }
   const task = tasks[matchIndex];
