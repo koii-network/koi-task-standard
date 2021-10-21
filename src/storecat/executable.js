@@ -161,21 +161,21 @@ async function witness(state, block) {
   canAudit : is it possible to audit
   return : boolean
 */
+
 function canAudit(state, block) {
   const taskIndex = state.tasks.findIndex((t) => !t.isReward);
   if (taskIndex < 0) return false;
   const task = state.tasks[taskIndex];
-
   if (block >= task.close) return false;
   if (block < task.open + OFFSET_PER_DAY) {
     // string scraping require
     return false;
   }
-
   if (state.payloads && state.payloads.length > 0) {
     return true;
   }
   return false;
+}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
@@ -207,7 +207,7 @@ async function writePayloadInPermaweb() {
   console.log("payload submit to arweave");
 }
 
-function canDistributeReward(subContractState) {
+function canDistributeReward(state) {
   if (hasDistributed) return false;
 
   const prepareDistribution = subContractState.task.prepareDistribution;
@@ -236,6 +236,22 @@ async function distribute() {
 }
 
 function canWritePayloadInPermaweb(state, block) {
+  const tasks = state.tasks;
+
+  if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
+  
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && element.hasAudit && element.payloads.length > 0) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if(matchIndex === -1)
+    throw new ContractError("There is no task to audit");
+  }
+  const task = tasks[matchIndex];
   return true;
 }
 
