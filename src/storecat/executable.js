@@ -337,7 +337,8 @@ async function getTask(state) {
     namespace.taskTxId,
     input
   );
-  if (await checkTxConfirmation(tx, task_name))
+  await checkTxConfirmation(tx, task_name);
+  
   return true;
 }
 /*
