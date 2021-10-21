@@ -235,6 +235,20 @@ async function distribute() {
   }
 }
 
+async function bundleAndExport(bundle) {
+  const myTx = await arweave.createTransaction(
+    {
+      data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
+    },
+    tools.wallet
+  );
+
+  await arweave.transactions.sign(myTx, tools.wallet);
+  const result = await arweave.transactions.post(myTx);
+  result.id = myTx.id;
+  return result;
+}
+
 function canWritePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
