@@ -10,6 +10,7 @@
     "url": "https://npmjs.org",
     "hasAudit": false,
     "hasReward": false,
+    "tId": "",
     "prepareDistribution": [{
       "block": 780,
       "distribution": [{

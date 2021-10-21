@@ -260,7 +260,7 @@ async function bundleAndExport(data) {
   // return result;
 }
 
-function canWritePayloadInPermaweb(state, block) {
+async function canWritePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
   if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
@@ -277,7 +277,18 @@ function canWritePayloadInPermaweb(state, block) {
     throw new ContractError("There is no task to audit");
   }
   const task = tasks[matchIndex];
-  return true;
+  const bundle = {
+    owner: task.owner,
+    uuid: task.uuid,
+    url: task.url,
+    payloads: topPayload// it should be changed with top Payload
+  }
+  const tId = await bundleAndExport(bundle);
+  if(tId) {
+    // update state 
+    return true;
+  }
+  return false;
 }
 
 function canRequestScrapingUrl() {
