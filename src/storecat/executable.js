@@ -235,18 +235,29 @@ async function distribute() {
   }
 }
 
-async function bundleAndExport(bundle) {
+async function bundleAndExport(data) {
   const myTx = await arweave.createTransaction(
     {
-      data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
+      data: Buffer.from(JSON.stringify(data, null, 2), "utf8")
     },
     tools.wallet
   );
 
+  myTx.addTag('owner', data.owner);
+  myTx.addTag('task', 'storecat');
+  myTx.addTag('created', Math.floor(Date.now() / 1000));
   await arweave.transactions.sign(myTx, tools.wallet);
   const result = await arweave.transactions.post(myTx);
-  result.id = myTx.id;
-  return result;
+  console.log("response arweave transaction" , result)
+  if (result.status === 200) {
+    // success transaction
+    return myTx.id;
+  } else {
+    console.log("error response arweave transaction : " , result, data.uuid)
+    return false;
+  }
+  // result.id = myTx.id;
+  // return result;
 }
 
 function canWritePayloadInPermaweb(state, block) {
