@@ -64,7 +64,8 @@ export default async function audit(state) {
       // set bounty process
       // 1 discount bounty from requester
       // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
-      task.prepareDistribution.push({task.owner: task.bounty * -1})
+      // it will decrease in koii main contract
+      // task.prepareDistribution.push({task.owner: task.bounty * -1})
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
 
@@ -75,7 +76,8 @@ export default async function audit(state) {
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
           // if (balances[hash.owner]) balances[hash.owner] += qty;
           // else balances[hash.owner] = qty;
-          task.prepareDistribution.push({hash.owner: qty})
+          // task.prepareDistribution.push({hash.owner: qty})
+          task.prepareDistribution[hash.owner] = qty;
           console.log(
             "set bounty target - " +
               hash.owner +

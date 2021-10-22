@@ -13,10 +13,10 @@
     "tId": "",
     "prepareDistribution": [{
       "block": 780,
-      "distribution": [{
+      "distribution": {
         "node1": 0.5, 
         "node2": 0.25
-      }],
+      },
       "isRewarded": false
     }],
     "payloads": [
