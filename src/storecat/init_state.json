@@ -11,14 +11,14 @@
     "hasAudit": false,
     "hasReward": false,
     "tId": "",
-    "prepareDistribution": [{
+    "prepareDistribution": {
       "block": 780,
       "distribution": {
         "node1": 0.5, 
         "node2": 0.25
       },
       "isRewarded": false
-    }],
+    },
     "payloads": [
       {
         "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",

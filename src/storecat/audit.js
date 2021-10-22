@@ -77,7 +77,7 @@ export default async function audit(state) {
           // if (balances[hash.owner]) balances[hash.owner] += qty;
           // else balances[hash.owner] = qty;
           // task.prepareDistribution.push({hash.owner: qty})
-          task.prepareDistribution[hash.owner] = qty;
+          task.prepareDistribution.distribution[hash.owner] = qty;
           console.log(
             "set bounty target - " +
               hash.owner +

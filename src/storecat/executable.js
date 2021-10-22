@@ -206,7 +206,7 @@ async function writePayloadInPermaweb() {
 
 function canDistributeReward(state) {
 
-  const prepareDistribution = subContractState.task.prepareDistribution;
+  const prepareDistribution = state.task.prepareDistribution;
   // check if there is not rewarded distributions
   const unrewardedDistribution = prepareDistribution.filter(
     (distribution) => !distribution.isRewarded
@@ -221,7 +221,7 @@ async function distribute() {
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
-    tools.contractId,
+    tools.contractId, // it is main contract id
     input
   );
   const task = "distributing reward to main contract";
@@ -338,7 +338,7 @@ async function getTask(state) {
     input
   );
   await checkTxConfirmation(tx, task_name);
-  
+
   return true;
 }
 /*
