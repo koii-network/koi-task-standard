@@ -169,21 +169,16 @@ async function getNftSummaries(req, res) {
       // Filter by day
       const unixNow = Math.round(Date.now() / 1000);
       const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
-
-      // Iterate from newest to oldest nfts
-      const nftIds = Object.keys(attentionState.nfts);
-      for (let i = nftIds.length - 1; i >= 0; --i) {
-        const id = nftIds[i];
-        if (kohaku.isContractCached(id)) {
-          const nftCachedState = JSON.parse(kohaku.readContractCache(id));
-          if (oldestValidTimestamp > parseInt(nftCachedState.createdAt)) break;
-        }
-        nftMap[id] = {
-          id,
-          holders: Object.keys(attentionState.nfts[id]),
-          attention: 0,
-          reward: 0
-        };
+      const nftRawTxs = getRawTxsCached(Object.keys(attentionState.nfts));
+      for (const tx of nftRawTxs) {
+        const id = tx.node.id;
+        if (oldestValidTimestamp < tx.node.block.timestamp)
+          nftMap[id] = {
+            id,
+            holders: Object.keys(attentionState.nfts[id]),
+            attention: 0,
+            reward: 0
+          };
       }
     } // Skip filtering if day is not set
     else
@@ -1081,4 +1076,50 @@ async function proposeSlash(state) {
       }
     })
   );
+}
+
+
+let rawTxCache = [];
+let nextFetch = 0;
+function getRawTxsCached(ids){
+  fetchRawTxs(ids).catch((e) => {
+    console.error("Error fetching raw Txs:", e);
+  })
+  return rawTxCache;
+}
+
+async function fetchRawTxs(ids) {
+  const CHUNK_SIZE = 2000;
+  const FETCH_COOLDOWN = 600000;
+  let now = Date.now();
+  if (now < nextFetch) return;
+  nextFetch = now + FETCH_COOLDOWN;
+
+  let txInfos = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + CHUNK_SIZE);
+
+    let transactions = await getNextPage(chunk);
+    txInfos = txInfos.concat(transactions.edges);
+    while (transactions.pageInfo.hasNextPage) {
+      const cursor = transactions.edges[transactions.edges.length - 1].cursor;
+      transactions = await getNextPage(chunk, cursor);
+      txInfos = txInfos.concat(transactions.edges);
+    }
+  }
+
+  rawTxCache = txInfos;
+}
+
+async function getNextPage(ids, after) {
+  const afterQuery = after ? `,after:"${after}"` : "";
+  const query = `query {
+    transactions(ids: ${JSON.stringify(ids)},
+    sort: HEIGHT_ASC, first: 100${afterQuery}) {
+      pageInfo { hasNextPage }
+      edges { node { id block { timestamp } } cursor }
+    }
+  }`;
+  const res = await arweave.api.post("graphql", { query });
+  return res.data.data.transactions;
 }
