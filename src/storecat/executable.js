@@ -106,7 +106,7 @@ async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape(state);
   const index_audit = canAudit(state, block)
-  if (index_audit > -1) await audit(state, block, index_audit);
+  if (index_audit > -1) await audit(index_audit);
   await distribute();
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
 }
@@ -165,6 +165,7 @@ function canAudit(state, block) {
   //   (t) => !t.hasAudit && (block >= t.close) && 
   //   (block < t.open) && t.payloads.length > 0
   // );
+  const tasks = state.tasks;
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
@@ -178,21 +179,21 @@ function canAudit(state, block) {
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
-async function audit(state, block, matchIndex) {
-  const tasks = state.tasks;
+async function audit(matchIndex) {
+  // const tasks = state.tasks;
 
-  if(tasks.length == 0) return false;
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if(matchIndex === -1) {
-    return false;
-  }
+  // if(tasks.length == 0) return false;
+  // let matchIndex = -1;
+  // for (let index = 0; index < tasks.length; index++) {
+  //   const element = tasks[index];
+  //   if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+  //     matchIndex = index;
+  //     break;
+  //   }
+  // }
+  // if(matchIndex === -1) {
+  //   return false;
+  // }
   const input = {
     function: "audit",
     id: matchIndex
