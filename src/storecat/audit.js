@@ -27,18 +27,16 @@
 export default async function audit(state, action) {
   const tasks = state.tasks;
   const matchIndex = action.input.id;
-  
+
   const task = tasks[matchIndex];
   if(task.hasOwnProperty('open')) {
     // get Top count of hash
     let topHash = "";
     let topCt = 0;
-    let topPayload = {};
     task.payloadHashs.forEach((hash) => {
       if(hash.count > topCt) {
         topCt = hash.count;
         topHash = hash.hash;
-        topPayload = hash.payload;
       }
     });
 
@@ -77,6 +75,7 @@ export default async function audit(state, action) {
       });
       // update task
       task.hasAudit = true;
+      task.tophash = topHash;
     } else {
       // not possible audit - update close
       task.close = task.close + 720;

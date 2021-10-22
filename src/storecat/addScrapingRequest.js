@@ -25,6 +25,7 @@ export default async function addScrapingRequest(state, action) {
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.url,
     hasAudit: false,
+    tophash: "",
     hasUploaded: false,
     payloads: [],
     payloadHashs: [],
