@@ -204,11 +204,8 @@ async function audit(state, block) {
   );
 
   await checkTxConfirmation(tx, task_name);
-  // can't be called koii main task
-
-  await checkTxConfirmation(tx, task_name);
   //   console.log("audit submitted");
-  return hasAudited = true;
+  return true;
 }
 
 async function writePayloadInPermaweb() {
@@ -216,11 +213,19 @@ async function writePayloadInPermaweb() {
 }
 
 function canDistributeReward(state) {
-  
-  return unrewardedDistribution.length !== 0;
+  const tasks = state.tasks;
+
+  if(tasks.length == 0) return false;
+  let matchIndex = -1;
+  const matching = tasks.find( t => !t.prepareDistribution.isReward)
+
+  return matching ? true : false;
 }
 
 async function distribute() {
+  // find matching prepareDistribute rewards
+
+  // submit main koii contract to distribute
   const input = {
     function: "distributeReward"
   };
