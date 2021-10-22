@@ -24,23 +24,10 @@
 // ]
 // }
 
-export default async function audit(state) {
+export default async function audit(state, action) {
   const tasks = state.tasks;
-
-  if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
-  let block = SmartWeave.block.height;
-
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if(matchIndex === -1) {
-    throw new ContractError("There is no task to audit");
-  }
+  const matchIndex = action.input.id;
+  
   const task = tasks[matchIndex];
   if(task.hasOwnProperty('open')) {
     // get Top count of hash

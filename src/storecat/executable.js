@@ -176,13 +176,24 @@ function canAudit(state, block) {
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
-async function audit(state) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if (taskIndex < 0) return false;
-  // check payload ranking
+async function audit(state, block) {
+  const tasks = state.tasks;
+
+  if(tasks.length == 0) return false;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if(matchIndex === -1) {
+    return false;
+  }
   const input = {
     function: "audit",
-    id: proposedData.txId
+    id: matchIndex
   };
   const task_name = "submit audit";
   const tx = await kohaku.interactWrite(
@@ -205,12 +216,7 @@ async function writePayloadInPermaweb() {
 }
 
 function canDistributeReward(state) {
-
-  const prepareDistribution = state.task.prepareDistribution;
-  // check if there is not rewarded distributions
-  const unrewardedDistribution = prepareDistribution.filter(
-    (distribution) => !distribution.isRewarded
-  );
+  
   return unrewardedDistribution.length !== 0;
 }
 
