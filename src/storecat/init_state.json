@@ -9,7 +9,7 @@
     "bounty": 1,
     "url": "https://npmjs.org",
     "hasAudit": false,
-    "hasReward": false,
+    "hasUploaded": false,
     "tId": "",
     "prepareDistribution": {
       "block": 780,
