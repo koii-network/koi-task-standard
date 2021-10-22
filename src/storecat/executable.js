@@ -212,22 +212,17 @@ async function writePayloadInPermaweb() {
   console.log("payload submit to arweave");
 }
 
-function canDistributeReward(state) {
+async function distribute(state) {
   const tasks = state.tasks;
 
   if(tasks.length == 0) return false;
-  let matchIndex = -1;
-  const matching = tasks.find( t => !t.prepareDistribution.isReward)
+  const matchIndex = tasks.findIndex( t => !t.prepareDistribution.isReward && hasAudit)
 
-  return matching ? true : false;
-}
-
-async function distribute() {
-  // find matching prepareDistribute rewards
-
+  if( matchIndex === -1 ) return false;
   // submit main koii contract to distribute
   const input = {
-    function: "distributeReward"
+    function: "distributeReward",
+    matchIndex: matchIndex
   };
   const tx = await kohaku.interactWrite(
     arweave,
@@ -237,9 +232,23 @@ async function distribute() {
   );
   const task = "distributing reward to main contract";
   if (await checkTxConfirmation(tx, task)) {
-    hasDistributed = true;
     console.log("Distributed");
+    // update distribute data in sub task
+    const input = {
+      function: "confirmDistributeReward",
+      matchIndex: matchIndex
+    };
+    const task_name = "confirm distribute reward";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name)
+    return true;
   }
+  return false;
 }
 
 async function bundleAndExport(data) {
