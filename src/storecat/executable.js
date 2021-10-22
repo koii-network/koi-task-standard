@@ -105,9 +105,10 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape(state);
-  if (canAudit(state, block)) await audit(state, block);
+  const index_audit = canAudit(state, block)
+  if (index_audit > -1) await audit(state, block, index_audit);
+  await distribute();
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
-  if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -160,23 +161,24 @@ async function witness(state, block) {
 */
 
 function canAudit(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if (taskIndex < 0) return false;
-  const task = state.tasks[taskIndex];
-  if (block >= task.close) return false;
-  if (block < task.open + OFFSET_PER_DAY) {
-    // string scraping require
-    return false;
+  // const taskIndex = state.tasks.findIndex(
+  //   (t) => !t.hasAudit && (block >= t.close) && 
+  //   (block < t.open) && t.payloads.length > 0
+  // );
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+      matchIndex = index;
+      break;
+    }
   }
-  if (state.payloads && state.payloads.length > 0) {
-    return true;
-  }
-  return false;
+  return matchIndex;
 }
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
-async function audit(state, block) {
+async function audit(state, block, matchIndex) {
   const tasks = state.tasks;
 
   if(tasks.length == 0) return false;
