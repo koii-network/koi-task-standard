@@ -1,10 +1,10 @@
 const smartest = require("@_koi/smartest");
 let Arweave = require("arweave");
-const {interactWrite} = require("smartweave")
+const {interactWrite, interactWriteDryRun} = require("smartweave")
 let Smartweave = require('smartweave');
 let fs = require('fs');
 require("dotenv").config();
-let contractInitialStateTx = "e1-8R65IX9iSRfy8ynn7NsXmKJ0ebXQlgZFyJUgLp3E";
+let contractInitialStateTx = "N8vgGLdQJgHKNR9ukditTGPwG195A10A4ovX7aTmqM0";
 
 const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
@@ -36,7 +36,8 @@ async function update() {
         wallet,          
         contractInitialStateTx,
         input
-    );
+    )
     console.log(txid)
 }
 update();
+

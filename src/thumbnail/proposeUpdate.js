@@ -17,7 +17,7 @@ export default function proposeUpdate(state, action) {
     // repeat checks for CID HERE
     if (!cid) throw new ContractError("Invalid input");
     if (typeof cid !== "string") throw new ContractError("Invalid input format");
-    if (aid.length !== 46) {
+    if (cid.length !== 46) {
       throw new ContractError("cid should have 46 characters");
     }
 
@@ -36,3 +36,4 @@ export default function proposeUpdate(state, action) {
     return { state };
   }
   
+ 
