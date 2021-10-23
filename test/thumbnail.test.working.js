@@ -7,7 +7,7 @@ const arweaveInstance = Arweave.init({
     port: 443
 });
 
-let contractIntialStateTx = "NJ_fElX5AZposmhhrbTNvbS2oQZxpaXvREpROaJ1iI8";
+let contractIntialStateTx = "e1-8R65IX9iSRfy8ynn7NsXmKJ0ebXQlgZFyJUgLp3E";
 
 async function getLatestState() {
     const latestState = await Smartweave.readContract(arweaveInstance, contractIntialStateTx);

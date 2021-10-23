@@ -1,8 +1,8 @@
 {
   "owner": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
-  "name": "thumbnail-v2",
-  "thumbnail":[],
-  "votes": {
+  "name": "thumbnail-v3",
+  "thumbnails":[],
+  "vote": {
     "update" : [],
     "slash" : []
   },
