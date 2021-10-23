@@ -45,6 +45,7 @@ function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
     namespace.express("get", "/id", getId);
+    namespace.express("get", "/task/:owner", getTask);
   }
 }
 async function root(_req, res) {
@@ -56,6 +57,52 @@ async function root(_req, res) {
 
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
+}
+
+async function getTask(req, res) {
+  try {
+    // Validate owner address
+    const id = req.query.;
+    if (!tools.validArId(id))
+      return res.status(400).send({ error: "invalid txId" });
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const nfts = Object.keys(attentionState.nfts);
+    const nftIndex = nfts.indexOf(id);
+    if (nftIndex === -1) return res.status(404).send(id + " is not registered");
+
+    // Get NFT state
+    let nftState;
+    try {
+      nftState = await tools.getState(id);
+    } catch (e) {
+      if (e.type !== "TX_NOT_FOUND") throw e;
+      nftState = {
+        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
+        balances: attentionState.nfts[id],
+        tags: ["missing"]
+      };
+    }
+
+    // Add extra fields
+    nftState.id = id;
+    nftState.next = nfts[(nftIndex + 1) % nfts.length];
+    nftState.prev = nfts[(nftIndex - 1 + nfts.length) % nfts.length];
+    nftState.attention = 0;
+    nftState.reward = 0;
+
+    // Calculate attention and rewards
+    for (const report of attentionState.task.attentionReport) {
+      if (id in report) {
+        const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
+        nftState.attention += report[id];
+        nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
+      }
+    }
+    res.status(200).send(nftState);
+  } catch (e) {
+    console.error("getNft error:", e.message);
+    res.status(400).send({ error: e });
+  }
 }
 
 // Define the execution block (this will be triggered after setup is complete)
@@ -121,10 +168,9 @@ async function witness(state, block) {
  * @param {*} task
  * @returns {bool} Whether transaction was found (true) or timedout (false)
  */
- async function checkTxConfirmation(txId, task) {
+async function checkTxConfirmation(txId, task) {
   const MS_TO_MIN = 60000;
   const TIMEOUT_TX = 60 * MS_TO_MIN;
-
   const start = new Date().getTime() - 1;
   const update_period = MS_TO_MIN * 5;
   const timeout = start + TIMEOUT_TX;
@@ -161,10 +207,6 @@ async function witness(state, block) {
 */
 
 function canAudit(state, block) {
-  // const taskIndex = state.tasks.findIndex(
-  //   (t) => !t.hasAudit && (block >= t.close) && 
-  //   (block < t.open) && t.payloads.length > 0
-  // );
   const tasks = state.tasks;
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
