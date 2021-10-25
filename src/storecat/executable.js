@@ -62,11 +62,19 @@ function getId(_req, res) {
 async function getTask(req, res) {
   try {
     // Validate owner address
-    const id = req.query.;
-    if (!tools.validArId(id))
+    const owner = req.params.owner;
+    if (!tools.validArId(owner))
       return res.status(400).send({ error: "invalid txId" });
-    const attentionState = await tools.getState(namespace.taskTxId);
-    const nfts = Object.keys(attentionState.nfts);
+    const storecatState = await tools.getState(namespace.taskTxId);
+    const tasks = storecatState.tasks;
+    // Get owner's task
+    const ownerTasks = [];
+    tasks.forEach(task => {
+      if(task.owner === owner) {
+        ownerTasks.push(task);
+      }
+    });
+    const nfts = Object.keys(storecatState.nfts);
     const nftIndex = nfts.indexOf(id);
     if (nftIndex === -1) return res.status(404).send(id + " is not registered");
 
