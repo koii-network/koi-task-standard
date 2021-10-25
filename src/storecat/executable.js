@@ -341,7 +341,7 @@ async function canWritePayloadInPermaweb(state, block) {
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (block >= element.close && element.hasAudit && element.payloads.length > 0) {
+    if (block >= element.close && element.hasAudit && element.prepareDistribution.isRewarded && !element.hasUploaded) {
       matchIndex = index;
       break;
     }
@@ -350,6 +350,15 @@ async function canWritePayloadInPermaweb(state, block) {
     return false;
   }
   const task = tasks[matchIndex];
+  let topHash = "";
+  let topCt = 0;
+  task.payloadHashs.forEach((hash) => {
+    if(hash.count > topCt) {
+      topCt = hash.count;
+      topHash = hash.hash;
+    }
+  });
+  
   const bundle = {
     owner: task.owner,
     uuid: task.uuid,

@@ -39,11 +39,7 @@ export default async function audit(state, action) {
         topHash = hash.hash;
       }
     });
-
-    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
-      throw new ContractError("Address should have 43 characters and no space");
-    }
-
+    
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
