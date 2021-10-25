@@ -98,16 +98,26 @@ async function getTask(req, res) {
 async function getCompletedTask(req, res) {
   try {
     // Validate owner address
-    const owner = req.params.owner;
-    const id = req.query.id;
-    if (!tools.validArId(owner))
-      return res.status(400).send({ error: "invalid txId" });
+    const owner = req.query.owner;
+    const uuid = req.query.uuid;
+    const hasOwner = req.query.hasOwnProperty("owner");
+    const hasUuid = req.query.hasOwnProperty("uuid");
+    if(hasOwner && owner !== ''){
+      if (!tools.validArId(owner))
+        return res.status(400).send({ error: "invalid txId" });
+    }
     const storecatState = await tools.getState(namespace.taskTxId);
     const tasks = storecatState.tasks;
     // Get owner's task
     const ownerTasks = [];
     tasks.forEach(task => {
-      if(task.owner === owner) {
+      if(hasOwner && hasUuid){
+        if(task.owner === owner && task.uuid === uuid) {
+          ownerTasks.push(task);
+        }
+      }else if(hasOwner) {
+        ownerTasks.push(task);
+      }else if(hasUuid) {
         ownerTasks.push(task);
       }
     });
