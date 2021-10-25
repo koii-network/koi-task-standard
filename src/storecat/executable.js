@@ -46,6 +46,7 @@ function setup(_init_state) {
     namespace.express("get", "/", root);
     namespace.express("get", "/id", getId);
     namespace.express("get", "/task/:owner", getTask);
+    namespace.express("get", "/completed-task", getCompletedTask);
   }
 }
 async function root(_req, res) {
@@ -63,6 +64,42 @@ async function getTask(req, res) {
   try {
     // Validate owner address
     const owner = req.params.owner;
+    if (!tools.validArId(owner))
+      return res.status(400).send({ error: "invalid txId" });
+    const storecatState = await tools.getState(namespace.taskTxId);
+    const tasks = storecatState.tasks;
+    // Get owner's task
+    const ownerTasks = [];
+    tasks.forEach(task => {
+      if(task.owner === owner) {
+        ownerTasks.push(task);
+      }
+    });
+    
+    // Get NFT state
+    let nftState;
+    try {
+      nftState = await tools.getState(id);
+    } catch (e) {
+      if (e.type !== "TX_NOT_FOUND") throw e;
+      nftState = {
+        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
+        balances: attentionState.nfts[id],
+        tags: ["missing"]
+      };
+    }
+    res.status(200).send(nftState);
+  } catch (e) {
+    console.error("getNft error:", e.message);
+    res.status(400).send({ error: e });
+  }
+}
+
+async function getCompletedTask(req, res) {
+  try {
+    // Validate owner address
+    const owner = req.params.owner;
+    const id = req.query.id;
     if (!tools.validArId(owner))
       return res.status(400).send({ error: "invalid txId" });
     const storecatState = await tools.getState(namespace.taskTxId);
