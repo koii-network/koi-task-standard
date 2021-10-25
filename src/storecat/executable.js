@@ -76,21 +76,9 @@ async function getTask(req, res) {
       }
     });
     
-    // Get NFT state
-    let nftState;
-    try {
-      nftState = await tools.getState(id);
-    } catch (e) {
-      if (e.type !== "TX_NOT_FOUND") throw e;
-      nftState = {
-        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
-        balances: attentionState.nfts[id],
-        tags: ["missing"]
-      };
-    }
-    res.status(200).send(nftState);
+    res.status(200).send(ownerTasks);
   } catch (e) {
-    console.error("getNft error:", e.message);
+    console.error("getTask error:", e.message);
     res.status(400).send({ error: e });
   }
 }
@@ -109,34 +97,21 @@ async function getCompletedTask(req, res) {
     const storecatState = await tools.getState(namespace.taskTxId);
     const tasks = storecatState.tasks;
     // Get owner's task
-    const ownerTasks = [];
+    const completedTasks = [];
     tasks.forEach(task => {
       if(hasOwner && hasUuid){
         if(task.owner === owner && task.uuid === uuid) {
-          ownerTasks.push(task);
+          completedTasks.push(task);
         }
       }else if(hasOwner) {
-        ownerTasks.push(task);
+        completedTasks.push(task);
       }else if(hasUuid) {
-        ownerTasks.push(task);
+        completedTasks.push(task);
       }
     });
-    
-    // Get NFT state
-    let nftState;
-    try {
-      nftState = await tools.getState(id);
-    } catch (e) {
-      if (e.type !== "TX_NOT_FOUND") throw e;
-      nftState = {
-        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
-        balances: attentionState.nfts[id],
-        tags: ["missing"]
-      };
-    }
-    res.status(200).send(nftState);
+    res.status(200).send(completedTasks);
   } catch (e) {
-    console.error("getNft error:", e.message);
+    console.error("getCompletedTask error:", e.message);
     res.status(400).send({ error: e });
   }
 }
