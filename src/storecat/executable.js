@@ -74,10 +74,7 @@ async function getTask(req, res) {
         ownerTasks.push(task);
       }
     });
-    const nfts = Object.keys(storecatState.nfts);
-    const nftIndex = nfts.indexOf(id);
-    if (nftIndex === -1) return res.status(404).send(id + " is not registered");
-
+    
     // Get NFT state
     let nftState;
     try {
@@ -89,22 +86,6 @@ async function getTask(req, res) {
         balances: attentionState.nfts[id],
         tags: ["missing"]
       };
-    }
-
-    // Add extra fields
-    nftState.id = id;
-    nftState.next = nfts[(nftIndex + 1) % nfts.length];
-    nftState.prev = nfts[(nftIndex - 1 + nfts.length) % nfts.length];
-    nftState.attention = 0;
-    nftState.reward = 0;
-
-    // Calculate attention and rewards
-    for (const report of attentionState.task.attentionReport) {
-      if (id in report) {
-        const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
-        nftState.attention += report[id];
-        nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
-      }
     }
     res.status(200).send(nftState);
   } catch (e) {
