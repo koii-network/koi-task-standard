@@ -358,7 +358,8 @@ async function canWritePayloadInPermaweb(state, block) {
       topHash = hash.hash;
     }
   });
-  
+  // get top payloads
+  const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
   const bundle = {
     owner: task.owner,
     uuid: task.uuid,
@@ -367,7 +368,19 @@ async function canWritePayloadInPermaweb(state, block) {
   }
   const tId = await bundleAndExport(bundle);
   if(tId) {
-    // update state 
+    // update state via contract write
+    const input = {
+      function: "savedPayloadToPermaweb",
+      scrapingRequest: data
+    };
+    const task_name = "saved payload in permaweb";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
     return true;
   }
   return false;
