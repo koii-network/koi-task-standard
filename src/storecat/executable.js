@@ -386,13 +386,12 @@ async function writePayloadInPermaweb(state, block) {
 
 async function updateCompletedTask(state, block) {
   const tasks = state.tasks;
-
   if(tasks.length == 0) return false;
   
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (block >= element.close && element.hasAudit && element.prepareDistribution.isRewarded && !element.hasUploaded) {
+    if (element.hasAudit && element.hasUploaded && element.tId !== '') {
       matchIndex = index;
       break;
     }
@@ -400,42 +399,20 @@ async function updateCompletedTask(state, block) {
   if(matchIndex === -1) {
     return false;
   }
-  const task = tasks[matchIndex];
-  let topHash = "";
-  let topCt = 0;
-  task.payloadHashs.forEach((hash) => {
-    if(hash.count > topCt) {
-      topCt = hash.count;
-      topHash = hash.hash;
-    }
-  });
-  // get top payloads
-  const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
-  const bundle = {
-    owner: task.owner,
-    uuid: task.uuid,
-    url: task.url,
-    payloads: topPayload // it should be changed with top Payload
-  }
-  const tId = await bundleAndExport(bundle);
-  if(tId) {
-    // update state via contract write
-    const input = {
-      function: "savedPayloadToPermaweb",
-      txId: tId,
-      matchIndex: matchIndex,
-    };
-    const task_name = "saved payload in permaweb";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
-  }
-  return false;
+  // update state via contract write
+  const input = {
+    function: "updateCompletedTask",
+    matchIndex: matchIndex,
+  };
+  const task_name = "updateCompletedTask";
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
+  await checkTxConfirmation(tx, task_name);
+  return true;
 }
 
 function canRequestScrapingUrl() {
