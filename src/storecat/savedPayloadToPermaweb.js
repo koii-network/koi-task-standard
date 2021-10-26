@@ -5,24 +5,16 @@ export default async function savedPayloadToPermaweb(state, action) {
   const txId = input.txId;
   
   // call interactWrite func update task
-  let task = {
-    open: SmartWeave.block.height,
-    close: SmartWeave.block.height + 720,
-    owner: scrapingRequest.owner,
-    uuid: scrapingRequest.uuid,
-    bounty: Number(scrapingRequest.bounty) || 1,
-    url: scrapingRequest.url,
-    hasAudit: false,
-    tophash: "",
-    hasUploaded: false,
-    payloads: [],
-    payloadHashs: [],
-    prepareDistribution: {
-      block: SmartWeave.block.height,
-      distribution: {},
-      isRewarded: false
-    }
+  if(typeof matchIndex !== 'number') {
+    throw new ContractError("Task index should be a number");
   }
-  tasks.push(task);
+  if (typeof txId !== "string")
+    throw new ContractError("Invalid input format");
+  if (txId.length !== 43)
+    throw new ContractError("TransactionId should have 43 characters");
+
+  const task = tasks[matchIndex];
+  task.tId = txId;
+  task.hasUploaded = true;
   return { state };
 }
