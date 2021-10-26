@@ -34,9 +34,6 @@ const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
-let hasScraped = false;
-let hasDistributed = false;
-let hasAudited = false;
 
 // You can also access and store files locally
 // const logsInfo = {
@@ -48,6 +45,8 @@ function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
     namespace.express("get", "/id", getId);
+    namespace.express("get", "/task/:owner", getTask);
+    namespace.express("get", "/completed-task", getCompletedTask);
   }
 }
 async function root(_req, res) {
@@ -59,6 +58,62 @@ async function root(_req, res) {
 
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
+}
+
+async function getTask(req, res) {
+  try {
+    // Validate owner address
+    const owner = req.params.owner;
+    if (!tools.validArId(owner))
+      return res.status(400).send({ error: "invalid txId" });
+    const storecatState = await tools.getState(namespace.taskTxId);
+    const tasks = storecatState.tasks;
+    // Get owner's task
+    const ownerTasks = [];
+    tasks.forEach(task => {
+      if(task.owner === owner) {
+        ownerTasks.push(task);
+      }
+    });
+    
+    res.status(200).send(ownerTasks);
+  } catch (e) {
+    console.error("getTask error:", e.message);
+    res.status(400).send({ error: e });
+  }
+}
+
+async function getCompletedTask(req, res) {
+  try {
+    // Validate owner address
+    const owner = req.query.owner;
+    const uuid = req.query.uuid;
+    const hasOwner = req.query.hasOwnProperty("owner");
+    const hasUuid = req.query.hasOwnProperty("uuid");
+    if(hasOwner && owner !== ''){
+      if (!tools.validArId(owner))
+        return res.status(400).send({ error: "invalid txId" });
+    }
+    const storecatState = await tools.getState(namespace.taskTxId);
+    const tasks = storecatState.tasks;
+    // Get owner's task
+    const completedTasks = [];
+    tasks.forEach(task => {
+      if(hasOwner && hasUuid){
+        if(task.owner === owner && task.uuid === uuid) {
+          completedTasks.push(task);
+        }
+      }else if(hasOwner) {
+        completedTasks.push(task);
+      }else if(hasUuid) {
+        completedTasks.push(task);
+      }
+    });
+    res.status(200).send(completedTasks);
+  } catch (e) {
+    console.error("getCompletedTask error:", e.message);
+    res.status(400).send({ error: e });
+  }
 }
 
 // Define the execution block (this will be triggered after setup is complete)
@@ -108,9 +163,10 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getTask();
   if (!canScrape(state, block)) await scrape(state);
-  if (canAudit(state, block)) await audit(state, block);
+  const index_audit = canAudit(state, block)
+  if (index_audit > -1) await audit(index_audit);
+  await distribute();
   if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
-  if (canDistributeReward(state)) await distribute();
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -123,10 +179,9 @@ async function witness(state, block) {
  * @param {*} task
  * @returns {bool} Whether transaction was found (true) or timedout (false)
  */
- async function checkTxConfirmation(txId, task) {
+async function checkTxConfirmation(txId, task) {
   const MS_TO_MIN = 60000;
   const TIMEOUT_TX = 60 * MS_TO_MIN;
-
   const start = new Date().getTime() - 1;
   const update_period = MS_TO_MIN * 5;
   const timeout = start + TIMEOUT_TX;
@@ -161,31 +216,40 @@ async function witness(state, block) {
   canAudit : is it possible to audit
   return : boolean
 */
+
 function canAudit(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if (taskIndex < 0) return false;
-  const task = state.tasks[taskIndex];
-
-  if (block >= task.close) return false;
-  if (block < task.open + OFFSET_PER_DAY) {
-    // string scraping require
-    return false;
+  const tasks = state.tasks;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+      matchIndex = index;
+      break;
+    }
   }
-
-  if (state.payloads && state.payloads.length > 0) {
-    return true;
-  }
-  return false;
+  return matchIndex;
+}
 /*
   An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
 */
-async function audit(state) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if (taskIndex < 0) return false;
-  // check payload ranking
+async function audit(matchIndex) {
+  // const tasks = state.tasks;
+
+  // if(tasks.length == 0) return false;
+  // let matchIndex = -1;
+  // for (let index = 0; index < tasks.length; index++) {
+  //   const element = tasks[index];
+  //   if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+  //     matchIndex = index;
+  //     break;
+  //   }
+  // }
+  // if(matchIndex === -1) {
+  //   return false;
+  // }
   const input = {
     function: "audit",
-    id: proposedData.txId
+    id: matchIndex
   };
   const task_name = "submit audit";
   const tx = await kohaku.interactWrite(
@@ -196,44 +260,131 @@ async function audit(state) {
   );
 
   await checkTxConfirmation(tx, task_name);
-
-
-  const koiiContract = state.koiiContract;
-  const input = {
-    function: "mint",
-    target: targetAddress,
-    qty: qty
-  };
-  const task_name = "set bounty to winner";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    koiiContract,
-    input
-  );
-
-  await checkTxConfirmation(tx, task_name);
   //   console.log("audit submitted");
-  return hasAudited = true;
+  return true;
 }
 
 async function writePayloadInPermaweb() {
   console.log("payload submit to arweave");
 }
 
-function canDistributeReward() {
-  if (hasDistributed) return false;
-  return hasScraped && hasAudited;
+async function distribute(state) {
+  const tasks = state.tasks;
+
+  if(tasks.length == 0) return false;
+  const matchIndex = tasks.findIndex( t => !t.prepareDistribution.isReward && hasAudit)
+
+  if( matchIndex === -1 ) return false;
+  // submit main koii contract to distribute
+  const input = {
+    function: "distributeReward",
+    matchIndex: matchIndex
+  };
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    tools.contractId, // it is main contract id
+    input
+  );
+  const task = "distributing reward to main contract";
+  if (await checkTxConfirmation(tx, task)) {
+    console.log("Distributed");
+    // update distribute data in sub task
+    const input = {
+      function: "confirmDistributeReward",
+      matchIndex: matchIndex
+    };
+    const task_name = "confirm distribute reward";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name)
+    return true;
+  }
+  return false;
 }
 
-async function distribute(){
+async function bundleAndExport(data) {
+  const myTx = await arweave.createTransaction(
+    {
+      data: Buffer.from(JSON.stringify(data, null, 2), "utf8")
+    },
+    tools.wallet
+  );
 
+  myTx.addTag('owner', data.owner);
+  myTx.addTag('task', 'storecat');
+  myTx.addTag('url', data.url);
+  myTx.addTag('created', Math.floor(Date.now() / 1000));
+  await arweave.transactions.sign(myTx, tools.wallet);
+  const result = await arweave.transactions.post(myTx);
+  console.log("response arweave transaction" , result)
+  if (result.status === 200) {
+    // success transaction
+    return myTx.id;
+  } else {
+    console.log("error response arweave transaction : " , result, data.uuid)
+    return false;
+  }
+  // result.id = myTx.id;
+  // return result;
 }
 
-function canWritePayloadInPermaweb(state, block) {
-  if (block < task.open + OFFSET_PER_DAY) return false;
-  if (block > task.close) return false;
-  return (hasScraped && hasAudited && !hasDistributed);
+async function canWritePayloadInPermaweb(state, block) {
+  const tasks = state.tasks;
+
+  if(tasks.length == 0) return false;
+  
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (block >= element.close && element.hasAudit && element.prepareDistribution.isRewarded && !element.hasUploaded) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if(matchIndex === -1) {
+    return false;
+  }
+  const task = tasks[matchIndex];
+  let topHash = "";
+  let topCt = 0;
+  task.payloadHashs.forEach((hash) => {
+    if(hash.count > topCt) {
+      topCt = hash.count;
+      topHash = hash.hash;
+    }
+  });
+  // get top payloads
+  const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
+  const bundle = {
+    owner: task.owner,
+    uuid: task.uuid,
+    url: task.url,
+    payloads: topPayload // it should be changed with top Payload
+  }
+  const tId = await bundleAndExport(bundle);
+  if(tId) {
+    // update state via contract write
+    const input = {
+      function: "savedPayloadToPermaweb",
+      txId: tId,
+      matchIndex: matchIndex,
+    };
+    const task_name = "saved payload in permaweb";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  }
+  return false;
 }
 
 function canRequestScrapingUrl() {
@@ -285,7 +436,8 @@ async function getTask(state) {
     namespace.taskTxId,
     input
   );
-  if (await checkTxConfirmation(tx, task_name))
+  await checkTxConfirmation(tx, task_name);
+
   return true;
 }
 /*

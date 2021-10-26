@@ -24,68 +24,29 @@
 // ]
 // }
 
-export default async function audit(state) {
+export default async function audit(state, action) {
   const tasks = state.tasks;
+  const matchIndex = action.input.id;
 
-  if(tasks.length == 0) throw new ContractError("There is no tasks to audit");
-  let block = SmartWeave.block.height;
-
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if(matchIndex === -1)
-    throw new ContractError("There is no task to audit");
-  }
   const task = tasks[matchIndex];
   if(task.hasOwnProperty('open')) {
     // get Top count of hash
     let topHash = "";
     let topCt = 0;
-    let topPayload = {};
     task.payloadHashs.forEach((hash) => {
       if(hash.count > topCt) {
         topCt = hash.count;
         topHash = hash.hash;
-        topPayload = hash.payload;
       }
     });
-
-    if (task.owner.length !== 43 || task.owner.indexOf(" ") >= 0) {
-      throw new ContractError("Address should have 43 characters and no space");
-    }
-
-    // const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
-    // const balances = koiiState.balances;
-
-    /*
-    const koiiContract = state.koiiContract;
-    const input = {
-      function: "mint",
-      target: targetAddress,
-      qty: qty
-    };
-    const task_name = "set bounty to winner";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      koiiContract,
-      input
-    );
-
-    await checkTxConfirmation(tx, task_name);
-    */
-
+    
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
       // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
-      task.prepareDistribution.push({task.owner: task.bounty * -1})
+      // it will decrease in koii main contract
+      // task.prepareDistribution.push({task.owner: task.bounty * -1})
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
 
@@ -96,7 +57,8 @@ export default async function audit(state) {
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
           // if (balances[hash.owner]) balances[hash.owner] += qty;
           // else balances[hash.owner] = qty;
-          task.prepareDistribution.push({hash.owner: qty})
+          // task.prepareDistribution.push({hash.owner: qty})
+          task.prepareDistribution.distribution[hash.owner] = qty;
           console.log(
             "set bounty target - " +
               hash.owner +
@@ -108,6 +70,8 @@ export default async function audit(state) {
         }
       });
       // update task
+      task.hasAudit = true;
+      task.tophash = topHash;
     } else {
       // not possible audit - update close
       task.close = task.close + 720;

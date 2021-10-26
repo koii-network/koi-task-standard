@@ -25,9 +25,15 @@ export default async function addScrapingRequest(state, action) {
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.url,
     hasAudit: false,
-    hasReward: false,
+    tophash: "",
+    hasUploaded: false,
     payloads: [],
-    payloadHashs: []
+    payloadHashs: [],
+    prepareDistribution: {
+      block: SmartWeave.block.height,
+      distribution: {},
+      isRewarded: false
+    }
   }
   tasks.push(task);
   return { state };
