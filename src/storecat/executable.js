@@ -371,7 +371,8 @@ async function canWritePayloadInPermaweb(state, block) {
     // update state via contract write
     const input = {
       function: "savedPayloadToPermaweb",
-      scrapingRequest: data
+      txId: tId,
+      matchIndex: matchIndex,
     };
     const task_name = "saved payload in permaweb";
     const tx = await kohaku.interactWrite(

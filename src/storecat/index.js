@@ -2,10 +2,14 @@
 
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
+import addScrapingRequest from "./addScrapingRequest";
+import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
 
 const handlers = [
   submitDistribution,
-  audit
+  audit,
+  addScrapingRequest,
+  savedPayloadToPermaweb,
 ];
 
 export async function handle(state, action) {
