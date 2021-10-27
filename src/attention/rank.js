@@ -47,10 +47,11 @@ export default async function rankPrepDistribution(state) {
       );
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
+
       const parseDataKeys = Object.keys(parseData);
       parseDataKeys.forEach((nftId) => {
         if (registeredNfts.includes(nftId)) {
-          const balances = Object.values(nfts[nftId]);
+          const balances = Object.values(nfts[nftId]["owners"]);
           const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
           if (sumNftBalances > 0) {
             scoreSum += [...new Set(parseData[nftId])].length;
@@ -78,16 +79,26 @@ export default async function rankPrepDistribution(state) {
   // Distributing Reward to owners
   const distributionReward = {};
   for (const nft of Object.keys(distribution)) {
-    const balances = Object.values(nfts[nft]);
+    let reward = distribution[nft].length * rewardPerAttention;
+    const creatorAddress = Object.keys(nfts[nft]["creatorShare"])[0];
+    if (!(creatorAddress in nfts[nft]["owners"])) {
+      const creatorShare = nfts[nft]["creatorShare"][creatorAddress];
+      const creatorReward = reward * creatorShare;
+      if (creatorReward > 0) {
+        creatorAddress in distributionReward
+          ? (distributionReward[creatorAddress] += creatorReward)
+          : (distributionReward[creatorAddress] = creatorReward);
+        reward = distribution[nft].length * rewardPerAttention - creatorReward;
+      }
+    }
+    const balances = Object.values(nfts[nft]["owners"]);
     const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
-    for (let owner in nfts[nft]) {
-      let rewardPer = nfts[nft][owner] / balancesSum;
+    for (let owner in nfts[nft]["owners"]) {
+      let rewardPer = nfts[nft]["owners"][owner] / balancesSum;
       if (rewardPer > 0 && !isNaN(rewardPer)) {
         owner in distributionReward
-          ? (distributionReward[owner] +=
-              distribution[nft].length * rewardPerAttention * rewardPer)
-          : (distributionReward[owner] =
-              distribution[nft].length * rewardPerAttention * rewardPer);
+          ? (distributionReward[owner] += reward * rewardPer)
+          : (distributionReward[owner] = reward * rewardPer);
       }
     }
   }

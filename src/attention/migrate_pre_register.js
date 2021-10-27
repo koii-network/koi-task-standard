@@ -28,25 +28,37 @@ export default async function migratePreRegister(state) {
     );
     return contractSrc && validContractSrc.includes(contractSrc.value);
   });
-  console.log(txInfos);
   for (const transaction of validTransactionIds) {
     const nftState = await SmartWeave.contracts
       .readContractState(transaction.node.id)
       .catch((e) => {
         if (e.type !== "TX_NOT_FOUND") throw e;
       });
+    const creatorShare = {};
+    const creator = nftState.owner || nftState.creator;
+    if (nftState["creator_share"] || nftState["creatorShare"]) {
+      const share =
+        Number(nftState["creator_share"]) || Number(nftState["creatorShare"]);
+      typeof share === "number"
+        ? (creatorShare[creator] = share)
+        : (creatorShare[creator] = 0);
+      state.nfts[transaction.node.id]["creatorShare"] = creatorShare;
+    } else {
+      creatorShare[creator] = 0;
+      state.nfts[transaction.node.id]["creatorShare"] = creatorShare;
+    }
     if (nftState && "balances" in nftState) {
-      console.log(transaction.node.id);
       const owners = {};
       for (let owner in nftState.balances) {
         if (
           nftState.balances[owner] > 0 &&
           typeof owner === "string" &&
-          owner.length === 43
+          owner.length === 43 &&
+          !(owner.indexOf(" ") >= 0)
         )
           owners[owner] = nftState.balances[owner];
       }
-      state.nfts[transaction.node.id] = owners;
+      state.nfts[transaction.node.id]["owners"] = owners;
     }
   }
   return { state };

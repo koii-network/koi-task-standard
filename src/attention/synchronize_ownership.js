@@ -19,7 +19,7 @@ export default async function syncOwnership(state, action) {
         .catch((e) => {
           if (e.type !== "TX_NOT_FOUND") throw e;
         });
-      if (nftState) {
+      if (nftState && "balances" in nftState) {
         const owners = {};
         for (let owner in nftState.balances) {
           if (
@@ -30,7 +30,7 @@ export default async function syncOwnership(state, action) {
           )
             owners[owner] = nftState.balances[owner];
         }
-        state.nfts[nft] = owners;
+        state.nfts[nft]["owners"] = owners;
       }
     }
   }
@@ -38,18 +38,24 @@ export default async function syncOwnership(state, action) {
     if (!Object.keys(state.nfts).includes(txId)) {
       throw new ContractError("Can't update ownership for not registered NFTs");
     }
-    const nftState = await SmartWeave.contracts.readContractState(txId);
-    const owners = {};
-    for (let owner in nftState.balances) {
-      if (
-        nftState.balances[owner] > 0 &&
-        typeof owner === "string" &&
-        owner.length === 43 &&
-        !(owner.indexOf(" ") >= 0)
-      )
-        owners[owner] = nftState.balances[owner];
+    const nftState = await SmartWeave.contracts
+      .readContractState(txId)
+      .catch((e) => {
+        if (e.type !== "TX_NOT_FOUND") throw e;
+      });
+    if (nftState && "balances" in nftState) {
+      const owners = {};
+      for (let owner in nftState.balances) {
+        if (
+          nftState.balances[owner] > 0 &&
+          typeof owner === "string" &&
+          owner.length === 43 &&
+          !(owner.indexOf(" ") >= 0)
+        )
+          owners[owner] = nftState.balances[owner];
+      }
+      state.nfts[txId]["owners"] = owners;
     }
-    state.nfts[txId] = owners;
   }
   return { state };
 }

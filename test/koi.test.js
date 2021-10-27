@@ -24,7 +24,7 @@ async function main() {
   let state = JSON.parse(fs.readFileSync(`src/attention/init_state.json`));
 
   const input = {
-    function: "migratePreRegister"
+    function: "rankPrepDistribution"
   };
   //console.log(state);
   const t1 = new Date();
@@ -36,7 +36,8 @@ async function main() {
     state,
     walletAddress
   );
-  console.log(state);
+  console.log(state.state.task.prepareDistribution[0]);
+  console.log(state.state.task.attentionReport[0]);
   const t2 = new Date();
   console.log(`Done in ${t2 - t1}ms\n\nReading contract`);
 }

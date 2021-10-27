@@ -14,13 +14,15 @@ const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 // const missedNft = [
 //   "bysi-4yyU7Zhk7ijcwcl7V8JSw7ANdeSy8_A8uAWmpQ",
-//   "G1a8w0JDgW2ZWv6WlH4nr2SvDsfM0SDmkGPAhhGxLf4"
+//   "1bjASUPwUfGiuiz94aaHzow9HeaMzBCmNcGMpZgNhHA",
+//   "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"
 // ];
 //const contractId = "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU"; // test attention contract
 //const contractId = "A1EeIXrknsb7SlBxHAboXSQIpcmTesvEykhU45uwig4"; // test koii Contract
 //const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production
 //const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
-const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
+
+//const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
 // const input = {
 //   function: "cleanPreRegister"
 // };
@@ -36,13 +38,17 @@ const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
 // const input = {
 //   function: "migratePreRegister"
 // };
-const input = {
-  function: "transfer",
-  target: "K4XidM-x1LXErn0H-w74Czm7LscUITUWfGonbUAXiLU",
-  qty: 1
-};
+// const input = {
+//   function: "transfer",
+//   target: "K4XidM-x1LXErn0H-w74Czm7LscUITUWfGonbUAXiLU",
+//   qty: 1
+// };
 // const input = {
 //   function: "rankPrepDistribution"
+// };
+// const input = {
+//   function: "registerValidContractSrc",
+//   contractSrc: "hmqdldElrUGT23q9dlegLZIABnYO8iQ03CHSEbEZYMo"
 // };
 // const input = {
 //   function: "registerTask",
@@ -53,7 +59,7 @@ const input = {
 //   function: "burnKoi",
 //   contractId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU",
 //   contentType: "nft",
-//   contentTxId: "vNFdxL_qZU0AbtbQiBCy7yXx7XwTcNnWs28eXpomPCA"
+//   contentTxId: "WRlbex123DX3a0xgGbW72x15cPWsVlcrPEUw6CJd1P8"
 // };
 // const input = {
 //   function: "mint",
