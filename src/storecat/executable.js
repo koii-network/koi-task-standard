@@ -166,7 +166,8 @@ async function service(state, block) {
   const index_audit = canAudit(state, block)
   if (index_audit > -1) await audit(index_audit);
   await distribute();
-  if (canWritePayloadInPermaweb(state, block)) await writePayloadInPermaweb();
+  await writePayloadInPermaweb(state, block);
+  await updateCompletedTask(state, block);
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -264,10 +265,6 @@ async function audit(matchIndex) {
   return true;
 }
 
-async function writePayloadInPermaweb() {
-  console.log("payload submit to arweave");
-}
-
 async function distribute(state) {
   const tasks = state.tasks;
 
@@ -333,7 +330,7 @@ async function bundleAndExport(data) {
   // return result;
 }
 
-async function canWritePayloadInPermaweb(state, block) {
+async function writePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
   if(tasks.length == 0) return false;
@@ -385,6 +382,37 @@ async function canWritePayloadInPermaweb(state, block) {
     return true;
   }
   return false;
+}
+
+async function updateCompletedTask(state, block) {
+  const tasks = state.tasks;
+  if(tasks.length == 0) return false;
+  
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (element.hasAudit && element.hasUploaded && element.tId !== '') {
+      matchIndex = index;
+      break;
+    }
+  }
+  if(matchIndex === -1) {
+    return false;
+  }
+  // update state via contract write
+  const input = {
+    function: "updateCompletedTask",
+    matchIndex: matchIndex,
+  };
+  const task_name = "updateCompletedTask";
+  const tx = await kohaku.interactWrite(
+    arweave,
+    tools.wallet,
+    namespace.taskTxId,
+    input
+  );
+  await checkTxConfirmation(tx, task_name);
+  return true;
 }
 
 function canRequestScrapingUrl() {

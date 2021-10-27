@@ -4,7 +4,6 @@ export default async function savedPayloadToPermaweb(state, action) {
   const matchIndex = input.matchIndex;
   const txId = input.txId;
   
-  // call interactWrite func update task
   if(typeof matchIndex !== 'number') {
     throw new ContractError("Task index should be a number");
   }
