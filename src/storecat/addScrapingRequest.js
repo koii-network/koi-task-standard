@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export default async function addScrapingRequest(state, action) {
   const tasks = state.tasks;
   const input = action.input;
@@ -8,7 +9,9 @@ export default async function addScrapingRequest(state, action) {
 
   if (!(scrapingRequest.owner in balances)) {
     throw new ContractError(
-      "Scraping owner should have minimum stake of " + scrapingRequest.bounty + " koii"
+      "Scraping owner should have minimum stake of " +
+        scrapingRequest.bounty +
+        " koii"
     );
   }
   const balanceOwner = balances[scrapingRequest.owner];
@@ -35,7 +38,7 @@ export default async function addScrapingRequest(state, action) {
       distribution: {},
       isRewarded: false
     }
-  }
+  };
   tasks.push(task);
   return { state };
 }

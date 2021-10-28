@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // The index.js file handles compiling the pieces of the contract into a single Smartweave contract file.
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
