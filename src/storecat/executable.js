@@ -168,7 +168,7 @@ async function service(state, block) {
   if (index_audit > -1) await audit(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
-  await updateCompletedTask(state, block);
+  await updateCompletedTask(state);
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -382,7 +382,7 @@ async function writePayloadInPermaweb(state, block) {
   return false;
 }
 
-async function updateCompletedTask(state, block) {
+async function updateCompletedTask(state) {
   const tasks = state.tasks;
   if(tasks.length == 0) return false;
   

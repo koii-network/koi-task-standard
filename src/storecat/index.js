@@ -5,6 +5,7 @@ import addScrapingRequest from "./addScrapingRequest";
 import savePayload from "./savePayload";
 import confirmDistributeReward from "./confirmDistributeReward";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
+import updateCompletedTask from "./updateCompletedTask";
 
 const handlers = [
   submitDistribution,
@@ -13,6 +14,7 @@ const handlers = [
   savePayload,
   confirmDistributeReward,
   savedPayloadToPermaweb,
+  updateCompletedTask
 ];
 
 export async function handle(state, action) {
