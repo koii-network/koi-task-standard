@@ -16,17 +16,22 @@ export default async function savePayload(state, action) {
     hashPayload: payload.hashPayload,
     owner: payload.owner
   });
+  
+  let isFounded = false;
   for (let index = 0; index < tasks[matchIndex].payloadHashs.length; index++) {
     const element = tasks[matchIndex].payloadHashs[index];
     if(element.hashPayload === payload.hashPayload) {
-      console.log("here")
+      isFounded = true;
+      tasks[matchIndex].payloadHashs[index].count++;
     }
   }
-  tasks[matchIndex].payloadHashs.push({
-    payload: payload.payload,
-    hashPayload: payload.hashPayload,
-  });
-  // remove task body
-  tasks.splice(matchIndex, 1);
+
+  if(!isFounded) {
+    tasks[matchIndex].payloadHashs.push({
+      payload: payload.payload,
+      hashPayload: payload.hashPayload,
+      count: 1
+    });
+  }
   return { state };
 }
