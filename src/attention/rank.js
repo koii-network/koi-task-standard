@@ -76,25 +76,33 @@ export default async function rankPrepDistribution(state) {
     totalAttention += distribution[key].length;
   }
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
-  // Distributing Reward to owners
+  // Distributing Reward to owners and creator.
   const distributionReward = {};
   for (const nft of Object.keys(distribution)) {
     let reward = distribution[nft].length * rewardPerAttention;
-    const creatorAddress = Object.keys(nfts[nft]["creatorShare"])[0];
-    if (!(creatorAddress in nfts[nft]["owners"])) {
-      const creatorShare = nfts[nft]["creatorShare"][creatorAddress];
+    const creator = Object.keys(nfts[nft]["creatorShare"])[0];
+    const owners = nfts[nft]["owners"];
+    // Creator reward
+    if (!(creator in owners)) {
+      const creatorShare = nfts[nft]["creatorShare"][creator];
       const creatorReward = reward * creatorShare;
-      if (creatorReward > 0) {
-        creatorAddress in distributionReward
-          ? (distributionReward[creatorAddress] += creatorReward)
-          : (distributionReward[creatorAddress] = creatorReward);
+      if (
+        creatorReward > 0 &&
+        typeof creator === "string" &&
+        creator.length === 43 &&
+        !(creator.indexOf(" ") >= 0)
+      ) {
+        creator in distributionReward
+          ? (distributionReward[creator] += creatorReward)
+          : (distributionReward[creator] = creatorReward);
         reward = distribution[nft].length * rewardPerAttention - creatorReward;
       }
     }
-    const balances = Object.values(nfts[nft]["owners"]);
+    //Current owners reward
+    const balances = Object.values(owners);
     const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
-    for (let owner in nfts[nft]["owners"]) {
-      let rewardPer = nfts[nft]["owners"][owner] / balancesSum;
+    for (let owner in owners) {
+      let rewardPer = owners[owner] / balancesSum;
       if (rewardPer > 0 && !isNaN(rewardPer)) {
         owner in distributionReward
           ? (distributionReward[owner] += reward * rewardPer)
@@ -102,6 +110,7 @@ export default async function rankPrepDistribution(state) {
       }
     }
   }
+
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,

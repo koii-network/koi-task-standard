@@ -4,6 +4,7 @@ export default function freeze(state, action) {
   const freeze = input.freeze;
   if (caller !== SmartWeave.contract.owner)
     throw new ContractError("Caller is not owner");
+  if (typeof freeze !== "boolean") throw new ContractError("Invaild input");
   state.freeze = freeze;
   return { state };
 }

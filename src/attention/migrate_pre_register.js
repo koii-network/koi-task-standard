@@ -35,17 +35,29 @@ export default async function migratePreRegister(state) {
         if (e.type !== "TX_NOT_FOUND") throw e;
       });
     const creatorShare = {};
-    const creator = nftState.owner || nftState.creator;
+    let creator = nftState.owner || nftState.creator;
+    if (!creator) {
+      creator = transaction.node.owner.address;
+    }
+    const creatorShareFromTag = transaction.node.tags.find(
+      (tag) => tag.name === "Creator-Share"
+    );
     if (nftState["creator_share"] || nftState["creatorShare"]) {
       const share =
         Number(nftState["creator_share"]) || Number(nftState["creatorShare"]);
       typeof share === "number"
         ? (creatorShare[creator] = share)
         : (creatorShare[creator] = 0);
-      state.nfts[transaction.node.id]["creatorShare"] = creatorShare;
+      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
+    } else if (creatorShareFromTag) {
+      const share = Number(creatorShareFromTag.value);
+      typeof share === "number"
+        ? (creatorShare[creator] = share)
+        : (creatorShare[creator] = 0);
+      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
     } else {
       creatorShare[creator] = 0;
-      state.nfts[transaction.node.id]["creatorShare"] = creatorShare;
+      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
     }
     if (nftState && "balances" in nftState) {
       const owners = {};
@@ -86,6 +98,9 @@ async function getNextPage(ids, after) {
       edges {
         node {
           id
+          owner {
+                  address
+                }
           tags { name value }
         }
         cursor
