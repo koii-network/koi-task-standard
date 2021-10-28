@@ -161,7 +161,7 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canRequestScrapingUrl(state)) await getTask();
+  if (!canRequestScrapingUrl(state)) await getScrapingRequest();
   if (!canScrape(state, block)) await scrape(state);
   const index_audit = canAudit(state, block)
   if (index_audit > -1) await audit(index_audit);
@@ -440,8 +440,8 @@ function canScrape(state, block) {
   bounty request api
   @returns scraping url, bounty, uuid
 */
-async function getTask(state) {
-  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+async function getScrapingRequest() {
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   const data = await fetch(url);
   console.log(data);
 
