@@ -28,18 +28,23 @@ export default async function audit(state, action) {
   const tasks = state.tasks;
   const matchIndex = action.input.id;
 
+  if (typeof matchIndex !== "number") {
+    // eslint-disable-next-line no-undef
+    throw new ContractError("Task index should be a number");
+  }
   const task = tasks[matchIndex];
-  if(task.hasOwnProperty('open')) {
+  // eslint-disable-next-line no-prototype-builtins
+  if (task.hasOwnProperty("open")) {
     // get Top count of hash
     let topHash = "";
     let topCt = 0;
     task.payloadHashs.forEach((hash) => {
-      if(hash.count > topCt) {
+      if (hash.count > topCt) {
         topCt = hash.count;
         topHash = hash.hash;
       }
     });
-    
+
     // check the top hash is correct
     if (topCt >= task.payloadHashs.length / 2) {
       // set bounty process

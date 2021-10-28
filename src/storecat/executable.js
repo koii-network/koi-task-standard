@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /*
 Available APIs:
 
@@ -223,7 +224,11 @@ function canAudit(state, block) {
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (block >= element.close && !element.hasAudit && element.payloads.length > 0) {
+    if (
+      block >= element.close &&
+      !element.hasAudit &&
+      element.payloads.length > 0
+    ) {
       matchIndex = index;
       break;
     }
