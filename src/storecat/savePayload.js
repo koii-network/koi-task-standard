@@ -2,9 +2,14 @@ export default async function savePayload(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const matchIndex = input.matchIndex;
+  const payload = input.payload;
   
   if(typeof matchIndex !== 'number') {
     throw new ContractError("Task index should be a number");
+  }
+
+  if(typeof payload !== 'object') {
+    throw new ContractError("Payload should be an object");
   }
 
   // call interactWrite func update task

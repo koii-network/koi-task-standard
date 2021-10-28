@@ -1,14 +1,15 @@
 // The index.js file handles compiling the pieces of the contract into a single Smartweave contract file.
-
 import submitDistribution from "./submit_distribution";
 import audit from "./audit";
 import addScrapingRequest from "./addScrapingRequest";
+import savePayload from "./savePayload";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
 
 const handlers = [
   submitDistribution,
   audit,
   addScrapingRequest,
+  savePayload,
   savedPayloadToPermaweb,
 ];
 
