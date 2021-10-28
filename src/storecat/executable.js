@@ -162,7 +162,7 @@ async function getStorecatStateAndBlock() {
 }
 async function service(state, block) {
   if (!canRequestScrapingUrl(state)) await getScrapingRequest();
-  if (!canScrape(state, block)) await scrape(state);
+  await scrape(state, block);
   const index_audit = canAudit(state, block)
   if (index_audit > -1) await audit(index_audit);
   await distribute();
@@ -419,23 +419,6 @@ function canRequestScrapingUrl() {
   return true;
 }
 /*
-  Check owner whether scrape
-  @returns boolean
-*/
-function canScrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => {
-    // if current owner already scraped : return true
-    const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
-    else return false;
-  });
-  if (taskIndex < 0) {
-    console.log("There is no task for scraping");
-    return false;
-  }
-  return true;
-}
-/*
   bounty request api
   @returns scraping url, bounty, uuid
 */
@@ -470,10 +453,39 @@ async function getScrapingRequest() {
   return false;
 }
 /*
+  Check owner whether scrape
+  @returns boolean
+*/
+function canScrape(state, block) {
+  return true;
+  // const taskIndex = state.tasks.findIndex((t) => {
+  //   // if current owner already scraped : return true
+  //   const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
+  //   if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+  //   else return false;
+  // });
+  // if (taskIndex < 0) {
+  //   console.log("There is no task for scraping");
+  //   return false;
+  // }
+  // return taskIndex;
+}
+/*
   scrape : get scraping payload 
   @returns scraping payload, hashpayload
 */
-async function scrape(state) {
+async function scrape(state, block) {
+  const taskIndex = state.tasks.findIndex((t) => {
+    // if current owner already scraped : return true
+    const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
+    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+    else return false;
+  });
+  if (taskIndex < 0) {
+    console.log("There is no task for scraping");
+    return false;
+  }
+
   // let payload = {
   //   content: {
   //     Image: [],
@@ -495,12 +507,14 @@ async function scrape(state) {
     function: "savePayload",
     payload: userPayload
   };
+  const task_name = "save payload";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
     namespace.taskTxId,
     input
   );
+  await checkTxConfirmation(tx, task_name);
   return true;
 }
 async function getPayload(url) {
