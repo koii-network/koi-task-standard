@@ -7,16 +7,20 @@ export default async function addScrapingRequest(state, action) {
     throw new ContractError("Task index should be a number");
   }
 
+  if(typeof matchIndex < 0) {
+    throw new ContractError("Task index should be unsigned number");
+  }
+
   // call interactWrite func update task
   const task = tasks[matchIndex];
   // update completed task 
   const completedTask = {
     uuid: task.uuid,
     owner: task.owner,
-    tdId: task.tId
+    txId: task.tId
   };
   state.completedTasks.push(completedTask);
-  // remove task body
+  // remove task from tasks
   tasks.splice(matchIndex, 1);
   return { state };
 }
