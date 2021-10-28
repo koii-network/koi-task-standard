@@ -474,28 +474,26 @@ async function getScrapingRequest() {
   @returns scraping payload, hashpayload
 */
 async function scrape(state) {
-  let payload = {
-    content: {
-      Image: [],
-      Text: [],
-      Link: []
-    }
-  };
-  let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  // let payload = await getPayload(state.task.url)
+  // let payload = {
+  //   content: {
+  //     Image: [],
+  //     Text: [],
+  //     Link: []
+  //   }
+  // };
+  // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
+  let payload = await getPayload(state.task.url)
   // hash = md5(JSON.stringify(scrapingData))
   // state.hashPayload = hash
   const userPayload = {};
   userPayload.payload = payload;
-  userPayload.hashPayload = hashPayload;
+  userPayload.hashPayload = md5(payload); //hashPayload;
   userPayload.owner = tools.address;
-  state.payloads.push(userPayload);
-  hasScraped = true;
   // call interactWrite function
   // updatePayload
   const input = {
-    function: "audit",
-    id: proposedData.txId
+    function: "savePayload",
+    payload: userPayload
   };
   const tx = await kohaku.interactWrite(
     arweave,
