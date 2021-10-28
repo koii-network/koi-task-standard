@@ -12,15 +12,20 @@ export default async function savePayload(state, action) {
     throw new ContractError("Payload should be an object");
   }
 
-  // call interactWrite func update task
-  const task = tasks[matchIndex];
-  // update completed task 
-  const completedTask = {
-    uuid: task.uuid,
-    owner: task.owner,
-    tdId: task.tId
-  };
-  state.completedTasks.push(completedTask);
+  tasks[matchIndex].payloads.push({
+    hashPayload: payload.hashPayload,
+    owner: payload.owner
+  });
+  for (let index = 0; index < tasks[matchIndex].payloadHashs.length; index++) {
+    const element = tasks[matchIndex].payloadHashs[index];
+    if(element.hashPayload === payload.hashPayload) {
+      console.log("here")
+    }
+  }
+  tasks[matchIndex].payloadHashs.push({
+    payload: payload.payload,
+    hashPayload: payload.hashPayload,
+  });
   // remove task body
   tasks.splice(matchIndex, 1);
   return { state };
