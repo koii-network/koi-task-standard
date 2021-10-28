@@ -452,21 +452,23 @@ async function getScrapingRequest() {
   // state.task.scraping.owner = 'ownerAddress';
 
   // check the owner has some koii
+  if(data.status === "success") {
 
-  const input = {
-    function: "addScrapingRequest",
-    scrapingRequest: data
-  };
-  const task_name = "add scraping request";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
-  await checkTxConfirmation(tx, task_name);
-
-  return true;
+    const input = {
+      function: "addScrapingRequest",
+      scrapingRequest: data.data
+    };
+    const task_name = "add scraping request";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  }
+  return false;
 }
 /*
   scrape : get scraping payload 
