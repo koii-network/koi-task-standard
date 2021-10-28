@@ -3,14 +3,18 @@ import submitDistribution from "./submit_distribution";
 import audit from "./audit";
 import addScrapingRequest from "./addScrapingRequest";
 import savePayload from "./savePayload";
+import confirmDistributeReward from "./confirmDistributeReward";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
+import updateCompletedTask from "./updateCompletedTask";
 
 const handlers = [
   submitDistribution,
   audit,
   addScrapingRequest,
   savePayload,
+  confirmDistributeReward,
   savedPayloadToPermaweb,
+  updateCompletedTask
 ];
 
 export async function handle(state, action) {

@@ -168,7 +168,7 @@ async function service(state, block) {
   if (index_audit > -1) await audit(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
-  await updateCompletedTask(state, block);
+  await updateCompletedTask(state);
 }
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
@@ -326,12 +326,15 @@ async function bundleAndExport(data) {
 async function writePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
-  if(tasks.length == 0) return false;
-  
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (block >= element.close && element.hasAudit && element.prepareDistribution.isRewarded && !element.hasUploaded) {
+    if (
+      block >= element.close &&
+      element.hasAudit &&
+      element.prepareDistribution.isRewarded &&
+      !element.hasUploaded
+    ) {
       matchIndex = index;
       break;
     }
@@ -350,11 +353,13 @@ async function writePayloadInPermaweb(state, block) {
   });
   // get top payloads
   const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
+  if (topPayload === undefined) return false;
+
   const bundle = {
     owner: task.owner,
     uuid: task.uuid,
     url: task.url,
-    payloads: topPayload // it should be changed with top Payload
+    payloads: topPayload
   }
   const tId = await bundleAndExport(bundle);
   if(tId) {
@@ -377,7 +382,7 @@ async function writePayloadInPermaweb(state, block) {
   return false;
 }
 
-async function updateCompletedTask(state, block) {
+async function updateCompletedTask(state) {
   const tasks = state.tasks;
   if(tasks.length == 0) return false;
   
