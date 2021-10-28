@@ -423,17 +423,16 @@ function canRequestScrapingUrl() {
   @returns boolean
 */
 function canScrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
+  const taskIndex = state.tasks.findIndex((t) => {
+    // if current owner already scraped : return true
+    const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
+    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+    else return false;
+  });
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
   }
-  const task = state.tasks[taskIndex];
-  // per day is 720 block height
-  if (block >= task.close) return false;
-  // if current owner already scraped : return true
-  const isPayloader = task.payloads.filter((p) => p.owner === tools.address);
-  if (isPayloader) return false;
   return true;
 }
 /*
