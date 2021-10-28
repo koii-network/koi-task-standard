@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 /* eslint-disable no-undef */
 /*
 Available APIs:
@@ -15,8 +16,6 @@ namespace {
 // Import SDK modules if you want to use them (optional)
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
-const axios = require("axios");
-const crypto = require("crypto");
 
 import ClusterUtil from "./cluster";
 import ScraperUtil from "./scraper";
@@ -31,7 +30,7 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
-const OFFSET_PER_DAY = 720;
+// const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -42,6 +41,7 @@ let lastLogClose = 0;
 // };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
+// eslint-disable-next-line no-unused-vars
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
@@ -71,12 +71,12 @@ async function getTask(req, res) {
     const tasks = storecatState.tasks;
     // Get owner's task
     const ownerTasks = [];
-    tasks.forEach(task => {
-      if(task.owner === owner) {
+    tasks.forEach((task) => {
+      if (task.owner === owner) {
         ownerTasks.push(task);
       }
     });
-    
+
     res.status(200).send(ownerTasks);
   } catch (e) {
     console.error("getTask error:", e.message);
@@ -91,7 +91,7 @@ async function getCompletedTask(req, res) {
     const uuid = req.query.uuid;
     const hasOwner = req.query.hasOwnProperty("owner");
     const hasUuid = req.query.hasOwnProperty("uuid");
-    if(hasOwner && owner !== ''){
+    if (hasOwner && owner !== "") {
       if (!tools.validArId(owner))
         return res.status(400).send({ error: "invalid txId" });
     }
@@ -291,7 +291,7 @@ async function distribute(state) {
       namespace.taskTxId,
       input
     );
-    await checkTxConfirmation(tx, task_name)
+    await checkTxConfirmation(tx, task_name);
     return true;
   }
   return false;
