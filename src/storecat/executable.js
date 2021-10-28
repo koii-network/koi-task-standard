@@ -326,12 +326,15 @@ async function bundleAndExport(data) {
 async function writePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
-  if(tasks.length == 0) return false;
-  
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (block >= element.close && element.hasAudit && element.prepareDistribution.isRewarded && !element.hasUploaded) {
+    if (
+      block >= element.close &&
+      element.hasAudit &&
+      element.prepareDistribution.isRewarded &&
+      !element.hasUploaded
+    ) {
       matchIndex = index;
       break;
     }
@@ -350,6 +353,8 @@ async function writePayloadInPermaweb(state, block) {
   });
   // get top payloads
   const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
+  if (topPayload === undefined) return false;
+  
   const bundle = {
     owner: task.owner,
     uuid: task.uuid,
