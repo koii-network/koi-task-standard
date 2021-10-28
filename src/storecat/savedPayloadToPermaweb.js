@@ -1,14 +1,14 @@
+/* eslint-disable no-undef */
 export default async function savedPayloadToPermaweb(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const matchIndex = input.matchIndex;
   const txId = input.txId;
-  
-  if(typeof matchIndex !== 'number') {
+
+  if (typeof matchIndex !== "number") {
     throw new ContractError("Task index should be a number");
   }
-  if (typeof txId !== "string")
-    throw new ContractError("Invalid input format");
+  if (typeof txId !== "string") throw new ContractError("Invalid input format");
   if (txId.length !== 43)
     throw new ContractError("TransactionId should have 43 characters");
 

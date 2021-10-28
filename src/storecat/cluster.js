@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { Cluster } = require("puppeteer-cluster");
 let cluster = null;
 

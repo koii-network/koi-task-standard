@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 /* eslint-disable no-undef */
 /*
 Available APIs:
@@ -15,8 +16,6 @@ namespace {
 // Import SDK modules if you want to use them (optional)
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
-const axios = require("axios");
-const crypto = require("crypto");
 
 import ClusterUtil from "./cluster";
 import ScraperUtil from "./scraper";
@@ -31,7 +30,7 @@ const arweave = Arweave.init({
 
 // Define system constants
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
-const OFFSET_PER_DAY = 720;
+// const OFFSET_PER_DAY = 720;
 
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -42,6 +41,7 @@ let lastLogClose = 0;
 // };
 
 // Define the setup block - node, external endpoints must be registered here using the namespace.express toolkit
+// eslint-disable-next-line no-unused-vars
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
@@ -71,12 +71,12 @@ async function getTask(req, res) {
     const tasks = storecatState.tasks;
     // Get owner's task
     const ownerTasks = [];
-    tasks.forEach(task => {
-      if(task.owner === owner) {
+    tasks.forEach((task) => {
+      if (task.owner === owner) {
         ownerTasks.push(task);
       }
     });
-    
+
     res.status(200).send(ownerTasks);
   } catch (e) {
     console.error("getTask error:", e.message);
@@ -91,7 +91,7 @@ async function getCompletedTask(req, res) {
     const uuid = req.query.uuid;
     const hasOwner = req.query.hasOwnProperty("owner");
     const hasUuid = req.query.hasOwnProperty("uuid");
-    if(hasOwner && owner !== ''){
+    if (hasOwner && owner !== "") {
       if (!tools.validArId(owner))
         return res.status(400).send({ error: "invalid txId" });
     }
@@ -99,14 +99,14 @@ async function getCompletedTask(req, res) {
     const tasks = storecatState.tasks;
     // Get owner's task
     const completedTasks = [];
-    tasks.forEach(task => {
-      if(hasOwner && hasUuid){
-        if(task.owner === owner && task.uuid === uuid) {
+    tasks.forEach((task) => {
+      if (hasOwner && hasUuid) {
+        if (task.owner === owner && task.uuid === uuid) {
           completedTasks.push(task);
         }
-      }else if(hasOwner) {
+      } else if (hasOwner) {
         completedTasks.push(task);
-      }else if(hasUuid) {
+      } else if (hasUuid) {
         completedTasks.push(task);
       }
     });
@@ -118,6 +118,7 @@ async function getCompletedTask(req, res) {
 }
 
 // Define the execution block (this will be triggered after setup is complete)
+// eslint-disable-next-line no-unused-vars
 async function execute(_init_state) {
   let state, block;
   for (;;) {
@@ -170,6 +171,7 @@ async function service(state, block) {
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
 }
+// eslint-disable-next-line no-unused-vars
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
@@ -291,7 +293,7 @@ async function distribute(state) {
       namespace.taskTxId,
       input
     );
-    await checkTxConfirmation(tx, task_name)
+    await checkTxConfirmation(tx, task_name);
     return true;
   }
   return false;
@@ -305,18 +307,18 @@ async function bundleAndExport(data) {
     tools.wallet
   );
 
-  myTx.addTag('owner', data.owner);
-  myTx.addTag('task', 'storecat');
-  myTx.addTag('url', data.url);
-  myTx.addTag('created', Math.floor(Date.now() / 1000));
+  myTx.addTag("owner", data.owner);
+  myTx.addTag("task", "storecat");
+  myTx.addTag("url", data.url);
+  myTx.addTag("created", Math.floor(Date.now() / 1000));
   await arweave.transactions.sign(myTx, tools.wallet);
   const result = await arweave.transactions.post(myTx);
-  console.log("response arweave transaction" , result)
+  console.log("response arweave transaction", result);
   if (result.status === 200) {
     // success transaction
     return myTx.id;
   } else {
-    console.log("error response arweave transaction : " , result, data.uuid)
+    console.log("error response arweave transaction : ", result, data.uuid);
     return false;
   }
   // result.id = myTx.id;
@@ -339,20 +341,22 @@ async function writePayloadInPermaweb(state, block) {
       break;
     }
   }
-  if(matchIndex === -1) {
+  if (matchIndex === -1) {
     return false;
   }
   const task = tasks[matchIndex];
   let topHash = "";
   let topCt = 0;
   task.payloadHashs.forEach((hash) => {
-    if(hash.count > topCt) {
+    if (hash.count > topCt) {
       topCt = hash.count;
       topHash = hash.hash;
     }
   });
   // get top payloads
-  const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
+  const topPayload = task.payloads.find(
+    (payload) => payload.hashPayload === topHash
+  );
   if (topPayload === undefined) return false;
 
   const bundle = {
@@ -360,14 +364,14 @@ async function writePayloadInPermaweb(state, block) {
     uuid: task.uuid,
     url: task.url,
     payloads: topPayload
-  }
+  };
   const tId = await bundleAndExport(bundle);
-  if(tId) {
+  if (tId) {
     // update state via contract write
     const input = {
       function: "savedPayloadToPermaweb",
       txId: tId,
-      matchIndex: matchIndex,
+      matchIndex: matchIndex
     };
     const task_name = "saved payload in permaweb";
     const tx = await kohaku.interactWrite(
@@ -384,23 +388,23 @@ async function writePayloadInPermaweb(state, block) {
 
 async function updateCompletedTask(state) {
   const tasks = state.tasks;
-  if(tasks.length == 0) return false;
-  
+  if (tasks.length == 0) return false;
+
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (element.hasAudit && element.hasUploaded && element.tId !== '') {
+    if (element.hasAudit && element.hasUploaded && element.tId !== "") {
       matchIndex = index;
       break;
     }
   }
-  if(matchIndex === -1) {
+  if (matchIndex === -1) {
     return false;
   }
   // update state via contract write
   const input = {
     function: "updateCompletedTask",
-    matchIndex: matchIndex,
+    matchIndex: matchIndex
   };
   const task_name = "updateCompletedTask";
   const tx = await kohaku.interactWrite(
@@ -432,8 +436,7 @@ async function getScrapingRequest() {
   // state.task.scraping.owner = 'ownerAddress';
 
   // check the owner has some koii
-  if(data.status === "success") {
-
+  if (data.status === "success") {
     const input = {
       function: "addScrapingRequest",
       scrapingRequest: data.data
@@ -451,24 +454,6 @@ async function getScrapingRequest() {
   return false;
 }
 /*
-  Check owner whether scrape
-  @returns boolean
-*/
-function canScrape(state, block) {
-  return true;
-  // const taskIndex = state.tasks.findIndex((t) => {
-  //   // if current owner already scraped : return true
-  //   const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-  //   if(!t.hasAudit && t.close >= block && !isPayloader) return true;
-  //   else return false;
-  // });
-  // if (taskIndex < 0) {
-  //   console.log("There is no task for scraping");
-  //   return false;
-  // }
-  // return taskIndex;
-}
-/*
   scrape : get scraping payload 
   @returns scraping payload, hashpayload
 */
@@ -476,7 +461,7 @@ async function scrape(state, block) {
   const taskIndex = state.tasks.findIndex((t) => {
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+    if (!t.hasAudit && t.close >= block && !isPayloader) return true;
     else return false;
   });
   if (taskIndex < 0) {
@@ -492,7 +477,7 @@ async function scrape(state, block) {
   //   }
   // };
   // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  let payload = await getPayload(task.url)
+  let payload = await getPayload(task.url);
   // hash = md5(JSON.stringify(scrapingData))
   // state.hashPayload = hash
   const userPayload = {};
@@ -530,10 +515,9 @@ async function getPayload(url) {
     );
     return scrapingData;
   } catch (error) {
-    console.log('get payload error', error);
+    console.log("get payload error", error);
     return false;
   }
-  
 }
 /**
  * Awaitable rate limit

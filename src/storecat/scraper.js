@@ -156,7 +156,7 @@ const getPayload = async (html) => {
   if ((image = $('meta[property="og:image"]').attr("content"))) {
     payload.image = image;
   } else {
-    $("img").each(function (i, elem) {
+    $("img").each(function (i) {
       if (i === 0) {
         image = $(this).attr("src");
       }
