@@ -454,24 +454,6 @@ async function getScrapingRequest() {
   return false;
 }
 /*
-  Check owner whether scrape
-  @returns boolean
-*/
-function canScrape(state, block) {
-  return true;
-  // const taskIndex = state.tasks.findIndex((t) => {
-  //   // if current owner already scraped : return true
-  //   const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-  //   if(!t.hasAudit && t.close >= block && !isPayloader) return true;
-  //   else return false;
-  // });
-  // if (taskIndex < 0) {
-  //   console.log("There is no task for scraping");
-  //   return false;
-  // }
-  // return taskIndex;
-}
-/*
   scrape : get scraping payload 
   @returns scraping payload, hashpayload
 */
@@ -479,7 +461,7 @@ async function scrape(state, block) {
   const taskIndex = state.tasks.findIndex((t) => {
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+    if (!t.hasAudit && t.close >= block && !isPayloader) return true;
     else return false;
   });
   if (taskIndex < 0) {
@@ -495,7 +477,7 @@ async function scrape(state, block) {
   //   }
   // };
   // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  let payload = await getPayload(task.url)
+  let payload = await getPayload(task.url);
   // hash = md5(JSON.stringify(scrapingData))
   // state.hashPayload = hash
   const userPayload = {};
@@ -533,10 +515,9 @@ async function getPayload(url) {
     );
     return scrapingData;
   } catch (error) {
-    console.log('get payload error', error);
+    console.log("get payload error", error);
     return false;
   }
-  
 }
 /**
  * Awaitable rate limit
