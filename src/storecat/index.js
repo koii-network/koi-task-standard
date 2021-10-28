@@ -3,6 +3,7 @@ import submitDistribution from "./submit_distribution";
 import audit from "./audit";
 import addScrapingRequest from "./addScrapingRequest";
 import savePayload from "./savePayload";
+import confirmDistributeReward from "./confirmDistributeReward";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
 
 const handlers = [
@@ -10,6 +11,7 @@ const handlers = [
   audit,
   addScrapingRequest,
   savePayload,
+  confirmDistributeReward,
   savedPayloadToPermaweb,
 ];
 
