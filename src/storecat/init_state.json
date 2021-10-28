@@ -1,6 +1,6 @@
 {
-  "owner": "D3lK6_xXvBUXMUyA2RJz3soqmLlztkv-gVpEP5AlVUo",
-  "name": "Storecat",
+  "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+  "name": "storecat",
   "tasks": [{
     "open": 101,
     "close": 850,
@@ -14,33 +14,13 @@
     "tId": "",
     "prepareDistribution": {
       "block": 780,
-      "distribution": {
-        "node1": 0.5, 
-        "node2": 0.25
-      },
+      "distribution": {},
       "isRewarded": false
     },
-    "payloads": [
-      {
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
-      }
-    ],
-    "payloadHashs": [
-      {
-        "payload": {},
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "count": 1
-      }
-    ]
+    "payloads": [],
+    "payloadHashs": []
   }],
-  "completedTasks": [
-    {
-      "uuid": "60d9cf5970d912231cc4a230",
-      "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
-      "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
-    }
-  ],
+  "completedTasks": [],
   "executableId": "v5wDE7ZsHYtaCHb0z_2e3_RkJWvyEwzze5RZkje_Z00",
   "koiiContract": "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"
 }
