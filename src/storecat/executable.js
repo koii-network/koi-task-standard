@@ -161,8 +161,8 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canRequestScrapingUrl(state)) await getTask();
-  if (!canScrape(state, block)) await scrape(state);
+  if (!canRequestScrapingUrl(state)) await getScrapingRequest();
+  await scrape(state, block);
   const index_audit = canAudit(state, block)
   if (index_audit > -1) await audit(index_audit);
   await distribute();
@@ -419,29 +419,11 @@ function canRequestScrapingUrl() {
   return true;
 }
 /*
-  Check owner whether scrape
-  @returns boolean
-*/
-function canScrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => !t.isReward);
-  if (taskIndex < 0) {
-    console.log("There is no task for scraping");
-    return false;
-  }
-  const task = state.tasks[taskIndex];
-  // per day is 720 block height
-  if (block >= task.close) return false;
-  // if current owner already scraped : return true
-  const isPayloader = task.payloads.filter((p) => p.owner === tools.address);
-  if (isPayloader) return false;
-  return true;
-}
-/*
   bounty request api
   @returns scraping url, bounty, uuid
 */
-async function getTask(state) {
-  let url = "https://app.getstorecat.com:8888/api/v1/bounty/get";
+async function getScrapingRequest() {
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   const data = await fetch(url);
   console.log(data);
 
@@ -452,12 +434,81 @@ async function getTask(state) {
   // state.task.scraping.owner = 'ownerAddress';
 
   // check the owner has some koii
+  if(data.status === "success") {
 
+    const input = {
+      function: "addScrapingRequest",
+      scrapingRequest: data.data
+    };
+    const task_name = "add scraping request";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  }
+  return false;
+}
+/*
+  Check owner whether scrape
+  @returns boolean
+*/
+function canScrape(state, block) {
+  return true;
+  // const taskIndex = state.tasks.findIndex((t) => {
+  //   // if current owner already scraped : return true
+  //   const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
+  //   if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+  //   else return false;
+  // });
+  // if (taskIndex < 0) {
+  //   console.log("There is no task for scraping");
+  //   return false;
+  // }
+  // return taskIndex;
+}
+/*
+  scrape : get scraping payload 
+  @returns scraping payload, hashpayload
+*/
+async function scrape(state, block) {
+  const taskIndex = state.tasks.findIndex((t) => {
+    // if current owner already scraped : return true
+    const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
+    if(!t.hasAudit && t.close >= block && !isPayloader) return true;
+    else return false;
+  });
+  if (taskIndex < 0) {
+    console.log("There is no task for scraping");
+    return false;
+  }
+  const task = state.tasks[taskIndex];
+  // let payload = {
+  //   content: {
+  //     Image: [],
+  //     Text: [],
+  //     Link: []
+  //   }
+  // };
+  // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
+  let payload = await getPayload(task.url)
+  // hash = md5(JSON.stringify(scrapingData))
+  // state.hashPayload = hash
+  const userPayload = {};
+  userPayload.payload = payload;
+  userPayload.hashPayload = md5(payload); //hashPayload;
+  userPayload.owner = tools.address;
+  // call interactWrite function
+  // updatePayload
   const input = {
-    function: "addScrapingRequest",
-    scrapingRequest: data
+    function: "savePayload",
+    matchIndex: taskIndex,
+    payload: userPayload
   };
-  const task_name = "add scraping request";
+  const task_name = "save payload";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
@@ -465,43 +516,6 @@ async function getTask(state) {
     input
   );
   await checkTxConfirmation(tx, task_name);
-
-  return true;
-}
-/*
-  scrape : get scraping payload 
-  @returns scraping payload, hashpayload
-*/
-async function scrape(state) {
-  let payload = {
-    content: {
-      Image: [],
-      Text: [],
-      Link: []
-    }
-  };
-  let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  // let payload = await getPayload(state.task.url)
-  // hash = md5(JSON.stringify(scrapingData))
-  // state.hashPayload = hash
-  const userPayload = {};
-  userPayload.payload = payload;
-  userPayload.hashPayload = hashPayload;
-  userPayload.owner = tools.address;
-  state.payloads.push(userPayload);
-  hasScraped = true;
-  // call interactWrite function
-  // updatePayload
-  const input = {
-    function: "audit",
-    id: proposedData.txId
-  };
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
   return true;
 }
 async function getPayload(url) {

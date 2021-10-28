@@ -23,10 +23,11 @@ export default async function addScrapingRequest(state, action) {
     owner: scrapingRequest.owner,
     uuid: scrapingRequest.uuid,
     bounty: Number(scrapingRequest.bounty) || 1,
-    url: scrapingRequest.url,
+    url: scrapingRequest.websiteUrl,
     hasAudit: false,
     tophash: "",
     hasUploaded: false,
+    tId: "",
     payloads: [],
     payloadHashs: [],
     prepareDistribution: {
