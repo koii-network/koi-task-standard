@@ -11,11 +11,18 @@ export default [
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   },
-
   {
     input: "src/attention/index.js",
     output: {
       file: "dist/attention.js",
+      format: "cjs"
+    },
+    plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
+  },
+  {
+    input: "src/storecat/index.js",
+    output: {
+      file: "dist/storecat.js",
       format: "cjs"
     },
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]

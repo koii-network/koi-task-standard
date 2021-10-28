@@ -109,7 +109,6 @@ async function latest(_req, res) {
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
-
 async function getNft(req, res) {
   try {
     // Validate nftId
