@@ -485,7 +485,7 @@ async function scrape(state, block) {
     console.log("There is no task for scraping");
     return false;
   }
-
+  const task = state.tasks[taskIndex];
   // let payload = {
   //   content: {
   //     Image: [],
@@ -494,7 +494,7 @@ async function scrape(state, block) {
   //   }
   // };
   // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
-  let payload = await getPayload(state.task.url)
+  let payload = await getPayload(task.url)
   // hash = md5(JSON.stringify(scrapingData))
   // state.hashPayload = hash
   const userPayload = {};
@@ -505,6 +505,7 @@ async function scrape(state, block) {
   // updatePayload
   const input = {
     function: "savePayload",
+    matchIndex: taskIndex,
     payload: userPayload
   };
   const task_name = "save payload";
