@@ -99,14 +99,14 @@ async function getCompletedTask(req, res) {
     const tasks = storecatState.tasks;
     // Get owner's task
     const completedTasks = [];
-    tasks.forEach(task => {
-      if(hasOwner && hasUuid){
-        if(task.owner === owner && task.uuid === uuid) {
+    tasks.forEach((task) => {
+      if (hasOwner && hasUuid) {
+        if (task.owner === owner && task.uuid === uuid) {
           completedTasks.push(task);
         }
-      }else if(hasOwner) {
+      } else if (hasOwner) {
         completedTasks.push(task);
-      }else if(hasUuid) {
+      } else if (hasUuid) {
         completedTasks.push(task);
       }
     });
@@ -118,6 +118,7 @@ async function getCompletedTask(req, res) {
 }
 
 // Define the execution block (this will be triggered after setup is complete)
+// eslint-disable-next-line no-unused-vars
 async function execute(_init_state) {
   let state, block;
   for (;;) {
@@ -170,6 +171,7 @@ async function service(state, block) {
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
 }
+// eslint-disable-next-line no-unused-vars
 async function witness(state, block) {
   // if (checkForVote(state, block)) await tryVote(state);
   // if (await checkProposeSlash(state, block)) await proposeSlash(state);
@@ -305,18 +307,18 @@ async function bundleAndExport(data) {
     tools.wallet
   );
 
-  myTx.addTag('owner', data.owner);
-  myTx.addTag('task', 'storecat');
-  myTx.addTag('url', data.url);
-  myTx.addTag('created', Math.floor(Date.now() / 1000));
+  myTx.addTag("owner", data.owner);
+  myTx.addTag("task", "storecat");
+  myTx.addTag("url", data.url);
+  myTx.addTag("created", Math.floor(Date.now() / 1000));
   await arweave.transactions.sign(myTx, tools.wallet);
   const result = await arweave.transactions.post(myTx);
-  console.log("response arweave transaction" , result)
+  console.log("response arweave transaction", result);
   if (result.status === 200) {
     // success transaction
     return myTx.id;
   } else {
-    console.log("error response arweave transaction : " , result, data.uuid)
+    console.log("error response arweave transaction : ", result, data.uuid);
     return false;
   }
   // result.id = myTx.id;
@@ -339,20 +341,22 @@ async function writePayloadInPermaweb(state, block) {
       break;
     }
   }
-  if(matchIndex === -1) {
+  if (matchIndex === -1) {
     return false;
   }
   const task = tasks[matchIndex];
   let topHash = "";
   let topCt = 0;
   task.payloadHashs.forEach((hash) => {
-    if(hash.count > topCt) {
+    if (hash.count > topCt) {
       topCt = hash.count;
       topHash = hash.hash;
     }
   });
   // get top payloads
-  const topPayload = task.payloads.find( payload => payload.hashPayload === topHash );
+  const topPayload = task.payloads.find(
+    (payload) => payload.hashPayload === topHash
+  );
   if (topPayload === undefined) return false;
 
   const bundle = {
@@ -360,14 +364,14 @@ async function writePayloadInPermaweb(state, block) {
     uuid: task.uuid,
     url: task.url,
     payloads: topPayload
-  }
+  };
   const tId = await bundleAndExport(bundle);
-  if(tId) {
+  if (tId) {
     // update state via contract write
     const input = {
       function: "savedPayloadToPermaweb",
       txId: tId,
-      matchIndex: matchIndex,
+      matchIndex: matchIndex
     };
     const task_name = "saved payload in permaweb";
     const tx = await kohaku.interactWrite(
@@ -384,23 +388,23 @@ async function writePayloadInPermaweb(state, block) {
 
 async function updateCompletedTask(state) {
   const tasks = state.tasks;
-  if(tasks.length == 0) return false;
-  
+  if (tasks.length == 0) return false;
+
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
     const element = tasks[index];
-    if (element.hasAudit && element.hasUploaded && element.tId !== '') {
+    if (element.hasAudit && element.hasUploaded && element.tId !== "") {
       matchIndex = index;
       break;
     }
   }
-  if(matchIndex === -1) {
+  if (matchIndex === -1) {
     return false;
   }
   // update state via contract write
   const input = {
     function: "updateCompletedTask",
-    matchIndex: matchIndex,
+    matchIndex: matchIndex
   };
   const task_name = "updateCompletedTask";
   const tx = await kohaku.interactWrite(
@@ -432,8 +436,7 @@ async function getScrapingRequest() {
   // state.task.scraping.owner = 'ownerAddress';
 
   // check the owner has some koii
-  if(data.status === "success") {
-
+  if (data.status === "success") {
     const input = {
       function: "addScrapingRequest",
       scrapingRequest: data.data
