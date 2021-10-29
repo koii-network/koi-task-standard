@@ -1,25 +1,7 @@
 {
   "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
   "name": "storecat",
-  "tasks": [{
-    "open": 101,
-    "close": 850,
-    "owner": "",
-    "uuid": "60d9cf5970d912231cc4a230",
-    "bounty": 1,
-    "url": "https://npmjs.org",
-    "hasAudit": false,
-    "topHash": "",
-    "hasUploaded": false,
-    "tId": "",
-    "prepareDistribution": {
-      "block": 780,
-      "distribution": {},
-      "isRewarded": false
-    },
-    "payloads": [],
-    "payloadHashs": []
-  }],
+  "tasks": [],
   "completedTasks": [],
   "executableId": "v5wDE7ZsHYtaCHb0z_2e3_RkJWvyEwzze5RZkje_Z00",
   "koiiContract": "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"
