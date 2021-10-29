@@ -24,14 +24,8 @@ async function main() {
   const executableId = await deployExecutable();
   console.log(`Deployed Executable with ID ${executableId}`);
   await checkTxConfirmation(executableId, "executable");
-  const initState = JSON.parse(state);
-  initState.executableId = executableId;
-  const id = await smartweave.createContract(
-    arweave,
-    wallet,
-    src,
-    JSON.stringify(initState)
-  );
+  state.executableId = executableId;
+  const id = await smartweave.createContract(arweave, wallet, src, state);
   console.log(`Deployed ${contractName} Contract with ID ${id}`);
   await checkTxConfirmation(id, contractName);
   fs.writeFileSync("dist/Transaction.json", JSON.stringify({ id }));
