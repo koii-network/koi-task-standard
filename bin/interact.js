@@ -17,8 +17,8 @@ const wallet = JSON.parse(fs.readFileSync(walletPath));
 //   "1bjASUPwUfGiuiz94aaHzow9HeaMzBCmNcGMpZgNhHA",
 //   "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"
 // ];
-//const contractId = "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU"; // test attention contract
-//const contractId = "A1EeIXrknsb7SlBxHAboXSQIpcmTesvEykhU45uwig4"; // test koii Contract
+//const contractId = "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"; // test attention contract
+const contractId = "7wfyUmgZZMtMbW8f9VufCKLalOQO_Jlgm0-Ll8KmfRc"; // test koii Contract
 //const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production
 //const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 
@@ -50,11 +50,11 @@ const wallet = JSON.parse(fs.readFileSync(walletPath));
 //   function: "registerValidContractSrc",
 //   contractSrc: "hmqdldElrUGT23q9dlegLZIABnYO8iQ03CHSEbEZYMo"
 // };
-// const input = {
-//   function: "registerTask",
-//   taskName: "Attention_Game",
-//   taskTxId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU"
-// };
+const input = {
+  function: "registerTask",
+  taskName: "Attention_Game",
+  taskTxId: "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"
+};
 // const input = {
 //   function: "burnKoi",
 //   contractId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU",

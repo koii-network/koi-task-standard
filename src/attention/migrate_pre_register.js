@@ -34,32 +34,33 @@ export default async function migratePreRegister(state) {
       .catch((e) => {
         if (e.type !== "TX_NOT_FOUND") throw e;
       });
-    const creatorShare = {};
-    let creator = nftState.owner || nftState.creator;
-    if (!creator) {
-      creator = transaction.node.owner.address;
-    }
-    const creatorShareFromTag = transaction.node.tags.find(
-      (tag) => tag.name === "Creator-Share"
-    );
-    if (nftState["creator_share"] || nftState["creatorShare"]) {
-      const share =
-        Number(nftState["creator_share"]) || Number(nftState["creatorShare"]);
-      typeof share === "number"
-        ? (creatorShare[creator] = share)
-        : (creatorShare[creator] = 0);
-      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
-    } else if (creatorShareFromTag) {
-      const share = Number(creatorShareFromTag.value);
-      typeof share === "number"
-        ? (creatorShare[creator] = share)
-        : (creatorShare[creator] = 0);
-      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
-    } else {
-      creatorShare[creator] = 0;
-      state.nfts[transaction.node.id] = { creatorShare: creatorShare };
-    }
+
     if (nftState && "balances" in nftState) {
+      const creatorShare = {};
+      let creator = nftState.owner || nftState.creator;
+      if (!creator) {
+        creator = transaction.node.owner.address;
+      }
+      const creatorShareFromTag = transaction.node.tags.find(
+        (tag) => tag.name === "Creator-Share"
+      );
+      if (nftState["creator_share"] || nftState["creatorShare"]) {
+        const share =
+          Number(nftState["creator_share"]) || Number(nftState["creatorShare"]);
+        typeof share === "number"
+          ? (creatorShare[creator] = share)
+          : (creatorShare[creator] = 0.1);
+        state.nfts[transaction.node.id] = { creatorShare: creatorShare };
+      } else if (creatorShareFromTag) {
+        const share = Number(creatorShareFromTag.value);
+        typeof share === "number"
+          ? (creatorShare[creator] = share)
+          : (creatorShare[creator] = 0.1);
+        state.nfts[transaction.node.id] = { creatorShare: creatorShare };
+      } else {
+        creatorShare[creator] = 0.1;
+        state.nfts[transaction.node.id] = { creatorShare: creatorShare };
+      }
       const owners = {};
       for (let owner in nftState.balances) {
         if (
