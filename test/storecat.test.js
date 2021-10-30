@@ -16,15 +16,13 @@ async function main() {
   const wallet = JSON.parse(fs.readFileSync(process.argv[2]));
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
 
-  /*
   // Load koi contract
-  const koiSrc = fs.readFileSync(`dist/koi.js`, "utf8");
+  const koiSrc = fs.readFileSync(`dist/koii-core.js`, "utf8");
   const koiContractId = "a1s2d3f4";
   const koiInitState = JSON.parse(
     fs.readFileSync(`src/koii-core/init_state.json`)
   );
   smartest.writeContractState(koiContractId, koiInitState);
-    */
 
   // Load storecat contract
   const storecatSrc = fs.readFileSync(`dist/storecat.js`, "utf8");
