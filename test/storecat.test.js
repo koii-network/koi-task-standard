@@ -2,6 +2,7 @@ const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
 
+console.log(process.argv[2]);
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
 async function main() {
