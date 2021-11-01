@@ -17,8 +17,8 @@ namespace {
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 
-import ClusterUtil from "./cluster";
-import ScraperUtil from "./scraper";
+const ClusterUtil = require("./cluster");
+const ScraperUtil = require("./scraper");
 
 const arweave = Arweave.init({
   host: "arweave.net",

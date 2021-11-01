@@ -7,6 +7,13 @@ import confirmDistributeReward from "./confirmDistributeReward";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
 import updateCompletedTask from "./updateCompletedTask";
 
+// const audit = require("./audit");
+// const addScrapingRequest = require("./addScrapingRequest");
+// const savePayload = require("./savePayload");
+// const confirmDistributeReward = require("./confirmDistributeReward");
+// const savedPayloadToPermaweb = require("./savedPayloadToPermaweb");
+// const updateCompletedTask = require("./updateCompletedTask");
+
 const handlers = [
   audit,
   addScrapingRequest,
