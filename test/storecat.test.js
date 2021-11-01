@@ -2,7 +2,6 @@ const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
 
-console.log(process.argv[2]);
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
 async function main() {
@@ -66,24 +65,25 @@ async function main() {
   // );
 
   const state = smartest.readContractState(storecatContractId);
-  const proposedPaylods = state.task.proposedPaylods.find(
-    (proposedPaylod) => proposedPaylod.block === state.task.open
-  );
-  const proposedDataId = proposedPaylods.proposedDatas[0].id;
-  const storecatInput1 = {
-    function: "audit",
-    id: proposedDataId,
-    descripition: "malicious_data"
-  };
-  await smartest.interactWrite(
-    arweave,
-    storecatSrc,
-    wallet,
-    storecatInput1,
-    smartest.readContractState(storecatContractId),
-    walletAddress,
-    storecatContractId
-  );
+  console.log("current state: " + state);
+  // const proposedPaylods = state.tasks.proposedPaylods.find(
+  //   (proposedPaylod) => proposedPaylod.block === state.task.open
+  // );
+  // const proposedDataId = proposedPaylods.proposedDatas[0].id;
+  // const storecatInput1 = {
+  //   function: "audit",
+  //   id: proposedDataId,
+  //   descripition: "malicious_data"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   storecatSrc,
+  //   wallet,
+  //   storecatInput1,
+  //   smartest.readContractState(storecatContractId),
+  //   walletAddress,
+  //   storecatContractId
+  // );
 
   /*
   const storecatInput2 = {
