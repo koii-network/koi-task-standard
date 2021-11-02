@@ -3,7 +3,29 @@ const Arweave = require("arweave");
 const fs = require("fs");
 const axios = require("axios").default;
 
+const ClusterUtil = require("../src/storecat/cluster");
+const ScraperUtil = require("../src/storecat/scraper");
+
 if (process.argv[2] === undefined) throw "Wallet path not defined";
+
+async function getPayload(url) {
+  try {
+    let cluster = await ClusterUtil.puppeteerCluster();
+    const { html } = await cluster.execute({
+      url,
+      takeScreenshot: false
+    });
+    const scrapingData = await ScraperUtil.getPayload(html);
+    console.log(
+      "**************** finished scraping *******************",
+      scrapingData
+    );
+    return scrapingData;
+  } catch (error) {
+    console.log("get payload error", error);
+    return false;
+  }
+}
 
 async function main() {
   const arweave = Arweave.init({

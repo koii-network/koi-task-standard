@@ -2,7 +2,7 @@
 const { Cluster } = require("puppeteer-cluster");
 let cluster = null;
 
-export default async function puppeteerCluster() {
+async function puppeteerCluster() {
   if (cluster) return cluster;
   cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
@@ -68,3 +68,4 @@ export default async function puppeteerCluster() {
   });
   return cluster;
 }
+module.exports = puppeteerCluster;
