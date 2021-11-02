@@ -152,7 +152,7 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  if (!canRequestScrapingUrl(state)) await getScrapingRequest();
+  await getScrapingRequest();
   await scrape(state, block);
   const index_audit = canAudit(state, block);
   if (index_audit > -1) await audit(index_audit);
@@ -374,7 +374,10 @@ async function writePayloadInPermaweb(state, block) {
   }
   return false;
 }
-
+/*
+  updateCompletedTask: update completed task status 
+  @returns remove task and added completedTasks
+*/
 async function updateCompletedTask(state) {
   const tasks = state.tasks;
   if (tasks.length == 0) return false;
@@ -405,10 +408,6 @@ async function updateCompletedTask(state) {
   await checkTxConfirmation(tx, task_name);
   return true;
 }
-
-function canRequestScrapingUrl() {
-  return true;
-}
 /*
   get scraping request from outside server(app.getstorecat.com)
   @returns scraping url, bounty, uuid, owner
@@ -436,8 +435,7 @@ async function getScrapingRequest() {
   return false;
 }
 /*
-  scrape : get payload from url
-  it is using puppeteerCluster and cheerio
+  scrape : save payload into task.payloads
   save the payload into task.payloads
   @returns scraping payload, hashpayload
 */
@@ -475,6 +473,11 @@ async function scrape(state, block) {
   await checkTxConfirmation(tx, task_name);
   return true;
 }
+/*
+  getPayload : get payload from url
+  it is using puppeteerCluster and cheerio
+  @returns scraping payload
+*/
 async function getPayload(url) {
   try {
     let cluster = await ClusterUtil.puppeteerCluster();
