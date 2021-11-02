@@ -1,21 +1,10 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable no-undef */
-/*
-Available APIs:
-
-tools
-require
-namespace {
-  redisGet()
-  redisSet()
-  fs()
-  express()
-}
-*/
 
 // Import SDK modules if you want to use them (optional)
 const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
+const axios = require("axios");
 
 const ClusterUtil = require("./cluster");
 const ScraperUtil = require("./scraper");
@@ -421,19 +410,12 @@ function canRequestScrapingUrl() {
   return true;
 }
 /*
-  bounty request api
-  @returns scraping url, bounty, uuid
+  get scraping request from outside server(app.getstorecat.com)
+  @returns scraping url, bounty, uuid, owner
 */
 async function getScrapingRequest() {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
-  const data = await fetch(url);
-  console.log(data);
-
-  // let return_url = "https://gmail.com";
-  // state.task.scraping.uuid = "60d9cf5970d912231cc4a230";
-  // state.task.scraping.bounty = 1;
-  // state.task.scraping.url = return_url;
-  // state.task.scraping.owner = 'ownerAddress';
+  const data = await axios.get(url);
 
   // check the owner has some koii
   if (data.status === "success") {
