@@ -1,3 +1,5 @@
+import { SmartWeave } from "@weavery/clarity";
+
 export default async function migratePreRegister(state) {
   const mainContactId = state.koiiContract;
   const validContractSrc = state.validContractSrcsB64;
@@ -26,7 +28,11 @@ export default async function migratePreRegister(state) {
     const contractSrc = transaction.node.tags.find(
       (tag) => tag.name === "Contract-Src"
     );
-    return contractSrc && validContractSrc.includes(contractSrc.value);
+    return (
+      contractSrc &&
+      validContractSrc.includes(contractSrc.value) &&
+      transaction.node.block.height < SmartWeave.block.height
+    );
   });
   for (const transaction of validTransactionIds) {
     const nftState = await SmartWeave.contracts
@@ -103,6 +109,9 @@ async function getNextPage(ids, after) {
                   address
                 }
           tags { name value }
+          block {
+                    height   
+                }
         }
         cursor
       }
