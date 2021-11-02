@@ -4,10 +4,22 @@ let cluster = null;
 
 async function puppeteerCluster() {
   if (cluster) return cluster;
-  cluster = await Cluster.launch({
-    concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: 4
-  });
+  try{
+
+    cluster = await Cluster.launch({
+      concurrency: Cluster.CONCURRENCY_CONTEXT,
+      maxConcurrency: 4
+      // puppeteerOptions: {
+      //   headless: true,
+      //   args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      // },
+      // skipDuplicateUrls: true
+    });
+  } catch (e) {
+    console.log("create cluster failed");
+    console.log(e);
+    return false;
+  }
   await cluster.task(async ({ page, data }) => {
     await page.evaluateOnNewDocument(() => {
       Object.defineProperty(navigator, "webdriver", {
