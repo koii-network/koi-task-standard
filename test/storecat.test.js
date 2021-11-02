@@ -32,20 +32,28 @@ async function main() {
   );
   smartest.writeContractState(storecatContractId, storecatInitState);
 
-  const storecatInput = {
-    function: "batchAction",
-    batchFile: "rivOhJyE70LVRNjH7jUWGEnMHZw88VZCMkRyslhUrWs",
-    voteId: "oH2XaHh0vMaJTBraw2USfOwptd3aEfBz2SQRDf5lAyo"
-  };
-  await smartest.interactWrite(
-    arweave,
-    storecatSrc,
-    wallet,
-    storecatInput,
-    smartest.readContractState(storecatContractId),
-    walletAddress,
-    storecatContractId
-  );
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
+  const data = await fetch(url);
+  console.log(data)
+  return true
+  // const storecatInput = {
+  //   function: "addScrapingRequest",
+  //   scrapingRequest: {
+  //     uuid: "60d9cf5970d912231cc4a230",
+  //     bounty: 1,
+  //     url: "https://gmail.com",
+  //     owner: ""
+  //   }
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   storecatSrc,
+  //   wallet,
+  //   storecatInput,
+  //   smartest.readContractState(storecatContractId),
+  //   walletAddress,
+  //   storecatContractId
+  // );
 
   // const attentionInput0 = {
   //   function: "submitDistribution",
