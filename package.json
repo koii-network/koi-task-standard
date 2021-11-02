@@ -13,8 +13,10 @@
     "deploy_task": "yarn build && node ./bin/task_deployment"
   },
   "dependencies": {
+    "@_koi/smartest": "^0.1.4",
     "@weavery/clarity": "^0.1.5",
     "arweave": "^1.10.14",
+    "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
