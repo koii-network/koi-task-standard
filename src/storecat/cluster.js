@@ -4,8 +4,7 @@ let cluster = null;
 
 async function puppeteerCluster() {
   if (cluster) return cluster;
-  try{
-
+  try {
     cluster = await Cluster.launch({
       concurrency: Cluster.CONCURRENCY_CONTEXT,
       maxConcurrency: 4
