@@ -1,7 +1,7 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
-// const fetch = require("node-fetch");
+const fetch = require("node-fetch");
 
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
