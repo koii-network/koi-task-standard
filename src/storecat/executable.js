@@ -246,7 +246,10 @@ async function audit(matchIndex) {
   //   console.log("audit submitted");
   return true;
 }
-
+/*
+  distribute: resolve prepared distribute reward
+  @returns 
+*/
 async function distribute(state) {
   const tasks = state.tasks;
 
@@ -287,33 +290,43 @@ async function distribute(state) {
   }
   return false;
 }
-
+/*
+  bundleAndExport: upload data to permaweb (arweave )
+  @returns 
+*/
 async function bundleAndExport(data) {
-  const myTx = await arweave.createTransaction(
-    {
-      data: Buffer.from(JSON.stringify(data, null, 2), "utf8")
-    },
-    tools.wallet
-  );
-
-  myTx.addTag("owner", data.owner);
-  myTx.addTag("task", "storecat");
-  myTx.addTag("url", data.url);
-  myTx.addTag("created", Math.floor(Date.now() / 1000));
-  await arweave.transactions.sign(myTx, tools.wallet);
-  const result = await arweave.transactions.post(myTx);
-  console.log("response arweave transaction", result);
-  if (result.status === 200) {
-    // success transaction
-    return myTx.id;
-  } else {
-    console.log("error response arweave transaction : ", result, data.uuid);
+  try {
+    const myTx = await arweave.createTransaction(
+      {
+        data: Buffer.from(JSON.stringify(data, null, 2), "utf8")
+      },
+      tools.wallet
+    );
+  
+    myTx.addTag("owner", data.owner);
+    myTx.addTag("task", "storecat");
+    myTx.addTag("url", data.url);
+    myTx.addTag("created", Math.floor(Date.now() / 1000));
+    await arweave.transactions.sign(myTx, tools.wallet);
+    const result = await arweave.transactions.post(myTx);
+    console.log("response arweave transaction", result);
+    if (result.status === 200) {
+      // success transaction
+      return myTx.id;
+    } else {
+      console.log("error response arweave transaction : ", result, data.uuid);
+      return false;
+    }  
+  } catch (error) {
+    console.log('error bundleAndExport', error);
     return false;
   }
-  // result.id = myTx.id;
-  // return result;
 }
-
+/*
+  writePayloadInPermaweb: upload payload of rewarded task to arweave
+  save transactionId in state.task
+  @returns 
+*/
 async function writePayloadInPermaweb(state, block) {
   const tasks = state.tasks;
 
