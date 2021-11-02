@@ -1,7 +1,7 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
-const fetch = require("node-fetch");
+const axios = require("axios").default;
 
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
@@ -34,9 +34,9 @@ async function main() {
   smartest.writeContractState(storecatContractId, storecatInitState);
 
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
-  const data = await fetch(url);
+  const data = await axios.get(url);
   console.log(data);
-  return true
+  return true;
   // const storecatInput = {
   //   function: "addScrapingRequest",
   //   scrapingRequest: {
