@@ -28,7 +28,7 @@ async function main() {
   const storecatSrc = fs.readFileSync(`dist/storecat.js`, "utf8");
   const storecatContractId = "q2w3e5r7";
   const storecatInitState = JSON.parse(
-    fs.readFileSync(`src/storecat/init_state.json`)
+    fs.readFileSync(`src/storecat/init_state_test.json`)
   );
   smartest.writeContractState(storecatContractId, storecatInitState);
 
