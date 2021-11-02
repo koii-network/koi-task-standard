@@ -167,4 +167,8 @@ const getPayload = async (html) => {
   return payload;
 };
 
-export { parseAndSaveAllSelctor, getPayload };
+// export { parseAndSaveAllSelctor, getPayload };
+module.exports = {
+  parseAndSaveAllSelctor,
+  getPayload
+};
