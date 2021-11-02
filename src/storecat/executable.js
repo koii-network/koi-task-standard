@@ -438,7 +438,7 @@ async function getScrapingRequest() {
 /*
   scrape : get payload from url
   it is using puppeteerCluster and cheerio
-  save the payload to 
+  save the payload into task.payloads
   @returns scraping payload, hashpayload
 */
 async function scrape(state, block) {
@@ -454,14 +454,12 @@ async function scrape(state, block) {
   }
   const task = state.tasks[taskIndex];
   let payload = await getPayload(task.url);
-  // hash = md5(JSON.stringify(scrapingData))
-  // state.hashPayload = hash
   const userPayload = {};
   userPayload.payload = payload;
-  userPayload.hashPayload = md5(payload); //hashPayload;
+  userPayload.hashPayload = md5(payload);
   userPayload.owner = tools.address;
   // call interactWrite function
-  // updatePayload
+  // savePayload
   const input = {
     function: "savePayload",
     matchIndex: taskIndex,
