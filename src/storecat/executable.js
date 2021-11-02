@@ -227,7 +227,8 @@ function canAudit(state, block) {
   return matchIndex;
 }
 /*
-  An audit contract can optionally be implemented when using gradual consensus (see https://koii.network/gradual-consensus.pdf for more info)
+  audit: find top payload and prepareDistribution rewards
+  @returns 
 */
 async function audit(matchIndex) {
   const input = {
@@ -248,6 +249,8 @@ async function audit(matchIndex) {
 }
 /*
   distribute: resolve prepared distribute reward
+  call main contract distributeReward and then 
+  update isRewarded = true of prepareDistribution
   @returns 
 */
 async function distribute(state) {
