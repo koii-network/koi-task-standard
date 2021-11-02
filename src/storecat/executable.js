@@ -436,7 +436,9 @@ async function getScrapingRequest() {
   return false;
 }
 /*
-  scrape : get scraping payload 
+  scrape : get payload from url
+  it is using puppeteerCluster and cheerio
+  save the payload to 
   @returns scraping payload, hashpayload
 */
 async function scrape(state, block) {
@@ -451,14 +453,6 @@ async function scrape(state, block) {
     return false;
   }
   const task = state.tasks[taskIndex];
-  // let payload = {
-  //   content: {
-  //     Image: [],
-  //     Text: [],
-  //     Link: []
-  //   }
-  // };
-  // let hashPayload = "2503e0483fe9bff8e3b18bf4ea1fe23b";
   let payload = await getPayload(task.url);
   // hash = md5(JSON.stringify(scrapingData))
   // state.hashPayload = hash
