@@ -490,7 +490,7 @@ async function scrape(state, block) {
     if (tId) {
       const userPayload = {};
       userPayload.payloadTxId = tId;
-      userPayload.hashPayload = md5(payload);
+      userPayload.hashPayload = md5(payload); //128byte
       userPayload.owner = tools.address;
       // call interactWrite function
       // savePayload
