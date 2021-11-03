@@ -154,8 +154,7 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
-  const index_audit = canAudit(state, block);
-  if (index_audit > -1) await audit(index_audit);
+  await audit(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
@@ -206,10 +205,10 @@ async function checkTxConfirmation(txId, task) {
 }
 
 /*
-  canAudit: find audit possible taskId
+  audit: find top payload and prepareDistribution rewards
   @returns 
 */
-function canAudit(state, block) {
+async function audit(state, block) {
   const tasks = state.tasks;
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
@@ -223,13 +222,9 @@ function canAudit(state, block) {
       break;
     }
   }
-  return matchIndex;
-}
-/*
-  audit: find top payload and prepareDistribution rewards
-  @returns 
-*/
-async function audit(matchIndex) {
+  if (matchIndex === -1) {
+    return false;
+  }
   try {
     const input = {
       function: "audit",
@@ -481,26 +476,33 @@ async function scrape(state, block) {
   }
   const task = state.tasks[taskIndex];
   let payload = await getPayload(task.url);
-  const userPayload = {};
-  userPayload.payload = payload;
-  userPayload.hashPayload = md5(payload);
-  userPayload.owner = tools.address;
-  // call interactWrite function
-  // savePayload
-  const input = {
-    function: "savePayload",
-    matchIndex: taskIndex,
-    payload: userPayload
-  };
-  const task_name = "save payload";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
-  await checkTxConfirmation(tx, task_name);
-  return true;
+
+  // upload payload to permaweb because we can't send more than 2kb data to contract
+  try {
+    const userPayload = {};
+    userPayload.payload = payload;
+    userPayload.hashPayload = md5(payload);
+    userPayload.owner = tools.address;
+    // call interactWrite function
+    // savePayload
+    const input = {
+      function: "savePayload",
+      matchIndex: taskIndex,
+      payload: userPayload
+    };
+    const task_name = "save payload";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  } catch (error) {
+    console.log("error payload upload to permaweb ", error);
+    return false;
+  }
 }
 /*
   getPayload : get payload from url
