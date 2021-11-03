@@ -250,60 +250,56 @@ async function distribute(state) {
         const rewardedBlockId = storecatContractBlock.rewardedBlock[index]; // rewardedBlockId = uuid + "_" + block
         if(rewardedBlockId !== "" && rewardedBlockId.length > 25) { // uuid length is 24byte
           const { blockT, uuidT } = getBlockAndUuid(rewardedBlockId);
-          const matchIndex = tasks.findIndex(
-            (t) => t.uuid === uuidT && !t.prepareDistribution.isReward && t.hasAudit && !t.hasUploaded
-          );        
+          let matchIndex = tasks.findIndex(
+            (t) => t.uuid === uuidT && t.open === Number(blockT) 
+            && !t.prepareDistribution.isReward 
+            && t.hasAudit && !t.hasUploaded
+          );
+          if (matchIndex > -1) {
+            // updated distributeReward
+            try {
+              // submit main koii contract to distribute
+              const input = {
+                function: "distributeReward",
+                matchIndex: matchIndex
+              };
+              const tx = await kohaku.interactWrite(
+                arweave,
+                tools.wallet,
+                tools.contractId, // it is main contract id
+                input
+              );
+              const task = "distributing reward to main contract";
+              if (await checkTxConfirmation(tx, task)) {
+                console.log("Distributed");
+                // update distribute data in sub task
+                const input = {
+                  function: "confirmDistributeReward",
+                  matchIndex: matchIndex
+                };
+                const task_name = "confirm distribute reward";
+                const tx = await kohaku.interactWrite(
+                  arweave,
+                  tools.wallet,
+                  namespace.taskTxId,
+                  input
+                );
+                await checkTxConfirmation(tx, task_name);
+                return true;
+              }
+              return false;
+            } catch (error) {
+              console.log('error distribute', error);
+              return false;
+            }
+          }
         }
         
       }
-      let rewardedBlockId = 
     }
     return false;
   }
   return false;
-
-  if (tasks.length == 0) return false;
-  const matchIndex = tasks.findIndex(
-    (t) => !t.prepareDistribution.isReward && t.hasAudit && !t.hasUploaded
-  );
-
-  if (matchIndex === -1) return false;
-
-  try {
-    // submit main koii contract to distribute
-    const input = {
-      function: "distributeReward",
-      matchIndex: matchIndex
-    };
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      tools.contractId, // it is main contract id
-      input
-    );
-    const task = "distributing reward to main contract";
-    if (await checkTxConfirmation(tx, task)) {
-      console.log("Distributed");
-      // update distribute data in sub task
-      const input = {
-        function: "confirmDistributeReward",
-        matchIndex: matchIndex
-      };
-      const task_name = "confirm distribute reward";
-      const tx = await kohaku.interactWrite(
-        arweave,
-        tools.wallet,
-        namespace.taskTxId,
-        input
-      );
-      await checkTxConfirmation(tx, task_name);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.log('error distribute', error);
-    return false;
-  }
 }
 /*
   bundleAndExport: upload data to permaweb (arweave )
