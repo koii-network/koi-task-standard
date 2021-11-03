@@ -439,10 +439,10 @@ async function updateCompletedTask(state) {
   }
   // update state via contract write
   const input = {
-    function: "updateCompletedTask",
+    function: "completeTask",
     matchIndex: matchIndex
   };
-  const task_name = "updateCompletedTask";
+  const task_name = "completeTask";
   const tx = await kohaku.interactWrite(
     arweave,
     tools.wallet,
