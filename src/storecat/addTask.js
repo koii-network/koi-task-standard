@@ -1,12 +1,12 @@
 /* eslint-disable no-undef */
-export default async function addScrapingRequest(state, action) {
+export default async function addTask(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
   const koiiContract = state.koiiContract;
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const balances = koiiState.balances;
-
+  //console.log("balances", balances);
   if (!(scrapingRequest.owner in balances)) {
     throw new ContractError(
       "Scraping owner should have minimum stake of " +
@@ -19,7 +19,6 @@ export default async function addScrapingRequest(state, action) {
     throw new ContractError("Owner koii balance is not enough");
   }
 
-  // call interactWrite func update task
   let task = {
     open: SmartWeave.block.height,
     close: SmartWeave.block.height + 720,

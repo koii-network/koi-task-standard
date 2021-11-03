@@ -1,7 +1,7 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
-const axios = require("axios").default;
+//const axios = require("axios").default;
 
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
@@ -32,7 +32,9 @@ async function main() {
     fs.readFileSync(`src/storecat/init_state_test.json`)
   );
   smartest.writeContractState(storecatContractId, storecatInitState);
-
+  // before interact
+  const state = smartest.readContractState(storecatContractId);
+  console.log("before state: ", state);
   // let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   // const data = await axios.get(url);
   // console.log(data);
@@ -44,8 +46,9 @@ async function main() {
   // }
 
   // test add scraping request
+
   const scInput_scrapingRequest = {
-    function: "addScrapingRequest",
+    function: "addTask",
     scrapingRequest: {
       websiteUrl: "http://gmail.com",
       uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
@@ -63,9 +66,6 @@ async function main() {
     storecatContractId
   );
 
-  const state = smartest.readContractState(storecatContractId);
-  console.log("current state: ", state);
-  
   console.log(
     "Storecat final state:",
     smartest.readContractState(storecatContractId)

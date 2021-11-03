@@ -24,7 +24,7 @@
 // ]
 // }
 
-export default async function audit(state, action) {
+export default function rank(state, action) {
   const tasks = state.tasks;
   const matchIndex = action.input.id;
 
@@ -75,7 +75,7 @@ export default async function audit(state, action) {
         }
       });
       // update task
-      task.hasAudit = true;
+      task.hasRanked = true;
       task.tophash = topHash;
     } else {
       // not possible audit - update close
