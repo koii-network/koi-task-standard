@@ -32,7 +32,6 @@ export default async function addScrapingRequest(state, action) {
     hasUploaded: false,
     tId: "",
     payloads: [],
-    payloadHashs: [],
     prepareDistribution: {
       block: SmartWeave.block.height,
       distribution: {},

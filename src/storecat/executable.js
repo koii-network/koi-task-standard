@@ -300,7 +300,7 @@ async function distribute(state) {
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
 */
-async function bundleAndExport(data) {
+async function bundleAndExport(data, tag = false) {
   try {
     const myTx = await arweave.createTransaction(
       {
@@ -308,11 +308,15 @@ async function bundleAndExport(data) {
       },
       tools.wallet
     );
-  
-    myTx.addTag("owner", data.owner);
-    myTx.addTag("task", "storecat");
-    myTx.addTag("url", data.url);
-    myTx.addTag("created", Math.floor(Date.now() / 1000));
+    
+    if (tag) {
+      myTx.addTag("owner", data.owner);
+      myTx.addTag("task", "storecat");
+      myTx.addTag("url", data.url);
+      myTx.addTag("created", Math.floor(Date.now() / 1000));
+    } else {
+      myTx.addTag("created", Math.floor(Date.now() / 1000));
+    }
     await arweave.transactions.sign(myTx, tools.wallet);
     const result = await arweave.transactions.post(myTx);
     console.log("response arweave transaction", result);
@@ -353,48 +357,64 @@ async function writePayloadInPermaweb(state, block) {
     return false;
   }
   const task = tasks[matchIndex];
-  let topHash = "";
+  let topPayloadTxId = "";
   let topCt = 0;
-  task.payloadHashs.forEach((hash) => {
+  task.payloads.forEach((hash) => {
     if (hash.count > topCt) {
       topCt = hash.count;
-      topHash = hash.hash;
+      topPayloadTxId = hash.payloadTxId;
     }
   });
   // get top payloads
-  const topPayload = task.payloads.find(
-    (payload) => payload.hashPayload === topHash
-  );
-  if (topPayload === undefined) return false;
-
-  try {
-    const bundle = {
-      owner: task.owner,
-      uuid: task.uuid,
-      url: task.url,
-      payloads: topPayload
+  if (topPayloadTxId !== "") {
+    // const topPayload = await tools.getTransaction(topPayloadTxId); // not tested yet
+    const input = {
+      function: "savedPayloadToPermaweb",
+      txId: topPayloadTxId,
+      matchIndex: matchIndex
     };
-    const tId = await bundleAndExport(bundle);
-    if (tId) {
-      // update state via contract write
-      const input = {
-        function: "savedPayloadToPermaweb",
-        txId: tId,
-        matchIndex: matchIndex
+    const task_name = "saved payload in permaweb";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+    /*
+    try {
+      const bundle = {
+        owner: task.owner,
+        uuid: task.uuid,
+        url: task.url,
+        payloads: topPayload.data.payload
       };
-      const task_name = "saved payload in permaweb";
-      const tx = await kohaku.interactWrite(
-        arweave,
-        tools.wallet,
-        namespace.taskTxId,
-        input
-      );
-      await checkTxConfirmation(tx, task_name);
-      return true;
+      const tId = await bundleAndExport(bundle, true);
+      if (tId) {
+        // update state via contract write
+        const input = {
+          function: "savedPayloadToPermaweb",
+          txId: tId,
+          matchIndex: matchIndex
+        };
+        const task_name = "saved payload in permaweb";
+        const tx = await kohaku.interactWrite(
+          arweave,
+          tools.wallet,
+          namespace.taskTxId,
+          input
+        );
+        await checkTxConfirmation(tx, task_name);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log('error writePayloadInPermaweb', error);
+      return false;
     }
-    return false;
-  } catch (error) {
-    console.log('error writePayloadInPermaweb', error);
+    */
+  } else {
     return false;
   }
 }
@@ -479,26 +499,35 @@ async function scrape(state, block) {
 
   // upload payload to permaweb because we can't send more than 2kb data to contract
   try {
-    const userPayload = {};
-    userPayload.payload = payload;
-    userPayload.hashPayload = md5(payload);
-    userPayload.owner = tools.address;
-    // call interactWrite function
-    // savePayload
-    const input = {
-      function: "savePayload",
-      matchIndex: taskIndex,
-      payload: userPayload
+    const bundle = {
+      payloads: topPayload
     };
-    const task_name = "save payload";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
+    const tId = await bundleAndExport(bundle);
+    if (tId) {
+      const userPayload = {};
+      userPayload.payloadTxId = tId;
+      userPayload.hashPayload = md5(payload); //128byte
+      userPayload.owner = tools.address;
+      // call interactWrite function
+      // savePayload
+      const input = {
+        function: "savePayload",
+        matchIndex: taskIndex,
+        payload: userPayload
+      };
+      const task_name = "save payload";
+      const tx = await kohaku.interactWrite(
+        arweave,
+        tools.wallet,
+        namespace.taskTxId,
+        input
+      );
+      await checkTxConfirmation(tx, task_name);
+      return true;
+    } else {
+      // failed upload payload to permaweb
+      return false;
+    }
   } catch (error) {
     console.log("error payload upload to permaweb ", error);
     return false;

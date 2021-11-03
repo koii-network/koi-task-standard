@@ -13,23 +13,19 @@ export default async function savePayload(state, action) {
     throw new ContractError("Payload should be an object");
   }
 
-  tasks[matchIndex].payloads.push({
-    hashPayload: payload.hashPayload,
-    owner: payload.owner
-  });
-
   let isFounded = false;
-  for (let index = 0; index < tasks[matchIndex].payloadHashs.length; index++) {
-    const element = tasks[matchIndex].payloadHashs[index];
+  for (let index = 0; index < tasks[matchIndex].payloads.length; index++) {
+    const element = tasks[matchIndex].payloads[index];
     if (element.hashPayload === payload.hashPayload) {
       isFounded = true;
-      tasks[matchIndex].payloadHashs[index].count++;
+      tasks[matchIndex].payloads[index].count++;
     }
   }
 
   if (!isFounded) {
-    tasks[matchIndex].payloadHashs.push({
-      payload: payload.payload,
+    tasks[matchIndex].payloads.push({
+      owner: payload.owner,
+      payloadTxId: payload.payloadTxId,
       hashPayload: payload.hashPayload,
       count: 1
     });
