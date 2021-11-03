@@ -154,8 +154,7 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
-  const index_audit = canAudit(state, block);
-  if (index_audit > -1) await audit(index_audit);
+  await audit(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
@@ -229,7 +228,20 @@ function canAudit(state, block) {
   audit: find top payload and prepareDistribution rewards
   @returns 
 */
-async function audit(matchIndex) {
+async function audit(state, block) {
+  const tasks = state.tasks;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (
+      block >= element.close &&
+      !element.hasAudit &&
+      element.payloads.length > 0
+    ) {
+      matchIndex = index;
+      break;
+    }
+  }
   try {
     const input = {
       function: "audit",
