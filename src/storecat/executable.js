@@ -126,8 +126,7 @@ async function execute(_init_state) {
 async function getStorecatStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
-  if (block < lastBlock) block = lastBlock;
-
+  
   if (!state) console.error("State or task invalid:", state);
   return [state, block];
 }
@@ -232,6 +231,10 @@ async function audit(state, block) {
 */
 async function distribute(state) {
   const tasks = state.tasks;
+
+  const koiiState = await tools.getState(tools.contractId);
+  if (!koiiState) console.log("%cMain State:", "color: red");
+  const storecatContractBlock = koiiState.filter( k => k.name === "storecat");
 
   if (tasks.length == 0) return false;
   const matchIndex = tasks.findIndex(
