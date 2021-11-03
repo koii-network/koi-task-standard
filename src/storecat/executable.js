@@ -357,48 +357,64 @@ async function writePayloadInPermaweb(state, block) {
     return false;
   }
   const task = tasks[matchIndex];
-  let topHash = "";
+  let topPayloadTxId = "";
   let topCt = 0;
   task.payloads.forEach((hash) => {
     if (hash.count > topCt) {
       topCt = hash.count;
-      topHash = hash.hashPayload;
+      topPayloadTxId = hash.payloadTxId;
     }
   });
   // get top payloads
-  const topPayload = task.payloads.find(
-    (payload) => payload.hashPayload === topHash
-  );
-  if (topPayload === undefined) return false;
-
-  try {
-    const bundle = {
-      owner: task.owner,
-      uuid: task.uuid,
-      url: task.url,
-      payloads: topPayload
+  if (topPayloadTxId !== "") {
+    // const topPayload = await tools.getTransaction(topPayloadTxId); // not tested yet
+    const input = {
+      function: "savedPayloadToPermaweb",
+      txId: topPayloadTxId,
+      matchIndex: matchIndex
     };
-    const tId = await bundleAndExport(bundle, true);
-    if (tId) {
-      // update state via contract write
-      const input = {
-        function: "savedPayloadToPermaweb",
-        txId: tId,
-        matchIndex: matchIndex
+    const task_name = "saved payload in permaweb";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+    /*
+    try {
+      const bundle = {
+        owner: task.owner,
+        uuid: task.uuid,
+        url: task.url,
+        payloads: topPayload.data.payload
       };
-      const task_name = "saved payload in permaweb";
-      const tx = await kohaku.interactWrite(
-        arweave,
-        tools.wallet,
-        namespace.taskTxId,
-        input
-      );
-      await checkTxConfirmation(tx, task_name);
-      return true;
+      const tId = await bundleAndExport(bundle, true);
+      if (tId) {
+        // update state via contract write
+        const input = {
+          function: "savedPayloadToPermaweb",
+          txId: tId,
+          matchIndex: matchIndex
+        };
+        const task_name = "saved payload in permaweb";
+        const tx = await kohaku.interactWrite(
+          arweave,
+          tools.wallet,
+          namespace.taskTxId,
+          input
+        );
+        await checkTxConfirmation(tx, task_name);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log('error writePayloadInPermaweb', error);
+      return false;
     }
-    return false;
-  } catch (error) {
-    console.log('error writePayloadInPermaweb', error);
+    */
+  } else {
     return false;
   }
 }
