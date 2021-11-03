@@ -126,7 +126,28 @@ async function main() {
       image: 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png'
     }
   };
-  const tId = await bundleAndExport(bundle);
+  try {
+    const myTx = await arweave.createTransaction(
+      {
+        data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
+      },
+      wallet
+    );
+    myTx.addTag("created", Math.floor(Date.now() / 1000));
+    await arweave.transactions.sign(myTx, wallet);
+    const result = await arweave.transactions.post(myTx);
+    console.log("response arweave transaction", result);
+    if (result.status === 200) {
+      // success transaction
+      console.log("transactionID", myTx.id); // iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
+    } else {
+      console.log("error response arweave transaction : ", result);
+      return false;
+    }
+  } catch (error) {
+    console.log("error bundleAndExport", error);
+    return false;
+  }
 
   console.log(
     "Storecat final state:",
