@@ -21,9 +21,6 @@ const arweave = Arweave.init({
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 // const OFFSET_PER_DAY = 720;
 
-let lastBlock = 0;
-let lastLogClose = 0;
-
 // You can also access and store files locally
 // const logsInfo = {
 //   filename: "history_storecat.log"
@@ -131,24 +128,7 @@ async function getStorecatStateAndBlock() {
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
-  if (!state || !state.task) console.error("State or task invalid:", state);
-  const logClose = state.task.close;
-  if (logClose > lastLogClose) {
-    if (lastLogClose !== 0) {
-      console.log("Task updated, resetting trackers");
-    }
-
-    lastLogClose = logClose;
-  }
-
-  if (block > lastBlock)
-    console.log(
-      block,
-      "Searching for a task, ranking and prepare distribution in",
-      logClose - block,
-      "blocks"
-    );
-  lastBlock = block;
+  if (!state) console.error("State or task invalid:", state);
   return [state, block];
 }
 async function service(state, block) {
