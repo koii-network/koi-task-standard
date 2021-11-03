@@ -233,8 +233,26 @@ async function distribute(state) {
   const tasks = state.tasks;
 
   const koiiState = await tools.getState(tools.contractId);
-  if (!koiiState) console.log("%cMain State:", "color: red");
+  if (!koiiState) {
+    console.log("%cMain State:", "color: red");
+    return false;
+  }
   const storecatContractBlock = koiiState.filter( k => k.name === "storecat");
+  if (storecatContractBlock) {
+    // check rewardedBlock
+    if (storecatContractBlock.rewardedBlock.length > 0) {
+      for (let index = 0; index < storecatContractBlock.rewardedBlock.length; index++) {
+        const rewardedBlockId = storecatContractBlock.rewardedBlock[index];
+        if(rewardedBlockId !== "") {
+          const { blockT, uuidT } = getBlockAndUuid(rewardedBlockId);
+        }
+        
+      }
+      let rewardedBlockId = 
+    }
+    return false;
+  }
+  return false;
 
   if (tasks.length == 0) return false;
   const matchIndex = tasks.findIndex(
