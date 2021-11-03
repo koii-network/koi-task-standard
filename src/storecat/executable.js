@@ -476,26 +476,33 @@ async function scrape(state, block) {
   }
   const task = state.tasks[taskIndex];
   let payload = await getPayload(task.url);
-  const userPayload = {};
-  userPayload.payload = payload;
-  userPayload.hashPayload = md5(payload);
-  userPayload.owner = tools.address;
-  // call interactWrite function
-  // savePayload
-  const input = {
-    function: "savePayload",
-    matchIndex: taskIndex,
-    payload: userPayload
-  };
-  const task_name = "save payload";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
-  await checkTxConfirmation(tx, task_name);
-  return true;
+
+  // upload payload to permaweb because we can't send more than 2kb data to contract
+  try {
+    const userPayload = {};
+    userPayload.payload = payload;
+    userPayload.hashPayload = md5(payload);
+    userPayload.owner = tools.address;
+    // call interactWrite function
+    // savePayload
+    const input = {
+      function: "savePayload",
+      matchIndex: taskIndex,
+      payload: userPayload
+    };
+    const task_name = "save payload";
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  } catch (error) {
+    console.log("error payload upload to permaweb ", error);
+    return false;
+  }
 }
 /*
   getPayload : get payload from url
