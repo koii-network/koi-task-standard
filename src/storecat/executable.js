@@ -300,7 +300,7 @@ async function distribute(state) {
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
 */
-async function bundleAndExport(data) {
+async function bundleAndExport(data, tag = false) {
   try {
     const myTx = await arweave.createTransaction(
       {
@@ -308,11 +308,15 @@ async function bundleAndExport(data) {
       },
       tools.wallet
     );
-  
-    myTx.addTag("owner", data.owner);
-    myTx.addTag("task", "storecat");
-    myTx.addTag("url", data.url);
-    myTx.addTag("created", Math.floor(Date.now() / 1000));
+    
+    if (tag) {
+      myTx.addTag("owner", data.owner);
+      myTx.addTag("task", "storecat");
+      myTx.addTag("url", data.url);
+      myTx.addTag("created", Math.floor(Date.now() / 1000));
+    } else {
+      myTx.addTag("created", Math.floor(Date.now() / 1000));
+    }
     await arweave.transactions.sign(myTx, tools.wallet);
     const result = await arweave.transactions.post(myTx);
     console.log("response arweave transaction", result);
@@ -479,6 +483,13 @@ async function scrape(state, block) {
 
   // upload payload to permaweb because we can't send more than 2kb data to contract
   try {
+    const bundle = {
+      payloads: topPayload
+    };
+    const tId = await bundleAndExport(bundle);
+    if (tId) {
+
+    }
     const userPayload = {};
     userPayload.payload = payload;
     userPayload.hashPayload = md5(payload);
