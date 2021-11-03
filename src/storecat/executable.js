@@ -223,6 +223,10 @@ async function audit(state, block) {
     return false;
   }
 }
+function getBlockAndUuid(str) {
+	const ids = str.split("_");
+  return {blockT: ids[0], uuidT:ids[1]}
+}
 /*
   distribute: resolve prepared distribute reward
   call main contract distributeReward and then 
@@ -231,6 +235,7 @@ async function audit(state, block) {
 */
 async function distribute(state) {
   const tasks = state.tasks;
+  if (tasks.length === 0) return false;
 
   const koiiState = await tools.getState(tools.contractId);
   if (!koiiState) {
@@ -242,9 +247,12 @@ async function distribute(state) {
     // check rewardedBlock
     if (storecatContractBlock.rewardedBlock.length > 0) {
       for (let index = 0; index < storecatContractBlock.rewardedBlock.length; index++) {
-        const rewardedBlockId = storecatContractBlock.rewardedBlock[index];
-        if(rewardedBlockId !== "") {
+        const rewardedBlockId = storecatContractBlock.rewardedBlock[index]; // rewardedBlockId = uuid + "_" + block
+        if(rewardedBlockId !== "" && rewardedBlockId.length > 25) { // uuid length is 24byte
           const { blockT, uuidT } = getBlockAndUuid(rewardedBlockId);
+          const matchIndex = tasks.findIndex(
+            (t) => t.uuid === uuidT && !t.prepareDistribution.isReward && t.hasAudit && !t.hasUploaded
+          );        
         }
         
       }
