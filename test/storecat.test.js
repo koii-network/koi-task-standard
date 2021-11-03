@@ -66,31 +66,30 @@ async function main() {
   // }
 
   // --- test add scraping request
-  // const scInput_scrapingRequest = {
-  //   function: "addScrapingRequest",
-  //   scrapingRequest: {
-  //     websiteUrl: "http://gmail.com",
-  //     uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
-  //     bounty: 1,
-  //     owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
-  //   }
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   storecatSrc,
-  //   wallet,
-  //   scInput_scrapingRequest,
-  //   smartest.readContractState(storecatContractId),
-  //   walletAddress,
-  //   storecatContractId
-  // );
+  const scInput_scrapingRequest = {
+    function: "addScrapingRequest",
+    scrapingRequest: {
+      websiteUrl: "http://gmail.com",
+      uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
+      bounty: 1,
+      owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
+    }
+  };
+  await smartest.interactWrite(
+    arweave,
+    storecatSrc,
+    wallet,
+    scInput_scrapingRequest,
+    smartest.readContractState(storecatContractId),
+    walletAddress,
+    storecatContractId
+  );
 
   // --- scraping test
   // const test_website = "http://gmail.com";
   // let payload = await getPayload(test_website);
   // console.log(payload);
-  return true;
-
+  
   const state = smartest.readContractState(storecatContractId);
   console.log("current state: ", state);
   
