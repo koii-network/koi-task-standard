@@ -102,7 +102,7 @@ async function getClose(_req, res) {
   res
     .status(200)
     .type("application/json")
-    .send(attentionState.task.close);
+    .send(attentionState.task.close.toString());
 }
 
 async function latest(_req, res) {
