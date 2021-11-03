@@ -205,26 +205,6 @@ async function checkTxConfirmation(txId, task) {
 }
 
 /*
-  canAudit: find audit possible taskId
-  @returns 
-*/
-function canAudit(state, block) {
-  const tasks = state.tasks;
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (
-      block >= element.close &&
-      !element.hasAudit &&
-      element.payloads.length > 0
-    ) {
-      matchIndex = index;
-      break;
-    }
-  }
-  return matchIndex;
-}
-/*
   audit: find top payload and prepareDistribution rewards
   @returns 
 */
@@ -241,6 +221,9 @@ async function audit(state, block) {
       matchIndex = index;
       break;
     }
+  }
+  if (matchIndex === -1) {
+    return false;
   }
   try {
     const input = {
