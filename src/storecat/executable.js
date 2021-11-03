@@ -359,10 +359,10 @@ async function writePayloadInPermaweb(state, block) {
   const task = tasks[matchIndex];
   let topHash = "";
   let topCt = 0;
-  task.payloadHashs.forEach((hash) => {
+  task.payloads.forEach((hash) => {
     if (hash.count > topCt) {
       topCt = hash.count;
-      topHash = hash.hash;
+      topHash = hash.hashPayload;
     }
   });
   // get top payloads
