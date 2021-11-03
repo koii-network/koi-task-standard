@@ -18,7 +18,7 @@ export default function registerExecutableId(state, action) {
   const input = action.input;
   const caller = action.caller;
   const executableId = input.executableId;
-  const owner = state.owner;
+  const owner = SmartWeave.contract.owner;
   if (caller !== owner) {
     throw new ContractError("Only owner can register");
   }

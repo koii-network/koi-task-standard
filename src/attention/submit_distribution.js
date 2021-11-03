@@ -42,24 +42,24 @@ export default async function submitDistribution(state, action) {
   const contractId = SmartWeave.contract.id;
   const tasks = koiiState.tasks;
   const contractTask = tasks.find((task) => task.txId === contractId);
-  if (contractTask !== undefined) {
-    const rewardedBlock = contractTask.rewardedBlock;
-    for (const distribution of task.prepareDistribution) {
-      if (
-        rewardedBlock.includes(distribution.block) &&
-        !distribution.isRewarded
-      ) {
-        distribution.isRewarded = true;
+  if (contractTask) {
+    task.prepareDistribution = task.prepareDistribution.filter(
+      (distribution) => {
+        if (
+          contractTask.rewardedBlock.includes(distribution.block) &&
+          !distribution.isRewarded
+        ) {
+          distribution.isRewarded = true;
+        }
+        return !distribution.isRewarded;
       }
-    }
+    );
   }
-  task.prepareDistribution = task.prepareDistribution.filter(
-    (distribution) => !distribution.isRewarded
-  );
+
   const proposedPayload = currentTask.proposedData.find(
     (payload) => payload.distributer === caller
   );
-  if (proposedPayload !== undefined) {
+  if (proposedPayload) {
     throw new ContractError(
       `Payload from this${caller} address is already proposed`
     );

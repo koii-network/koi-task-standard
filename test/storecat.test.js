@@ -65,7 +65,7 @@ async function main() {
 
   const state = smartest.readContractState(storecatContractId);
   console.log("current state: ", state);
-  
+
   console.log(
     "Storecat final state:",
     smartest.readContractState(storecatContractId)

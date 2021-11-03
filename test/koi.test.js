@@ -39,7 +39,14 @@ async function main() {
     state,
     walletAddress
   );
+<<<<<<< HEAD
+  console.log(state.state.task.prepareDistribution[0]);
+  console.log(state.state.task.attentionReport[0]);
+  const t2 = new Date();
+  console.log(`Done in ${t2 - t1}ms\n\nReading contract`);
+=======
   console.log(state);
+>>>>>>> main
 }
 
 /**

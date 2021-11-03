@@ -86,7 +86,7 @@ export default function stake(state, action) {
 
 ```bash
 export default function mint(state, action) {
-  const owner = state.owner;
+  const owner = SmartWeave.contract.owner;
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;
@@ -169,7 +169,7 @@ export default async function registerTask(state, action) {
   const taskName = input.taskName;
   const taskTxId = input.taskTxId;
   const koiReward = input.koiReward;
-  if (caller !== state.owner) {
+  if (caller !== SmartWeave.contract.owner) {
     throw new ContractError("Only owner can register a task");
   }
   if (!taskTxId || !taskName) throw new ContractError("Invalid inputs");

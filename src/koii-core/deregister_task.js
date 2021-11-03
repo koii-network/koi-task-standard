@@ -8,7 +8,7 @@ export default function deregisterTask(state, action) {
   const task = state.tasks.find(
     (task) => task.txId === txId && task.owner === caller
   );
-  if (task === undefined) {
+  if (!task) {
     throw new ContractError(
       `Task with ${txId} Id and ${caller} owner is not registered`
     );
