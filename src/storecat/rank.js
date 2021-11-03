@@ -1,30 +1,4 @@
-// The Audit function can be included optionall as a way of invoking a stake slashing behavior to penalize bad actors
-// {
-//   "open": 101,
-//   "close": 850,
-//   "uuid": "60d9cf5970d912231cc4a230",
-//   "bounty": 1,
-//   "url": "https://npmjs.org",
-//   "hasAudit": false,
-//   "hasReward": false,
-//   "payloads": [
-//     {
-//       "payload": {},
-//       "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-//       "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
-//       "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
-//     }
-//   ],
-// "payloadHashs": [
-//   {
-//     "payload": {},
-//     "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-//     "count": 1
-//   }
-// ]
-// }
-
-export default async function audit(state, action) {
+export default async function rank(state, action) {
   const tasks = state.tasks;
   const matchIndex = action.input.id;
 

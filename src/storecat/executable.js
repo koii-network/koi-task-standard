@@ -21,9 +21,6 @@ const arweave = Arweave.init({
 const ARWEAVE_RATE_LIMIT = 20000; // Reduce arweave load - 20seconds
 // const OFFSET_PER_DAY = 720;
 
-let lastBlock = 0;
-let lastLogClose = 0;
-
 // You can also access and store files locally
 // const logsInfo = {
 //   filename: "history_storecat.log"
@@ -129,32 +126,14 @@ async function execute(_init_state) {
 async function getStorecatStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
-  if (block < lastBlock) block = lastBlock;
-
-  if (!state || !state.task) console.error("State or task invalid:", state);
-  const logClose = state.task.close;
-  if (logClose > lastLogClose) {
-    if (lastLogClose !== 0) {
-      console.log("Task updated, resetting trackers");
-    }
-
-    lastLogClose = logClose;
-  }
-
-  if (block > lastBlock)
-    console.log(
-      block,
-      "Searching for a task, ranking and prepare distribution in",
-      logClose - block,
-      "blocks"
-    );
-  lastBlock = block;
+  
+  if (!state) console.error("State or task invalid:", state);
   return [state, block];
 }
 async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
-  await audit(index_audit);
+  await rank(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
@@ -205,10 +184,10 @@ async function checkTxConfirmation(txId, task) {
 }
 
 /*
-  audit: find top payload and prepareDistribution rewards
+  rank: find top payload and prepareDistribution rewards
   @returns 
 */
-async function audit(state, block) {
+async function rank(state, block) {
   const tasks = state.tasks;
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
@@ -227,10 +206,10 @@ async function audit(state, block) {
   }
   try {
     const input = {
-      function: "audit",
+      function: "rank",
       id: matchIndex
     };
-    const task_name = "submit audit";
+    const task_name = "submit rank";
     const tx = await kohaku.interactWrite(
       arweave,
       tools.wallet,
@@ -240,9 +219,13 @@ async function audit(state, block) {
     await checkTxConfirmation(tx, task_name);
     return true;
   } catch (error) {
-    console.log('error audit', error);
+    console.log('error rank', error);
     return false;
   }
+}
+function getBlockAndUuid(str) {
+	const ids = str.split("_");
+  return {blockT: ids[0], uuidT:ids[1]}
 }
 /*
   distribute: resolve prepared distribute reward
@@ -252,49 +235,71 @@ async function audit(state, block) {
 */
 async function distribute(state) {
   const tasks = state.tasks;
+  if (tasks.length === 0) return false;
 
-  if (tasks.length == 0) return false;
-  const matchIndex = tasks.findIndex(
-    (t) => !t.prepareDistribution.isReward && t.hasAudit && !t.hasUploaded
-  );
-
-  if (matchIndex === -1) return false;
-
-  try {
-    // submit main koii contract to distribute
-    const input = {
-      function: "distributeReward",
-      matchIndex: matchIndex
-    };
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      tools.contractId, // it is main contract id
-      input
-    );
-    const task = "distributing reward to main contract";
-    if (await checkTxConfirmation(tx, task)) {
-      console.log("Distributed");
-      // update distribute data in sub task
-      const input = {
-        function: "confirmDistributeReward",
-        matchIndex: matchIndex
-      };
-      const task_name = "confirm distribute reward";
-      const tx = await kohaku.interactWrite(
-        arweave,
-        tools.wallet,
-        namespace.taskTxId,
-        input
-      );
-      await checkTxConfirmation(tx, task_name);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.log('error distribute', error);
+  const koiiState = await tools.getState(tools.contractId);
+  if (!koiiState) {
+    console.log("%cMain State:", "color: red");
     return false;
   }
+  const storecatContractBlock = koiiState.filter( k => k.name === "storecat");
+  if (storecatContractBlock) {
+    // check rewardedBlock
+    if (storecatContractBlock.rewardedBlock.length > 0) {
+      for (let index = 0; index < storecatContractBlock.rewardedBlock.length; index++) {
+        const rewardedBlockId = storecatContractBlock.rewardedBlock[index]; // rewardedBlockId = uuid + "_" + block
+        if(rewardedBlockId !== "" && rewardedBlockId.length > 25) { // uuid length is 24byte
+          const { blockT, uuidT } = getBlockAndUuid(rewardedBlockId);
+          let matchIndex = tasks.findIndex(
+            (t) => t.uuid === uuidT && t.open === Number(blockT) 
+            && !t.prepareDistribution.isReward 
+            && t.hasAudit && !t.hasUploaded
+          );
+          if (matchIndex > -1) {
+            // updated distributeReward
+            try {
+              // submit main koii contract to distribute
+              const input = {
+                function: "distributeReward",
+                matchIndex: matchIndex
+              };
+              const tx = await kohaku.interactWrite(
+                arweave,
+                tools.wallet,
+                tools.contractId, // it is main contract id
+                input
+              );
+              const task = "distributing reward to main contract";
+              if (await checkTxConfirmation(tx, task)) {
+                console.log("Distributed");
+                // update distribute data in sub task
+                const input = {
+                  function: "confirmDistributeReward",
+                  matchIndex: matchIndex
+                };
+                const task_name = "confirm distribute reward";
+                const tx = await kohaku.interactWrite(
+                  arweave,
+                  tools.wallet,
+                  namespace.taskTxId,
+                  input
+                );
+                await checkTxConfirmation(tx, task_name);
+                return true;
+              }
+              return false;
+            } catch (error) {
+              console.log('error distribute', error);
+              return false;
+            }
+          }
+        }
+        
+      }
+    }
+    return false;
+  }
+  return false;
 }
 /*
   bundleAndExport: upload data to permaweb (arweave )
@@ -326,9 +331,9 @@ async function bundleAndExport(data, tag = false) {
     } else {
       console.log("error response arweave transaction : ", result, data.uuid);
       return false;
-    }  
+    }
   } catch (error) {
-    console.log('error bundleAndExport', error);
+    console.log("error bundleAndExport", error);
     return false;
   }
 }
