@@ -24,10 +24,13 @@ async function main() {
   let state = JSON.parse(fs.readFileSync(`src/attention/init_state.json`));
 
   const input = {
-    function: "rankPrepDistribution"
+    function: "migratePreRegister"
+    // txId: [
+    //   "EKW3AApL4mdLc6sIhVr3Cn8VN7N9VAQUp2BNALHXFtQ",
+    //   "37Uw2P_pSbYYshxl9ceIBGOHJuUtmBEc26nC8aPQr6c"
+    // ]
   };
   //console.log(state);
-  const t1 = new Date();
   state = await interactDryRun(
     arweave,
     contractSrc,
@@ -36,10 +39,14 @@ async function main() {
     state,
     walletAddress
   );
+<<<<<<< HEAD
   console.log(state.state.task.prepareDistribution[0]);
   console.log(state.state.task.attentionReport[0]);
   const t2 = new Date();
   console.log(`Done in ${t2 - t1}ms\n\nReading contract`);
+=======
+  console.log(state);
+>>>>>>> main
 }
 
 /**

@@ -9,7 +9,7 @@ export default async function syncOwnership(state, action) {
     throw new ContractError("Owner can only update in batch");
 
   if (Array.isArray(txId)) {
-    // filler the nfts registered only to avoid reading invalid nft contract
+    // filler the nfts registered to avoid reading invalid nft contract
     const validNfts = txId.filter((nft) =>
       Object.keys(state.nfts).includes(nft)
     );

@@ -3,7 +3,7 @@ const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const kohaku = require("@_koi/kohaku");
 
-const KOII_CONTRACT_ID = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0";
+const KOII_CONTRACT_ID = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
@@ -52,6 +52,12 @@ async function main() {
 
   // Init Kohaku
   if (taskTxId !== "test") {
+    // Comment out if Kohaku not cached
+    // console.log("Restoring Kohaku");
+    // const restore = await tools.redisGetAsync("kohaku");
+    // const { arweave } = require("@_koi/sdk/common")
+    // await kohaku.importCache(arweave, restore);
+
     console.log("Initializing Koii contract for Kohaku");
     await tools.getKoiiStateAwait();
     const initialHeight = kohaku.getCacheHeight();

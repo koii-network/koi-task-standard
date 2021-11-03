@@ -12,11 +12,6 @@ const arweave = Arweave.init({
 
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
-// const missedNft = [
-//   "bysi-4yyU7Zhk7ijcwcl7V8JSw7ANdeSy8_A8uAWmpQ",
-//   "1bjASUPwUfGiuiz94aaHzow9HeaMzBCmNcGMpZgNhHA",
-//   "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"
-// ];
 //const contractId = "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"; // test attention contract
 const contractId = "7wfyUmgZZMtMbW8f9VufCKLalOQO_Jlgm0-Ll8KmfRc"; // test koii Contract
 //const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production

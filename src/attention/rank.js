@@ -110,7 +110,6 @@ export default async function rankPrepDistribution(state) {
       }
     }
   }
-
   currentProposed.isRanked = true;
   prepareDistribution.push({
     block: task.open,
