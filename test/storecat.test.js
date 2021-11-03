@@ -51,51 +51,40 @@ async function getPayload(url) {
     return false;
   }
 }
-async function test_upload_payload_to_arweave() {
-
-}
-async function main() {
-  const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-
+async function test_get_scraping_request() {
   // --- test get scraping request
-  // let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
-  // const data = await axios.get(url);
-  // console.log(data);
+  let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
+  const data = await axios.get(url);
+  console.log(data);
   // data: {
   //   websiteUrl: 'http://gmail.com',
   //   uuid: 'Bwsx4fw3tEZbSn3iV9OgiSKG',
   //   bounty: 1,
   //   owner: '7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss'
   // }
-
+}
+async function test_add_scraping_request(walletAddress) {
   // --- test add scraping request
-  // const scInput_scrapingRequest = {
-  //   function: "addScrapingRequest",
-  //   scrapingRequest: {
-  //     websiteUrl: "http://gmail.com",
-  //     uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
-  //     bounty: 1,
-  //     owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
-  //   }
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   storecatSrc,
-  //   wallet,
-  //   scInput_scrapingRequest,
-  //   smartest.readContractState(storecatContractId),
-  //   walletAddress,
-  //   storecatContractId
-  // );
-
-  // --- scraping test
-  // const test_website = "http://gmail.com";
-  // let payload = await getPayload(test_website);
-  // console.log(payload);
-
-  // const state = smartest.readContractState(storecatContractId);
-  // console.log("current state: ", state);
-
+  const scInput_scrapingRequest = {
+    function: "addScrapingRequest",
+    scrapingRequest: {
+      websiteUrl: "http://gmail.com",
+      uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
+      bounty: 1,
+      owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
+    }
+  };
+  await smartest.interactWrite(
+    arweave,
+    storecatSrc,
+    wallet,
+    scInput_scrapingRequest,
+    smartest.readContractState(storecatContractId),
+    walletAddress,
+    storecatContractId
+  );
+}
+async function test_upload_payload_to_arweave() {
   // testing save payload
   const bundle = {
     payloads: {
@@ -151,6 +140,22 @@ async function main() {
     console.log("error bundleAndExport", error);
     return false;
   }
+}
+async function main() {
+  const walletAddress = await arweave.wallets.jwkToAddress(wallet);
+
+  // await test_get_scraping_request();
+  // await test_add_scraping_request(walletAddress);
+
+  // --- scraping test
+  // const test_website = "http://gmail.com";
+  // let payload = await getPayload(test_website);
+  // console.log(payload);
+
+  // const state = smartest.readContractState(storecatContractId);
+  // console.log("current state: ", state);
+
+  // await test_upload_payload_to_arweave();
 
   console.log(
     "Storecat final state:",
