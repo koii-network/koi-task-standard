@@ -66,24 +66,24 @@ async function main() {
   // }
 
   // --- test add scraping request
-  const scInput_scrapingRequest = {
-    function: "addScrapingRequest",
-    scrapingRequest: {
-      websiteUrl: "http://gmail.com",
-      uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
-      bounty: 1,
-      owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
-    }
-  };
-  await smartest.interactWrite(
-    arweave,
-    storecatSrc,
-    wallet,
-    scInput_scrapingRequest,
-    smartest.readContractState(storecatContractId),
-    walletAddress,
-    storecatContractId
-  );
+  // const scInput_scrapingRequest = {
+  //   function: "addScrapingRequest",
+  //   scrapingRequest: {
+  //     websiteUrl: "http://gmail.com",
+  //     uuid: "Bwsx4fw3tEZbSn3iV9OgiSKG",
+  //     bounty: 1,
+  //     owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
+  //   }
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   storecatSrc,
+  //   wallet,
+  //   scInput_scrapingRequest,
+  //   smartest.readContractState(storecatContractId),
+  //   walletAddress,
+  //   storecatContractId
+  // );
 
   // --- scraping test
   // const test_website = "http://gmail.com";
@@ -93,7 +93,41 @@ async function main() {
   // const state = smartest.readContractState(storecatContractId);
   // console.log("current state: ", state);
 
-  console.log(smartest.readContractState(storecatContractId));
+  // testing save payload
+  const bundle = {
+    payloads: {
+      title: "一个帐号，畅享 Google 所有服务！",
+      content: {
+        Image: [
+          {
+            label: "Payload Image0",
+            selector: "0$img[class='circle-mask']",
+            text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
+            type: "Image"
+          }
+        ],
+        Link: [
+          {
+            label: "Payload Link0",
+            selector: "0$a[class='need-help']",
+            text: "https://accounts.google.com/signin/usernamerecovery?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&service=mail&osid=1&hl=en",
+            type: "Link"
+          }
+        ],
+        Text: [
+          {
+            label: "Payload Text0",
+            selector: "0$div[class='banner']>h1",
+            text: "One account. All of Google.",
+            type: "Text"
+          }
+        ]
+      },
+      image: 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+    }
+  };
+  const tId = await bundleAndExport(bundle);
+
   console.log(
     "Storecat final state:",
     smartest.readContractState(storecatContractId)
