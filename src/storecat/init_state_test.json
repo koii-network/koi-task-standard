@@ -1,37 +1,24 @@
 {
   "name": "storecat",
   "tasks": [{
-    "open": 101,
-    "close": 850,
-    "owner": "",
-    "uuid": "60d9cf5970d912231cc4a230",
+    "open": 803506,
+    "close": 804226,
+    "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+    "uuid": "Bwsx4fw3tEZbSn3iV9OgiSKG",
     "bounty": 1,
-    "url": "https://npmjs.org",
+    "url": "http://gmail.com",
     "hasAudit": false,
-    "topHash": "",
+    "tophash": "",
     "hasUploaded": false,
     "tId": "",
-    "prepareDistribution": {
-      "block": 780,
-      "distribution": {
-        "node1": 0.5, 
-        "node2": 0.25
-      },
-      "isRewarded": false
-    },
-    "payloads": [
-      {
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
+    "payloads": [],
+    "prepareDistribution": [{
+      "prepareDistribution": {
+        "block": 803506,
+        "distribution": {},
+        "isRewarded": false
       }
-    ],
-    "payloadHashs": [
-      {
-        "payload": {},
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "count": 1
-      }
-    ]
+    }]
   }],
   "completedTasks": [
     {
