@@ -1,31 +1,30 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
-const axios = require("axios").default;
-
-const ClusterUtil = require("../src/storecat/cluster");
-const ScraperUtil = require("../src/storecat/scraper");
+// const axios = require("axios").default;
+// const ClusterUtil = require("../src/storecat/cluster");
+// const ScraperUtil = require("../src/storecat/scraper");
 
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
-async function getPayload(url) {
-  try {
-    let cluster = await ClusterUtil.puppeteerCluster();
-    const { html } = await cluster.execute({
-      url,
-      takeScreenshot: false
-    });
-    const scrapingData = await ScraperUtil.getPayload(html);
-    console.log(
-      "**************** finished scraping *******************",
-      scrapingData
-    );
-    return scrapingData;
-  } catch (error) {
-    console.log("get payload error", error);
-    return false;
-  }
-}
+// async function getPayload(url) {
+//   try {
+//     let cluster = await ClusterUtil.puppeteerCluster();
+//     const { html } = await cluster.execute({
+//       url,
+//       takeScreenshot: false
+//     });
+//     const scrapingData = await ScraperUtil.getPayload(html);
+//     console.log(
+//       "**************** finished scraping *******************",
+//       scrapingData
+//     );
+//     return scrapingData;
+//   } catch (error) {
+//     console.log("get payload error", error);
+//     return false;
+//   }
+// }
 
 async function main() {
   const arweave = Arweave.init({
@@ -55,6 +54,7 @@ async function main() {
   );
   smartest.writeContractState(storecatContractId, storecatInitState);
 
+  // --- test get scraping request
   // let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   // const data = await axios.get(url);
   // console.log(data);
@@ -65,7 +65,7 @@ async function main() {
   //   owner: '7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss'
   // }
 
-  // test add scraping request
+  // --- test add scraping request
   // const scInput_scrapingRequest = {
   //   function: "addScrapingRequest",
   //   scrapingRequest: {
@@ -85,9 +85,10 @@ async function main() {
   //   storecatContractId
   // );
 
-  const test_website = "http://gmail.com";
-  let payload = await getPayload(test_website);
-  console.log(payload);
+  // --- scraping test
+  // const test_website = "http://gmail.com";
+  // let payload = await getPayload(test_website);
+  // console.log(payload);
   return true;
 
   const state = smartest.readContractState(storecatContractId);
