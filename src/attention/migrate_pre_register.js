@@ -1,5 +1,3 @@
-import { SmartWeave } from "@weavery/clarity";
-
 export default async function migratePreRegister(state) {
   const mainContactId = state.koiiContract;
   const validContractSrc = state.validContractSrcsB64;
