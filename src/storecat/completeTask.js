@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-export default async function addScrapingRequest(state, action) {
+export default async function completeTask(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const matchIndex = input.matchIndex;

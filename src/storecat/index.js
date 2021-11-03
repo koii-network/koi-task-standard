@@ -1,11 +1,11 @@
 /* eslint-disable no-undef */
 // The index.js file handles compiling the pieces of the contract into a single Smartweave contract file.
 import audit from "./audit";
-import addScrapingRequest from "./saveScrapingRequest";
+import addScrapingRequest from "./addTask";
 import savePayload from "./savePayload";
 import confirmDistributeReward from "./confirmDistributeReward";
 import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
-import updateCompletedTask from "./updateCompletedTask";
+import completeTask from "./completeTask";
 
 const handlers = [
   audit,
@@ -13,7 +13,7 @@ const handlers = [
   savePayload,
   confirmDistributeReward,
   savedPayloadToPermaweb,
-  updateCompletedTask
+  completeTask
 ];
 
 export async function handle(state, action) {
