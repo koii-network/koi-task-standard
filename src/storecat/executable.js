@@ -133,7 +133,7 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
-  await audit(index_audit);
+  await rank(index_audit);
   await distribute();
   await writePayloadInPermaweb(state, block);
   await updateCompletedTask(state);
@@ -184,10 +184,10 @@ async function checkTxConfirmation(txId, task) {
 }
 
 /*
-  audit: find top payload and prepareDistribution rewards
+  rank: find top payload and prepareDistribution rewards
   @returns 
 */
-async function audit(state, block) {
+async function rank(state, block) {
   const tasks = state.tasks;
   let matchIndex = -1;
   for (let index = 0; index < tasks.length; index++) {
@@ -206,10 +206,10 @@ async function audit(state, block) {
   }
   try {
     const input = {
-      function: "audit",
+      function: "rank",
       id: matchIndex
     };
-    const task_name = "submit audit";
+    const task_name = "submit rank";
     const tx = await kohaku.interactWrite(
       arweave,
       tools.wallet,
@@ -219,7 +219,7 @@ async function audit(state, block) {
     await checkTxConfirmation(tx, task_name);
     return true;
   } catch (error) {
-    console.log('error audit', error);
+    console.log('error rank', error);
     return false;
   }
 }
@@ -331,9 +331,9 @@ async function bundleAndExport(data, tag = false) {
     } else {
       console.log("error response arweave transaction : ", result, data.uuid);
       return false;
-    }  
+    }
   } catch (error) {
-    console.log('error bundleAndExport', error);
+    console.log("error bundleAndExport", error);
     return false;
   }
 }
