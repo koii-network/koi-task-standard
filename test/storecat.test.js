@@ -35,6 +35,59 @@ const storecatInitState = JSON.parse(
 );
 smartest.writeContractState(storecatContractId, storecatInitState);
 
+const test_payload_dong = {
+  title: "一个帐号，畅享 Google 所有服务！",
+  content: {
+    Image: [
+      {
+        label: "Payload Image0",
+        selector: "0$img[class='circle-mask']",
+        text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
+        type: "Image"
+      }
+    ],
+    Link: [],
+    Text: [
+      {
+        label: "Payload Text0",
+        selector: "0$div[class='banner']>h1",
+        text: "One account. All of Google.",
+        type: "Text"
+      }
+    ]
+  },
+  image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
+};
+const test_payload_james = {
+  title: "一个帐号，畅享 Google 所有服务！",
+  content: {
+    Image: [
+      {
+        label: "Payload Image0",
+        selector: "0$img[class='circle-mask']",
+        text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
+        type: "Image"
+      }
+    ],
+    Link: [
+      {
+        label: "Payload Link0",
+        selector: "0$a[class='need-help']",
+        text: "https://accounts.google.com/signin/usernamerecovery?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&service=mail&osid=1&hl=en",
+        type: "Link"
+      }
+    ],
+    Text: [
+      {
+        label: "Payload Text0",
+        selector: "0$div[class='banner']>h1",
+        text: "One account. All of Google.",
+        type: "Text"
+      }
+    ]
+  },
+  image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
+};
 const test_payload = {
   title: "一个帐号，畅享 Google 所有服务！",
   content: {
@@ -150,11 +203,11 @@ async function test_upload_payload_to_arweave() {
     return false;
   }
 }
-async function test_save_payload(walletAddress) {
+async function test_save_payload(walletAddress, txId, payload) {
   // --- test save payload
   const userPayload = {};
-  userPayload.payloadTxId = "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE";
-  userPayload.hashPayload = md5(test_payload); //32byte
+  userPayload.payloadTxId = txId;
+  userPayload.hashPayload = md5(payload); //32byte
   userPayload.owner = walletAddress;
   const scInput_savePayload = {
     function: "savePayload",
@@ -179,9 +232,12 @@ async function main() {
     await test_add_scraping_request(walletAddress);
     await test_scraping();
     await test_upload_payload_to_arweave();
+    await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload);
   } else {
     // it is not tested area
-    await test_save_payload(walletAddress);
+    
+    // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_james);
+    // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);
   console.log(latestState.tasks[0].payloads);
