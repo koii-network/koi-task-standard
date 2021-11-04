@@ -11,14 +11,19 @@
     "tophash": "",
     "hasUploaded": false,
     "tId": "",
-    "payloads": [],
-    "prepareDistribution": [{
-      "prepareDistribution": {
-        "block": 803506,
-        "distribution": {},
-        "isRewarded": false
+    "payloads": [
+      {
+        "owner": "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4",
+        "payloadTxId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+        "hashPayload": "3449c9e5e332f1dbb81505cd739fbf3f",
+        "count": 1
       }
-    }]
+    ],
+    "prepareDistribution": {
+      "taskId": "Bwsx4fw3tEZbSn3iV9OgiSKG_803506",
+      "distribution": {},
+      "isRewarded": false
+    }
   }],
   "completedTasks": [
     {
