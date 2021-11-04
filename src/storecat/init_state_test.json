@@ -19,13 +19,11 @@
         "count": 1
       }
     ],
-    "prepareDistribution": [{
-      "prepareDistribution": {
-        "block": 803506,
-        "distribution": {},
-        "isRewarded": false
-      }
-    }]
+    "prepareDistribution": {
+      "taskId": "Bwsx4fw3tEZbSn3iV9OgiSKG_803506",
+      "distribution": {},
+      "isRewarded": false
+    }
   }],
   "completedTasks": [
     {
