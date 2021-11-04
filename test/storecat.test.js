@@ -17,7 +17,7 @@ const arweave = Arweave.init({
 
 const wallet = JSON.parse(fs.readFileSync(process.argv[2]));
 
-const testing_completed = true;
+const isTested = false;
 // Load koi contract
 const koiSrc = fs.readFileSync(`dist/koii-core.js`, "utf8");
 const koiContractId = "a1s2d3f4";
@@ -85,6 +85,7 @@ async function test_add_scraping_request(walletAddress) {
   );
 }
 async function test_scraping() {
+  // --- scraping test
   const test_website = "http://gmail.com";
   let payload = await getPayload(test_website);
   console.log(payload);
@@ -149,16 +150,14 @@ async function test_upload_payload_to_arweave() {
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
 
-  // await test_get_scraping_request();
-  // await test_add_scraping_request(walletAddress);
-
-  // --- scraping test
-  await test_scriping();
-
-  // const state = smartest.readContractState(storecatContractId);
-  // console.log("current state: ", state);
-
-  // await test_upload_payload_to_arweave();
+  if (isTested) {
+    await test_get_scraping_request();
+    await test_add_scraping_request(walletAddress);
+    await test_scraping();
+    await test_upload_payload_to_arweave();
+  } else {
+    // it is not tested area
+  }
 
   console.log(
     "Storecat final state:",
