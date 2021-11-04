@@ -35,7 +35,7 @@ const storecatInitState = JSON.parse(
 smartest.writeContractState(storecatContractId, storecatInitState);
 
 const test_payload_dong = {
-  title: "一个帐号，畅享 Google 所有服务！",
+  title: "sss一个帐号，畅享 Google 所有服务！",
   content: {
     Image: [
       {
@@ -45,7 +45,6 @@ const test_payload_dong = {
         type: "Image"
       }
     ],
-    Link: [],
     Text: [
       {
         label: "Payload Text0",
@@ -192,7 +191,7 @@ async function test_upload_payload_to_arweave(payload) {
     console.log("response arweave transaction", result);
     if (result.status === 200) {
       // success transaction
-      console.log("transactionID", myTx.id); 
+      console.log("transactionID", myTx.id);
       // james :  iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
       // yang :  JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E
     } else {
@@ -210,7 +209,7 @@ async function test_save_payload(walletAddress, txId, payload) {
   userPayload.payloadTxId = txId;
   userPayload.hashPayload = md5(payload); // 32byte
   userPayload.owner = walletAddress;
-  console.log(userPayload)
+  console.log(userPayload);
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
@@ -228,26 +227,42 @@ async function test_save_payload(walletAddress, txId, payload) {
 }
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-
+  const firstState = smartest.readContractState(storecatContractId);
+  console.log(firstState.tasks[0].payloads);
+  console.log(firstState.tasks[0].hashPayloads);
   if (isTested) {
     await test_get_scraping_request();
     await test_add_scraping_request(walletAddress);
     await test_scraping();
     await test_upload_payload_to_arweave(test_payload);
     // await test_upload_payload_to_arweave(test_payload_yang);
-    await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload);
+    await test_save_payload(
+      walletAddress,
+      "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+      test_payload
+    );
+    await test_save_payload(
+      walletAddress,
+      "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+      test_payload_yang
+    );
   } else {
     // it is not tested area
-    await test_save_payload(walletAddress, "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E", test_payload_yang);
+    await test_save_payload(
+      walletAddress,
+      "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+      test_payload_dong
+    );
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);
   console.log(latestState.tasks[0].payloads);
+  console.log(latestState.tasks[0].hashPayloads);
 
-  console.log(
-    "Storecat final state:",
-    smartest.readContractState(storecatContractId)
-  );
+  // console.log(
+  //   "Storecat final state:",
+  //   smartest.readContractState(storecatContractId)
+  // );
 }
 
 main().then(() => {

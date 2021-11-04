@@ -15,8 +15,18 @@
       {
         "owner": "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4",
         "payloadTxId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+        "hashPayload": "3449c9e5e332f1dbb81505cd739fbf3f"
+      },
+      {
+        "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+        "payloadTxId": "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+        "hashPayload": "3449c9e5e332f1dbb81505cd739fbf3f"
+      }
+    ],
+    "hashPayloads": [
+      {
         "hashPayload": "3449c9e5e332f1dbb81505cd739fbf3f",
-        "count": 1
+        "count": 2
       }
     ],
     "prepareDistribution": {

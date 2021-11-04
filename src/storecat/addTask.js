@@ -32,6 +32,7 @@ export default async function addScrapingRequest(state, action) {
     hasUploaded: false,
     tId: "",
     payloads: [],
+    hashPayloads: [],
     prepareDistribution: {
       taskId: scrapingRequest.uuid + "_" + SmartWeave.block.height,
       distribution: {},
