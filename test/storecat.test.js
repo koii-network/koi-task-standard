@@ -17,7 +17,7 @@ const arweave = Arweave.init({
 });
 
 const wallet = JSON.parse(fs.readFileSync(process.argv[2]));
-
+console.log({wallet});
 const isTested = false;
 // Load koi contract
 const koiSrc = fs.readFileSync(`dist/koii-core.js`, "utf8");
@@ -58,7 +58,7 @@ const test_payload_dong = {
   },
   image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
 };
-const test_payload_james = {
+const test_payload_yang = {
   title: "一个帐号，畅享 Google 所有服务！",
   content: {
     Image: [
@@ -175,10 +175,10 @@ async function test_scraping() {
   let payload = await getPayload(test_website);
   console.log(payload);
 }
-async function test_upload_payload_to_arweave() {
+async function test_upload_payload_to_arweave(payload) {
   // testing save payload
   const bundle = {
-    payloads: test_payload
+    payloads: payload
   };
   try {
     const myTx = await arweave.createTransaction(
@@ -193,7 +193,9 @@ async function test_upload_payload_to_arweave() {
     console.log("response arweave transaction", result);
     if (result.status === 200) {
       // success transaction
-      console.log("transactionID", myTx.id); // iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
+      console.log("transactionID", myTx.id); 
+      // james :  iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
+      // yang :  JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E
     } else {
       console.log("error response arweave transaction : ", result);
       return false;
@@ -226,17 +228,18 @@ async function test_save_payload(walletAddress, txId, payload) {
 }
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
+  console.log("%c here is yang wallet address",walletAddress);
 
   if (isTested) {
     await test_get_scraping_request();
     await test_add_scraping_request(walletAddress);
     await test_scraping();
-    await test_upload_payload_to_arweave();
+    await test_upload_payload_to_arweave(test_payload);
+    // await test_upload_payload_to_arweave(test_payload_yang);
     await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload);
   } else {
     // it is not tested area
-    
-    // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_james);
+    // await test_save_payload(walletAddress, "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E", test_payload_yang);
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);
