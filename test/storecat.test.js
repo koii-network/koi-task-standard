@@ -17,7 +17,7 @@ const arweave = Arweave.init({
 
 const wallet = JSON.parse(fs.readFileSync(process.argv[2]));
 
-
+const testing_completed = true;
 // Load koi contract
 const koiSrc = fs.readFileSync(`dist/koii-core.js`, "utf8");
 const koiContractId = "a1s2d3f4";
@@ -84,6 +84,11 @@ async function test_add_scraping_request(walletAddress) {
     storecatContractId
   );
 }
+async function test_scraping() {
+  const test_website = "http://gmail.com";
+  let payload = await getPayload(test_website);
+  console.log(payload);
+}
 async function test_upload_payload_to_arweave() {
   // testing save payload
   const bundle = {
@@ -148,9 +153,7 @@ async function main() {
   // await test_add_scraping_request(walletAddress);
 
   // --- scraping test
-  // const test_website = "http://gmail.com";
-  // let payload = await getPayload(test_website);
-  // console.log(payload);
+  await test_scriping();
 
   // const state = smartest.readContractState(storecatContractId);
   // console.log("current state: ", state);
