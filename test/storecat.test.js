@@ -17,7 +17,6 @@ const arweave = Arweave.init({
 });
 
 const wallet = JSON.parse(fs.readFileSync(process.argv[2]));
-console.log({wallet});
 const isTested = false;
 // Load koi contract
 const koiSrc = fs.readFileSync(`dist/koii-core.js`, "utf8");
@@ -209,8 +208,9 @@ async function test_save_payload(walletAddress, txId, payload) {
   // --- test save payload
   const userPayload = {};
   userPayload.payloadTxId = txId;
-  userPayload.hashPayload = md5(payload); //32byte
+  userPayload.hashPayload = md5(payload); // 32byte
   userPayload.owner = walletAddress;
+  console.log(userPayload)
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
@@ -228,7 +228,6 @@ async function test_save_payload(walletAddress, txId, payload) {
 }
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-  console.log("%c here is yang wallet address",walletAddress);
 
   if (isTested) {
     await test_get_scraping_request();
@@ -239,7 +238,7 @@ async function main() {
     await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload);
   } else {
     // it is not tested area
-    // await test_save_payload(walletAddress, "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E", test_payload_yang);
+    await test_save_payload(walletAddress, "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E", test_payload_yang);
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);
