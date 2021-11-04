@@ -1,3 +1,4 @@
+const log = log.bind(console, "Storecat :");
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
@@ -73,13 +74,10 @@ async function getPayload(url) {
       takeScreenshot: false
     });
     const scrapingData = await ScraperUtil.getPayload(html);
-    console.log(
-      "**************** finished scraping *******************",
-      scrapingData
-    );
+    log("finished scraping", scrapingData);
     return scrapingData;
   } catch (error) {
-    console.log("get payload error", error);
+    log("get payload error", error);
     return false;
   }
 }
@@ -87,7 +85,7 @@ async function test_get_scraping_request() {
   // --- test get scraping request
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   const data = await axios.get(url);
-  console.log(data);
+  log(data);
   // data: {
   //   websiteUrl: 'http://gmail.com',
   //   uuid: 'Bwsx4fw3tEZbSn3iV9OgiSKG',
@@ -120,7 +118,7 @@ async function test_scraping() {
   // --- scraping test
   const test_website = "http://gmail.com";
   let payload = await getPayload(test_website);
-  console.log(payload);
+  log(payload);
 }
 async function test_upload_payload_to_arweave() {
   // testing save payload
@@ -137,16 +135,16 @@ async function test_upload_payload_to_arweave() {
     myTx.addTag("created", Math.floor(Date.now() / 1000));
     await arweave.transactions.sign(myTx, wallet);
     const result = await arweave.transactions.post(myTx);
-    console.log("response arweave transaction", result);
+    log("response arweave transaction", result);
     if (result.status === 200) {
       // success transaction
-      console.log("transactionID", myTx.id); // iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
+      log("transactionID", myTx.id); // iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
     } else {
-      console.log("error response arweave transaction : ", result);
+      log("error response arweave transaction : ", result);
       return false;
     }
   } catch (error) {
-    console.log("error bundleAndExport", error);
+    log("error bundleAndExport", error);
     return false;
   }
 }
@@ -184,14 +182,11 @@ async function main() {
     await test_save_payload(walletAddress);
   }
   const latestState = smartest.readContractState(storecatContractId);
-  console.log(latestState.tasks[0].payloads);
+  log(latestState.tasks[0].payloads);
 
-  console.log(
-    "Storecat final state:",
-    smartest.readContractState(storecatContractId)
-  );
+  log("Storecat final state:", smartest.readContractState(storecatContractId));
 }
 
 main().then(() => {
-  console.log("Test complete");
+  log("Test complete");
 });
