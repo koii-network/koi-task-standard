@@ -26,11 +26,7 @@ export default async function migratePreRegister(state) {
     const contractSrc = transaction.node.tags.find(
       (tag) => tag.name === "Contract-Src"
     );
-    return (
-      contractSrc &&
-      validContractSrc.includes(contractSrc.value) &&
-      transaction.node.block.height < SmartWeave.block.height
-    );
+    return contractSrc && validContractSrc.includes(contractSrc.value);
   });
   for (const transaction of validTransactionIds) {
     const nftState = await SmartWeave.contracts
@@ -96,9 +92,9 @@ async function fetchTransactions(ids) {
 async function getNextPage(ids, after) {
   const afterQuery = after ? `,after:"${after}"` : "";
   const query = `query {
-    transactions(ids: ${JSON.stringify(
-      ids
-    )}, sort: HEIGHT_ASC, first: 100${afterQuery}) {
+    transactions(ids: ${JSON.stringify(ids)}, sort: HEIGHT_ASC, block: {max: ${
+    SmartWeave.block.height
+  }}, first: 100${afterQuery}) {
       pageInfo { hasNextPage }
       edges {
         node {
@@ -107,9 +103,6 @@ async function getNextPage(ids, after) {
                   address
                 }
           tags { name value }
-          block {
-                    height   
-                }
         }
         cursor
       }
