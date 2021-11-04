@@ -7,6 +7,22 @@ export default async function addScrapingRequest(state, action) {
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const balances = koiiState.balances;
 
+  const contractId = SmartWeave.contract.id; // storecat contract id
+  const KoiiTasks = koiiState.tasks;
+  const contractTask = KoiiTasks.find((task) => task.txId === contractId);
+  if (contractTask) {
+    for (let task of tasks) {
+      task.prepareDistribution.forEach((distribution) => {
+        if (
+          contractTask.rewardedTaskId.includes(distribution.id) &&
+          !distribution.isRewarded
+        ) {
+          distribution.isRewarded = true;
+        }
+      });
+    }
+  }
+
   if (!(scrapingRequest.owner in balances)) {
     throw new ContractError(
       "Scraping owner should have minimum stake of " +
