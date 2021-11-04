@@ -13,7 +13,9 @@ export default async function savePayload(state, action) {
     throw new ContractError("Payload should be an object");
   }
 
-  const isExistIndex = tasks[matchIndex].hashPayloads.findIndex( h => h.hashPayload === payload.hashPayload);
+  const isExistIndex = tasks[matchIndex].hashPayloads.findIndex(
+    (h) => h.hashPayload === payload.hashPayload
+  );
   if (isExistIndex < 0) {
     tasks[matchIndex].hashPayloads.push({
       hashPayload: payload.hashPayload,

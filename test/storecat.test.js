@@ -35,7 +35,7 @@ const storecatInitState = JSON.parse(
 smartest.writeContractState(storecatContractId, storecatInitState);
 
 const test_payload_dong = {
-  title: "一个帐号，畅享 Google 所有服务！",
+  title: "sss一个帐号，畅享 Google 所有服务！",
   content: {
     Image: [
       {
@@ -45,7 +45,6 @@ const test_payload_dong = {
         type: "Image"
       }
     ],
-    Link: [],
     Text: [
       {
         label: "Payload Text0",
@@ -210,7 +209,7 @@ async function test_save_payload(walletAddress, txId, payload) {
   userPayload.payloadTxId = txId;
   userPayload.hashPayload = md5(payload); // 32byte
   userPayload.owner = walletAddress;
-  // console.log(userPayload);
+  console.log(userPayload);
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
@@ -251,8 +250,8 @@ async function main() {
     // it is not tested area
     await test_save_payload(
       walletAddress,
-      "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
-      test_payload
+      "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+      test_payload_dong
     );
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
