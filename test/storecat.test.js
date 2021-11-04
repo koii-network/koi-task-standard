@@ -1,7 +1,7 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
-var md5 = require('md5');
+const md5 = require("md5");
 const axios = require("axios").default;
 const ClusterUtil = require("../src/storecat/cluster");
 const ScraperUtil = require("../src/storecat/scraper");
@@ -155,7 +155,7 @@ async function test_save_payload(walletAddress) {
   const userPayload = {};
   userPayload.payloadTxId = "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE";
   userPayload.hashPayload = md5(test_payload); //128byte
-  userPayload.owner = tools.address;
+  userPayload.owner = walletAddress;
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
