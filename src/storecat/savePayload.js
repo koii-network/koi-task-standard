@@ -14,21 +14,25 @@ export default async function savePayload(state, action) {
   }
 
   let isFounded = false;
-  for (let index = 0; index < tasks[matchIndex].payloads.length; index++) {
-    const element = tasks[matchIndex].payloads[index];
+  const isExist = tasks[matchIndex].hashPayloads.findIndex( h => h.hashPayload === payload.hashPayload);
+  if (isExist < 0) {
+    tasks[matchIndex].hashPayloads.push({
+      hashPayload: payload.hashPayload,
+      count: 1
+    });
+  }
+  for (let index = 0; index < tasks[matchIndex].hashPayloads.length; index++) {
+    const element = tasks[matchIndex].hashPayloads[index];
     if (element.hashPayload === payload.hashPayload) {
       isFounded = true;
       tasks[matchIndex].payloads[index].count++;
     }
   }
-
-  if (!isFounded) {
-    tasks[matchIndex].payloads.push({
-      owner: payload.owner,
-      payloadTxId: payload.payloadTxId,
-      hashPayload: payload.hashPayload,
-      count: 1
-    });
-  }
+  tasks[matchIndex].payloads.push({
+    owner: payload.owner,
+    payloadTxId: payload.payloadTxId,
+    hashPayload: payload.hashPayload,
+    count: 1
+  });
   return { state };
 }
