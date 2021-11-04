@@ -126,7 +126,7 @@ async function execute(_init_state) {
 async function getStorecatStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
   let block = await tools.getBlockHeight();
-  
+
   if (!state) console.error("State or task invalid:", state);
   return [state, block];
 }

@@ -192,7 +192,7 @@ async function test_upload_payload_to_arweave(payload) {
     console.log("response arweave transaction", result);
     if (result.status === 200) {
       // success transaction
-      console.log("transactionID", myTx.id); 
+      console.log("transactionID", myTx.id);
       // james :  iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE
       // yang :  JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E
     } else {
@@ -210,7 +210,7 @@ async function test_save_payload(walletAddress, txId, payload) {
   userPayload.payloadTxId = txId;
   userPayload.hashPayload = md5(payload); // 32byte
   userPayload.owner = walletAddress;
-  console.log(userPayload)
+  console.log(userPayload);
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
@@ -235,10 +235,18 @@ async function main() {
     await test_scraping();
     await test_upload_payload_to_arweave(test_payload);
     // await test_upload_payload_to_arweave(test_payload_yang);
-    await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload);
+    await test_save_payload(
+      walletAddress,
+      "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+      test_payload
+    );
+    await test_save_payload(
+      walletAddress,
+      "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+      test_payload_yang
+    );
   } else {
     // it is not tested area
-    await test_save_payload(walletAddress, "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E", test_payload_yang);
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);
