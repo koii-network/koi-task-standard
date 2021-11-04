@@ -1,6 +1,7 @@
 const smartest = require("@_koi/smartest");
 const Arweave = require("arweave");
 const fs = require("fs");
+var md5 = require('md5');
 const axios = require("axios").default;
 const ClusterUtil = require("../src/storecat/cluster");
 const ScraperUtil = require("../src/storecat/scraper");
@@ -33,6 +34,37 @@ const storecatInitState = JSON.parse(
   fs.readFileSync(`src/storecat/init_state_test.json`)
 );
 smartest.writeContractState(storecatContractId, storecatInitState);
+
+const test_payload = {
+  title: "一个帐号，畅享 Google 所有服务！",
+  content: {
+    Image: [
+      {
+        label: "Payload Image0",
+        selector: "0$img[class='circle-mask']",
+        text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
+        type: "Image"
+      }
+    ],
+    Link: [
+      {
+        label: "Payload Link0",
+        selector: "0$a[class='need-help']",
+        text: "https://accounts.google.com/signin/usernamerecovery?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&service=mail&osid=1&hl=en",
+        type: "Link"
+      }
+    ],
+    Text: [
+      {
+        label: "Payload Text0",
+        selector: "0$div[class='banner']>h1",
+        text: "One account. All of Google.",
+        type: "Text"
+      }
+    ]
+  },
+  image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
+};
 async function getPayload(url) {
   try {
     let cluster = await ClusterUtil.puppeteerCluster();
@@ -93,36 +125,7 @@ async function test_scraping() {
 async function test_upload_payload_to_arweave() {
   // testing save payload
   const bundle = {
-    payloads: {
-      title: "一个帐号，畅享 Google 所有服务！",
-      content: {
-        Image: [
-          {
-            label: "Payload Image0",
-            selector: "0$img[class='circle-mask']",
-            text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
-            type: "Image"
-          }
-        ],
-        Link: [
-          {
-            label: "Payload Link0",
-            selector: "0$a[class='need-help']",
-            text: "https://accounts.google.com/signin/usernamerecovery?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&service=mail&osid=1&hl=en",
-            type: "Link"
-          }
-        ],
-        Text: [
-          {
-            label: "Payload Text0",
-            selector: "0$div[class='banner']>h1",
-            text: "One account. All of Google.",
-            type: "Text"
-          }
-        ]
-      },
-      image: 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png'
-    }
+    payloads: test_payload
   };
   try {
     const myTx = await arweave.createTransaction(
@@ -147,6 +150,27 @@ async function test_upload_payload_to_arweave() {
     return false;
   }
 }
+async function test_save_payload(walletAddress) {
+  // --- test save payload
+  const userPayload = {};
+  userPayload.payloadTxId = "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE";
+  userPayload.hashPayload = md5(test_payload); //128byte
+  userPayload.owner = tools.address;
+  const scInput_savePayload = {
+    function: "savePayload",
+    matchIndex: 0,
+    payload: userPayload
+  };
+  await smartest.interactWrite(
+    arweave,
+    storecatSrc,
+    wallet,
+    scInput_savePayload,
+    smartest.readContractState(storecatContractId),
+    walletAddress,
+    storecatContractId
+  );
+}
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
 
@@ -157,6 +181,7 @@ async function main() {
     await test_upload_payload_to_arweave();
   } else {
     // it is not tested area
+    await test_save_payload(walletAddress);
   }
 
   console.log(
