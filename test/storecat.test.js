@@ -154,7 +154,7 @@ async function test_save_payload(walletAddress) {
   // --- test save payload
   const userPayload = {};
   userPayload.payloadTxId = "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE";
-  userPayload.hashPayload = md5(test_payload); //128byte
+  userPayload.hashPayload = md5(test_payload); //32byte
   userPayload.owner = walletAddress;
   const scInput_savePayload = {
     function: "savePayload",
@@ -183,6 +183,8 @@ async function main() {
     // it is not tested area
     await test_save_payload(walletAddress);
   }
+  const latestState = smartest.readContractState(storecatContractId);
+  console.log(latestState.tasks[0].payloads);
 
   console.log(
     "Storecat final state:",
