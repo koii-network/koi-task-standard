@@ -29,6 +29,11 @@ export default async function rank(state, action) {
       // task.prepareDistribution.push({task.owner: task.bounty * -1})
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
+      const newPrepareDistribution = {
+        id: task.uuid + "_" + task.open,
+        distribution: {},
+        isRewarded: false
+      };
 
       task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
@@ -41,7 +46,7 @@ export default async function rank(state, action) {
           // if (balances[hash.owner]) balances[hash.owner] += qty;
           // else balances[hash.owner] = qty;
           // task.prepareDistribution.push({hash.owner: qty})
-          task.prepareDistribution.distribution[hash.owner] = qty;
+          newPrepareDistribution.distribution[hash.owner] = qty;
           console.log(
             "set bounty target - " +
               hash.owner +
@@ -58,6 +63,7 @@ export default async function rank(state, action) {
         task.hasAudit = true;
         task.tophash = topHash;
         task.tId = topTId;
+        task.prepareDistribution.push({ newPrepareDistribution });
       } else {
         // eslint-disable-next-line no-undef
         throw new ContractError("There is an issue to get distribution");
