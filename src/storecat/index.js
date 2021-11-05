@@ -3,18 +3,8 @@
 import rank from "./rank";
 import addScrapingRequest from "./addTask";
 import savePayload from "./savePayload";
-// import confirmDistributeReward from "./confirmDistributeReward";
-// import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
-// import completeTask from "./completeTask";
 
-const handlers = [
-  rank,
-  addScrapingRequest,
-  savePayload
-  // confirmDistributeReward,
-  // savedPayloadToPermaweb,
-  // completeTask
-];
+const handlers = [rank, addScrapingRequest, savePayload];
 
 export async function handle(state, action) {
   const handler = handlers.find((fn) => fn.name === action.input.function);
