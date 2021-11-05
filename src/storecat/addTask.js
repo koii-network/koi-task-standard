@@ -11,7 +11,7 @@ export default async function addScrapingRequest(state, action) {
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
   if (isCleaner) {
-    // updated distribution rewards
+    // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
     if (contractTask) {
       for (let task of tasks) {
@@ -23,6 +23,18 @@ export default async function addScrapingRequest(state, action) {
             distribution.isRewarded = true;
           }
         });
+      }
+    }
+    // update completed tasks
+    for (let index = 0; index < tasks.length; index++) {
+      const element = tasks[index];
+      if (element.distribution.isRewarded && element.hasAudit  && element.tId !== "") {
+        const completedTask = {
+          uuid: element.uuid,
+          owner: element.owner,
+          txId: element.tId
+        };
+        state.completedTasks.push(completedTask);
       }
     }
   }
