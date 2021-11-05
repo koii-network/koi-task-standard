@@ -1,11 +1,8 @@
 {
   "owner": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
-  "name": "thumbnail-v3",
+  "name": "thumbnail-v5",
   "thumbnails":[],
-  "vote": {
-    "update" : [],
-    "slash" : []
-  },
+  "votes": [],
   "task": {
     "open": 770649,
     "close": 771369,

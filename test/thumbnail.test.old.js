@@ -4,7 +4,7 @@ const {interactWrite, interactWriteDryRun} = require("smartweave")
 let Smartweave = require('smartweave');
 let fs = require('fs');
 require("dotenv").config();
-let contractInitialStateTx = "N8vgGLdQJgHKNR9ukditTGPwG195A10A4ovX7aTmqM0";
+let contractInitialStateTx = "8xGxCXqgNl8Btt4Biw5i7_iHgj_urXHwdbDhT9FgjvM";
 
 const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
@@ -27,6 +27,7 @@ async function update() {
 
     const input = {
         "function": "proposeUpdate",
+        "id": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
         "aid": 'gtSQKcx3Ex8eOdgZxNh0rWSNiKQCt3Xi02cGnJQ_uSM',
         "cid": 'QmVhDHYYas6rnt8frPqKp6T2KjobJfCDVEYEUUH8ZgBZhF'
     }
