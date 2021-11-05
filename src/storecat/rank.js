@@ -11,16 +11,17 @@ export default async function rank(state, action) {
   if (task.hasOwnProperty("open")) {
     // get Top count of hash
     let topHash = "";
+    let topTId = "";
     let topCt = 0;
-    task.payloadHashs.forEach((hash) => {
+    task.hashPayloads.forEach((hash) => {
       if (hash.count > topCt) {
         topCt = hash.count;
-        topHash = hash.hash;
+        topHash = hash.hashPayload;
       }
     });
 
     // check the top hash is correct
-    if (topCt >= task.payloadHashs.length / 2) {
+    if (topCt >= task.hashPayloads.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
       // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
@@ -31,6 +32,9 @@ export default async function rank(state, action) {
 
       task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
+          if (deeper === 0) {
+            topTId = hash.payloadTxId;
+          }
           deeper++;
           // pay bounty to winner
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
@@ -48,9 +52,16 @@ export default async function rank(state, action) {
           );
         }
       });
-      // update task
-      task.hasAudit = true;
-      task.tophash = topHash;
+
+      if (topHash !== "" && topTId !== "") {
+        // update task
+        task.hasAudit = true;
+        task.tophash = topHash;
+        task.tId = topTId;
+      } else {
+        // eslint-disable-next-line no-undef
+        throw new ContractError("There is an issue to get distribution");
+      }
     } else {
       // not possible audit - update close
       task.close = task.close + 720;
