@@ -3,23 +3,27 @@ export default async function addScrapingRequest(state, action) {
   const tasks = state.tasks;
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
+  const isCleaner = input.clean || false;
   const koiiContract = state.koiiContract;
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const balances = koiiState.balances;
 
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
-  const contractTask = KoiiTasks.find((task) => task.txId === contractId);
-  if (contractTask) {
-    for (let task of tasks) {
-      task.prepareDistribution.forEach((distribution) => {
-        if (
-          contractTask.rewardedTaskId.includes(distribution.id) &&
-          !distribution.isRewarded
-        ) {
-          distribution.isRewarded = true;
-        }
-      });
+  if (isCleaner) {
+    // updated distribution rewards
+    const contractTask = KoiiTasks.find((task) => task.txId === contractId);
+    if (contractTask) {
+      for (let task of tasks) {
+        task.prepareDistribution.forEach((distribution) => {
+          if (
+            contractTask.rewardedTaskId.includes(distribution.id) &&
+            !distribution.isRewarded
+          ) {
+            distribution.isRewarded = true;
+          }
+        });
+      }
     }
   }
 
@@ -36,7 +40,7 @@ export default async function addScrapingRequest(state, action) {
   }
 
   // call interactWrite func update task
-  let task = {
+  const newTask = {
     open: SmartWeave.block.height,
     close: SmartWeave.block.height + 720,
     owner: scrapingRequest.owner,
@@ -55,6 +59,6 @@ export default async function addScrapingRequest(state, action) {
       isRewarded: false
     }
   };
-  tasks.push(task);
+  tasks.push(newTask);
   return { state };
 }
