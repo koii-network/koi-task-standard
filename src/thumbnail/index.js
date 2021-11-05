@@ -3,7 +3,7 @@
 // import submitDistribution from "./submit_distribution";
 // import audit from "./audit";
 import proposeUpdate from "./proposeUpdate";
-// import proposeSlash from "./proposeSlash";
+import proposeSlash from "./proposeSlash";
 
 
 // const handlers = [
@@ -13,7 +13,8 @@ import proposeUpdate from "./proposeUpdate";
 //   proposeSlash
 // ];
 const handlers = [
-  proposeUpdate
+  proposeUpdate,
+  proposeSlash
 ];
 
 export async function handle(state, action) {

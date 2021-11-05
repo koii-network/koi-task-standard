@@ -4,7 +4,7 @@ const {interactWrite, interactWriteDryRun} = require("smartweave")
 let Smartweave = require('smartweave');
 let fs = require('fs');
 require("dotenv").config();
-let contractInitialStateTx = "8xGxCXqgNl8Btt4Biw5i7_iHgj_urXHwdbDhT9FgjvM";
+let contractInitialStateTx = "L0Q-yYk7soPRxmMFGnDP_Ef8Eh6p_NU3uvBXSriLpJg";
 
 const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
@@ -25,12 +25,18 @@ getLatestState();
 
 async function update() {
 
+    // const input = {
+    //     function: "proposeUpdate",
+    //     "aid": 'gtSQKcx3Ex8eOdgZxNh0rWSNiKQCt3Xi02cGnJQ_uSM',
+    //     "cid": 'QmVhDHYYas6rnt8frPqKp6T2KjobJfCDVEYEUUH8ZgBZhF'
+    // }
+
     const input = {
-        "function": "proposeUpdate",
-        "id": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
-        "aid": 'gtSQKcx3Ex8eOdgZxNh0rWSNiKQCt3Xi02cGnJQ_uSM',
-        "cid": 'QmVhDHYYas6rnt8frPqKp6T2KjobJfCDVEYEUUH8ZgBZhF'
-    }
+            function: "proposeSlash",
+            "uid": 'oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0',
+            "data": 'Soma'
+        }
+
     // `interactWrite` will return the transaction ID.
     const txid = await interactWrite(
         arweave,   
