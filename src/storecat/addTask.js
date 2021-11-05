@@ -11,7 +11,10 @@ export default async function addScrapingRequest(state, action) {
   const KoiiTasks = koiiState.tasks;
   if (isCleaner) {
     // clear completedTask from tasks
-    state.tasks = state.tasks.filter( t => !t.prepareDistribution.isRewarded );
+    state.tasks = state.tasks.filter(
+      (t) =>
+        t.prepareDistribution.length === 0 || !t.prepareDistribution[0].isRewarded
+    );
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
     if (contractTask) {
@@ -66,7 +69,7 @@ export default async function addScrapingRequest(state, action) {
     payloads: [],
     hashPayloads: [],
     prepareDistribution: {
-      taskId: scrapingRequest.uuid + "_" + SmartWeave.block.height,
+      id: scrapingRequest.uuid + "_" + SmartWeave.block.height,
       distribution: {},
       isRewarded: false
     }
