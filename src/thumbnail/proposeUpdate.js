@@ -1,7 +1,7 @@
 // The Audit function can be included optionall as a way of invoking a stake slashing behavior to penalize bad actors
 
 export default function proposeUpdate(state, action) {
-    const thumbnails = state.thumbnails;
+    const thumbnails = state.votes;
     const caller = action.caller; // the arweave ID who is calling the function
     const input = action.input; // the input action value (data payload, aid, cid)
     const aid = input.aid;
@@ -29,8 +29,10 @@ export default function proposeUpdate(state, action) {
 
 
     const thumbnail = {
-      aid: aid,
-      cid: cid
+      update: { 
+        aid: aid,
+        cid: cid
+      }
     };
     thumbnails.push(thumbnail);
     return { state };

@@ -19,8 +19,10 @@ export default function proposeSlash(state, action) {
     }
     // if it passes all the tests, update the state
     const vote = {
-      uid: uid,
-      data: data
+      slash:{
+        uid: uid,
+        data: data
+      }
     };
     votes.push(vote);
     return { state };

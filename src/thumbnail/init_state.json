@@ -2,10 +2,7 @@
   "owner": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
   "name": "thumbnail-v6",
   "thumbnails":[],
-  "votes": {
-    "update":[],
-    "slash":[]
-  },
+  "votes": [],
   "distributions":[],
   "task": {
     "open": 770649,
