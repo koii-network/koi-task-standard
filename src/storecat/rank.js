@@ -52,10 +52,16 @@ export default async function rank(state, action) {
           );
         }
       });
-      // update task
-      task.hasAudit = true;
-      task.tophash = topHash;
-      task.tId = topTId;
+
+      if (topHash !== "" && topTId !== "") {
+        // update task
+        task.hasAudit = true;
+        task.tophash = topHash;
+        task.tId = topTId;
+      } else {
+        // eslint-disable-next-line no-undef
+        throw new ContractError("There is an issue to get distribution");
+      }
     } else {
       // not possible audit - update close
       task.close = task.close + 720;
