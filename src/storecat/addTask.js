@@ -49,7 +49,6 @@ export default async function addScrapingRequest(state, action) {
     url: scrapingRequest.websiteUrl,
     hasAudit: false,
     tophash: "",
-    hasUploaded: false,
     tId: "",
     payloads: [],
     hashPayloads: [],

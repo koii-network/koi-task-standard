@@ -133,8 +133,8 @@ async function getStorecatStateAndBlock() {
 async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
-  await rank(index_audit);
-  await distribute();
+  await rank(state, block);
+  // await distribute();
   // await writePayloadInPermaweb(state, block);
   // await updateCompletedTask(state);
 }
