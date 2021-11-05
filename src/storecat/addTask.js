@@ -11,7 +11,7 @@ export default async function addScrapingRequest(state, action) {
   const KoiiTasks = koiiState.tasks;
   if (isCleaner) {
     // clear completedTask from tasks
-    state.tasks = state.tasks.filter( t => !t.distribution.isRewarded );
+    state.tasks = state.tasks.filter( t => !t.prepareDistribution.isRewarded );
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
     if (contractTask) {
@@ -29,7 +29,7 @@ export default async function addScrapingRequest(state, action) {
     // update completed tasks
     for (let index = 0; index < state.tasks.length; index++) {
       const element = tasks[index];
-      if (element.distribution.isRewarded && element.hasAudit  && element.tId !== "") {
+      if (element.prepareDistribution.isRewarded && element.hasAudit  && element.tId !== "") {
         const completedTask = {
           uuid: element.uuid,
           owner: element.owner,

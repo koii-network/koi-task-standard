@@ -136,7 +136,6 @@ async function service(state, block) {
   await rank(state, block);
   // await distribute();
   // await writePayloadInPermaweb(state, block);
-  // await updateCompletedTask(state);
 }
 // eslint-disable-next-line no-unused-vars
 async function witness(state, block) {
@@ -422,40 +421,6 @@ async function writePayloadInPermaweb(state, block) {
   } else {
     return false;
   }
-}
-/*
-  updateCompletedTask: update completed task status 
-  @returns remove task and added completedTasks
-*/
-async function updateCompletedTask(state) {
-  const tasks = state.tasks;
-  if (tasks.length == 0) return false;
-
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (element.hasAudit && element.hasUploaded && element.tId !== "") {
-      matchIndex = index;
-      break;
-    }
-  }
-  if (matchIndex === -1) {
-    return false;
-  }
-  // update state via contract write
-  const input = {
-    function: "completeTask",
-    matchIndex: matchIndex
-  };
-  const task_name = "completeTask";
-  const tx = await kohaku.interactWrite(
-    arweave,
-    tools.wallet,
-    namespace.taskTxId,
-    input
-  );
-  await checkTxConfirmation(tx, task_name);
-  return true;
 }
 /*
   get scraping request from outside server(app.getstorecat.com)
