@@ -134,8 +134,6 @@ async function service(state, block) {
   await getScrapingRequest();
   await scrape(state, block);
   await rank(state, block);
-  // await distribute();
-  // await writePayloadInPermaweb(state, block);
 }
 // eslint-disable-next-line no-unused-vars
 async function witness(state, block) {
@@ -222,84 +220,6 @@ async function rank(state, block) {
     return false;
   }
 }
-function getBlockAndUuid(str) {
-	const ids = str.split("_");
-  return {blockT: ids[0], uuidT:ids[1]}
-}
-/*
-  distribute: resolve prepared distribute reward
-  call main contract distributeReward and then 
-  update isRewarded = true of prepareDistribution
-  @returns 
-*/
-async function distribute(state) {
-  const tasks = state.tasks;
-  if (tasks.length === 0) return false;
-
-  const koiiState = await tools.getState(tools.contractId);
-  if (!koiiState) {
-    console.log("%cMain State:", "color: red");
-    return false;
-  }
-  const storecatContractBlock = koiiState.filter( k => k.name === "storecat");
-  if (storecatContractBlock) {
-    // check rewardedBlock
-    if (storecatContractBlock.rewardedBlock.length > 0) {
-      for (let index = 0; index < storecatContractBlock.rewardedBlock.length; index++) {
-        const rewardedBlockId = storecatContractBlock.rewardedBlock[index]; // rewardedBlockId = uuid + "_" + block
-        if(rewardedBlockId !== "" && rewardedBlockId.length > 25) { // uuid length is 24byte
-          const { blockT, uuidT } = getBlockAndUuid(rewardedBlockId);
-          let matchIndex = tasks.findIndex(
-            (t) => t.uuid === uuidT && t.open === Number(blockT) 
-            && !t.prepareDistribution.isReward 
-            && t.hasAudit && !t.hasUploaded
-          );
-          if (matchIndex > -1) {
-            // updated distributeReward
-            try {
-              // submit main koii contract to distribute
-              const input = {
-                function: "distributeReward",
-                matchIndex: matchIndex
-              };
-              const tx = await kohaku.interactWrite(
-                arweave,
-                tools.wallet,
-                tools.contractId, // it is main contract id
-                input
-              );
-              const task = "distributing reward to main contract";
-              if (await checkTxConfirmation(tx, task)) {
-                console.log("Distributed");
-                // update distribute data in sub task
-                const input = {
-                  function: "confirmDistributeReward",
-                  matchIndex: matchIndex
-                };
-                const task_name = "confirm distribute reward";
-                const tx = await kohaku.interactWrite(
-                  arweave,
-                  tools.wallet,
-                  namespace.taskTxId,
-                  input
-                );
-                await checkTxConfirmation(tx, task_name);
-                return true;
-              }
-              return false;
-            } catch (error) {
-              console.log('error distribute', error);
-              return false;
-            }
-          }
-        }
-        
-      }
-    }
-    return false;
-  }
-  return false;
-}
 /*
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
@@ -336,92 +256,7 @@ async function bundleAndExport(data, tag = false) {
     return false;
   }
 }
-/*
-  writePayloadInPermaweb: upload payload of rewarded task to arweave
-  save transactionId in state.task
-  @returns 
-*/
-async function writePayloadInPermaweb(state, block) {
-  const tasks = state.tasks;
 
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (
-      block >= element.close &&
-      element.hasAudit &&
-      element.prepareDistribution.isRewarded &&
-      !element.hasUploaded
-    ) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if (matchIndex === -1) {
-    return false;
-  }
-  const task = tasks[matchIndex];
-  let topPayloadTxId = "";
-  let topCt = 0;
-  task.hashPayloads.forEach((hash) => {
-    if (hash.count > topCt) {
-      topCt = hash.count;
-      topPayloadTxId = hash.payloadTxId;
-    }
-  });
-  // get top payloads
-  if (topPayloadTxId !== "") {
-    // const topPayload = await tools.getTransaction(topPayloadTxId); // not tested yet
-    const input = {
-      function: "savedPayloadToPermaweb",
-      txId: topPayloadTxId,
-      matchIndex: matchIndex
-    };
-    const task_name = "saved payload in permaweb";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
-    /*
-    try {
-      const bundle = {
-        owner: task.owner,
-        uuid: task.uuid,
-        url: task.url,
-        payloads: topPayload.data.payload
-      };
-      const tId = await bundleAndExport(bundle, true);
-      if (tId) {
-        // update state via contract write
-        const input = {
-          function: "savedPayloadToPermaweb",
-          txId: tId,
-          matchIndex: matchIndex
-        };
-        const task_name = "saved payload in permaweb";
-        const tx = await kohaku.interactWrite(
-          arweave,
-          tools.wallet,
-          namespace.taskTxId,
-          input
-        );
-        await checkTxConfirmation(tx, task_name);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.log('error writePayloadInPermaweb', error);
-      return false;
-    }
-    */
-  } else {
-    return false;
-  }
-}
 /*
   get scraping request from outside server(app.getstorecat.com)
   @returns scraping url, bounty, uuid, owner
