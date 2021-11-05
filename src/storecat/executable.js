@@ -135,8 +135,8 @@ async function service(state, block) {
   await scrape(state, block);
   await rank(index_audit);
   await distribute();
-  await writePayloadInPermaweb(state, block);
-  await updateCompletedTask(state);
+  // await writePayloadInPermaweb(state, block);
+  // await updateCompletedTask(state);
 }
 // eslint-disable-next-line no-unused-vars
 async function witness(state, block) {
@@ -364,7 +364,7 @@ async function writePayloadInPermaweb(state, block) {
   const task = tasks[matchIndex];
   let topPayloadTxId = "";
   let topCt = 0;
-  task.payloads.forEach((hash) => {
+  task.hashPayloads.forEach((hash) => {
     if (hash.count > topCt) {
       topCt = hash.count;
       topPayloadTxId = hash.payloadTxId;

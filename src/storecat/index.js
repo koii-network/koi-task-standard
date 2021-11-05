@@ -3,17 +3,17 @@
 import rank from "./rank";
 import addScrapingRequest from "./addTask";
 import savePayload from "./savePayload";
-import confirmDistributeReward from "./confirmDistributeReward";
-import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
-import completeTask from "./completeTask";
+// import confirmDistributeReward from "./confirmDistributeReward";
+// import savedPayloadToPermaweb from "./savedPayloadToPermaweb";
+// import completeTask from "./completeTask";
 
 const handlers = [
   rank,
   addScrapingRequest,
-  savePayload,
-  confirmDistributeReward,
-  savedPayloadToPermaweb,
-  completeTask
+  savePayload
+  // confirmDistributeReward,
+  // savedPayloadToPermaweb,
+  // completeTask
 ];
 
 export async function handle(state, action) {
