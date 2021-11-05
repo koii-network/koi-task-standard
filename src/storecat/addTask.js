@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 export default async function addScrapingRequest(state, action) {
-  const tasks = state.tasks;
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
   const isCleaner = input.clean || false;
@@ -11,10 +10,12 @@ export default async function addScrapingRequest(state, action) {
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
   if (isCleaner) {
+    // clear completedTask from tasks
+    state.tasks = state.tasks.filter( t => !t.distribution.isRewarded );
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
     if (contractTask) {
-      for (let task of tasks) {
+      for (let task of state.tasks) {
         task.prepareDistribution.forEach((distribution) => {
           if (
             contractTask.rewardedTaskId.includes(distribution.id) &&
@@ -26,7 +27,7 @@ export default async function addScrapingRequest(state, action) {
       }
     }
     // update completed tasks
-    for (let index = 0; index < tasks.length; index++) {
+    for (let index = 0; index < state.tasks.length; index++) {
       const element = tasks[index];
       if (element.distribution.isRewarded && element.hasAudit  && element.tId !== "") {
         const completedTask = {
@@ -70,6 +71,6 @@ export default async function addScrapingRequest(state, action) {
       isRewarded: false
     }
   };
-  tasks.push(newTask);
+  state.tasks.push(newTask);
   return { state };
 }
