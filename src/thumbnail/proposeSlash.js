@@ -11,12 +11,10 @@ export default function proposeSlash(state, action) {
      // checks for data
      if (!data) throw new ContractError("Invalid input");
      if (typeof data !== "string") throw new ContractError("Invalid input format");
-    
+     const 
     // checks caller
     if (!caller) throw new ContractError("Invalid input");
-    if (caller !== "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0") {
-      throw new ContractError("caller should be Soma");
-    }
+    
     // if it passes all the tests, update the state
     const vote = {
       slash:{

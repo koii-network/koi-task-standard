@@ -23,10 +23,6 @@ export default function proposeUpdate(state, action) {
 
     // checks caller
     if (!caller) throw new ContractError("Invalid input");
-    if (caller !== "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0") {
-      throw new ContractError("caller should be Soma");
-    }
-
 
     const thumbnail = {
       update: { 
