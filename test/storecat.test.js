@@ -247,13 +247,14 @@ async function main() {
       "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
       test_payload_dong
     );
-  } else {
-    // it is not tested area
     await test_save_payload(
       walletAddress,
       "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
       test_payload_dong
     );
+  } else {
+    // it is not tested area
+    console.log('here');
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
   const latestState = smartest.readContractState(storecatContractId);

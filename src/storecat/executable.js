@@ -312,7 +312,7 @@ async function scrape(state, block) {
     if (tId) {
       const userPayload = {};
       userPayload.payloadTxId = tId;
-      userPayload.hashPayload = md5(payload); //128byte
+      userPayload.hashPayload = md5(JSON.stringify(payload)); // 32byte
       userPayload.owner = tools.address;
       // call interactWrite function
       // savePayload
