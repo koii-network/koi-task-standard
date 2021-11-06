@@ -207,8 +207,9 @@ async function test_save_payload(walletAddress, txId, payload) {
   // --- test save payload
   const userPayload = {};
   userPayload.payloadTxId = txId;
-  userPayload.hashPayload = md5(payload); // 32byte
+  userPayload.hashPayload = md5(JSON.stringify(payload)); // 32byte
   userPayload.owner = walletAddress;
+  console.log(payload);
   console.log(userPayload);
   const scInput_savePayload = {
     function: "savePayload",
@@ -227,9 +228,9 @@ async function test_save_payload(walletAddress, txId, payload) {
 }
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
-  const firstState = smartest.readContractState(storecatContractId);
-  console.log(firstState.tasks[0].payloads);
-  console.log(firstState.tasks[0].hashPayloads);
+  // const firstState = smartest.readContractState(storecatContractId);
+  // console.log(firstState.tasks[0].payloads);
+  // console.log(firstState.tasks[0].hashPayloads);
   if (isTested) {
     await test_get_scraping_request();
     await test_add_scraping_request(walletAddress);
@@ -244,14 +245,14 @@ async function main() {
     await test_save_payload(
       walletAddress,
       "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
-      test_payload_yang
+      test_payload_dong
     );
   } else {
     // it is not tested area
     await test_save_payload(
       walletAddress,
       "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
-      test_payload_dong
+      test_payload_yang
     );
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }

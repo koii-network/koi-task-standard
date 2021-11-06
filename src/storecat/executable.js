@@ -8,6 +8,7 @@ const axios = require("axios");
 
 const ClusterUtil = require("./cluster");
 const ScraperUtil = require("./scraper");
+const md5 = require("md5");
 
 const arweave = Arweave.init({
   host: "arweave.net",
