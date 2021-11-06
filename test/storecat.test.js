@@ -252,7 +252,7 @@ async function main() {
     await test_save_payload(
       walletAddress,
       "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
-      test_payload_yang
+      test_payload_dong
     );
     // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
   }
