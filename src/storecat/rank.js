@@ -65,6 +65,7 @@ export default async function rank(state, action) {
         task.tId = topTId;
         task.prepareDistribution.push({ newPrepareDistribution });
       } else {
+        task.close = task.close + 720;
         // eslint-disable-next-line no-undef
         throw new ContractError("There is an issue to get distribution");
       }

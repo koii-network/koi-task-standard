@@ -209,8 +209,8 @@ async function test_save_payload(walletAddress, txId, payload) {
   userPayload.payloadTxId = txId;
   userPayload.hashPayload = md5(JSON.stringify(payload)); // 32byte
   userPayload.owner = walletAddress;
-  console.log(payload);
-  console.log(userPayload);
+  // console.log(payload);
+  // console.log(userPayload);
   const scInput_savePayload = {
     function: "savePayload",
     matchIndex: 0,
