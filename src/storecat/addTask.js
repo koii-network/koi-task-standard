@@ -10,11 +10,6 @@ export default async function addScrapingRequest(state, action) {
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
   if (isCleaner) {
-    // clear completedTask from tasks
-    state.tasks = state.tasks.filter(
-      (t) =>
-        t.prepareDistribution.length === 0 || !t.prepareDistribution[0].isRewarded
-    );
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
     if (contractTask) {
@@ -31,11 +26,11 @@ export default async function addScrapingRequest(state, action) {
     }
     // update completed tasks
     for (let index = 0; index < state.tasks.length; index++) {
-      const element = tasks[index];
+      const element = state.tasks[index];
       if (element.prepareDistribution.length === 0) continue;
       if (
         element.prepareDistribution[0].isRewarded &&
-        element.hasAudit &&
+        element.hasRanked &&
         element.tId !== ""
       ) {
         const completedTask = {
@@ -46,6 +41,12 @@ export default async function addScrapingRequest(state, action) {
         state.completedTasks.push(completedTask);
       }
     }
+    // clear completedTask from tasks
+    state.tasks = state.tasks.filter(
+      (t) =>
+        t.prepareDistribution.length === 0 ||
+        !t.prepareDistribution[0].isRewarded
+    );
   }
 
   if (!(scrapingRequest.owner in balances)) {
@@ -68,7 +69,7 @@ export default async function addScrapingRequest(state, action) {
     uuid: scrapingRequest.uuid,
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.websiteUrl,
-    hasAudit: false,
+    hasRanked: false,
     tophash: "",
     tId: "",
     payloads: [],

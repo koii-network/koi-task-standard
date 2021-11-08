@@ -60,7 +60,7 @@ export default async function rank(state, action) {
 
       if (topHash !== "" && topTId !== "") {
         // update task
-        task.hasAudit = true;
+        task.hasRanked = true;
         task.tophash = topHash;
         task.tId = topTId;
         task.prepareDistribution.push({ newPrepareDistribution });
