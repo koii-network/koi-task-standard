@@ -61,7 +61,7 @@ export default async function rank(state, action) {
       if (topHash !== "" && topTId !== "") {
         // update task
         task.hasRanked = true;
-        task.tId = topTId;
+        task.txId = topTId;
         task.prepareDistribution.push({ newPrepareDistribution });
       } else {
         // have an issue in rank - update close
