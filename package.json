@@ -13,14 +13,20 @@
     "deploy_task": "yarn build && node ./bin/task_deployment"
   },
   "dependencies": {
-    "@_koi/smartest": "^0.1.4",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@weavery/clarity": "^0.1.5",
-    "arweave": "^1.10.14",
-    "axios": "^0.24.0",
+    "arweave": "^1.10.18",
+    "axios": "^0.23.0",
     "bignumber.js": "^9.0.1",
-    "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
-    "puppeteer-cluster": "^0.22.0"
+    "ffmpeg-extract-frames": "^2.0.2",
+    "fs": "^0.0.1-security",
+    "ipfs": "^0.59.1",
+    "ipfs-api": "^26.1.2",
+    "ipfs-core": "^0.11.1",
+    "multiformats": "^9.4.8",
+    "puppeteer": "^10.4.0",
+    "sharp": "^0.29.1"
   },
   "devDependencies": {
     "@_koi/sdk": "^2.4.7",

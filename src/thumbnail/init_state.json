@@ -1,0 +1,20 @@
+{
+  "owner": "oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0",
+  "name": "thumbnail-v6",
+  "thumbnails":[],
+  "votes": [],
+  "distributions":[],
+  "task": {
+    "open": 770649,
+    "close": 771369,
+    "proposedPayloads": [
+      {
+        "block": 770649,
+        "proposedData": [],
+        "isRanked": false
+      }
+    ]
+  },
+  "executableId": "i2rZ8etomGvdIBXj76LVnGwXg9PnwqTQjpoHebMLjhM",
+  "koiiContract": "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"
+}

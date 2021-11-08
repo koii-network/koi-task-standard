@@ -2,6 +2,7 @@ require("dotenv").config();
 const fsPromises = require("fs/promises");
 const koiSdk = require("@_koi/sdk/node");
 const kohaku = require("@_koi/kohaku");
+const { argv } = require("process");
 
 const KOII_CONTRACT_ID = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8";
 
@@ -10,6 +11,7 @@ const tools = new koiSdk.Node(
   KOII_CONTRACT_ID
 );
 
+console.log('args', process,argv)
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
@@ -64,6 +66,12 @@ async function main() {
     console.log("Kohaku initialized to height", kohaku.getCacheHeight());
     if (initialHeight < 1) throw new Error("Failed to initialize");
   }
+
+  // console.log("Initializing Koii contract for Kohaku");
+  // await tools.getKoiiStateAwait();
+  // const initialHeight = kohaku.getCacheHeight();
+  // console.log("Kohaku initialized to height", kohaku.getCacheHeight());
+  // if (initialHeight < 1) throw new Error("Failed to initialize");
 
   // Initialize tasks then start express app
   await executableTask.setup(null);
