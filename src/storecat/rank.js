@@ -62,7 +62,7 @@ export default async function rank(state, action) {
         // update task
         task.hasRanked = true;
         task.txId = topTId;
-        task.prepareDistribution.push({ newPrepareDistribution });
+        task.prepareDistribution.push(newPrepareDistribution);
       } else {
         // have an issue in rank - update close
         task.close = task.close + 720;

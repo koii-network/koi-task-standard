@@ -2,13 +2,14 @@
 export default async function addScrapingRequest(state, action) {
   const input = action.input;
   const scrapingRequest = input.scrapingRequest;
-  const isCleaner = input.clean || false;
+  const isCleaner = input.scrapingRequest.clean || false;
   const koiiContract = state.koiiContract;
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const balances = koiiState.balances;
 
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
+  // console.log({ isCleaner });
   if (isCleaner) {
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
