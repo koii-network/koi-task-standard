@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 export default async function savePayload(state, action) {
   const tasks = state.tasks;
+  const caller = action.caller;
   const input = action.input;
   const matchIndex = input.matchIndex;
   const payload = input.payload;
@@ -25,7 +26,7 @@ export default async function savePayload(state, action) {
     tasks[matchIndex].hashPayloads[isExistIndex].count++;
   }
   tasks[matchIndex].payloads.push({
-    owner: payload.owner,
+    owner: caller,
     payloadTxId: payload.payloadTxId,
     hashPayload: payload.hashPayload
   });
