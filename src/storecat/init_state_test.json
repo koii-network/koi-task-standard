@@ -8,8 +8,8 @@
       "uuid": "Bwsx4fw3tEZbSn3iV9OgiSKG",
       "bounty": 1,
       "url": "http://gmail.com",
-      "hasRanked": false,
-      "txId": "",
+      "hasRanked": true,
+      "txId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
       "payloads": [
         {
           "owner": "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4",
@@ -37,7 +37,14 @@
           "count": 1
         }
       ],
-      "prepareDistribution": []
+      "prepareDistribution": [{
+        "id": "Bwsx4fw3tEZbSn3iV9OgiSKG_803506",
+        "distribution": {
+          "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4": 0.5,
+          "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss": 0.25
+        },
+        "isRewarded": false
+      }]
     }
   ],
   "completedTasks": [
