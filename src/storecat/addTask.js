@@ -70,7 +70,6 @@ export default async function addScrapingRequest(state, action) {
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.websiteUrl,
     hasRanked: false,
-    tophash: "",
     tId: "",
     payloads: [],
     hashPayloads: [],
