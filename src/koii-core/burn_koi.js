@@ -16,8 +16,11 @@ export default async function burnKoi(state, action) {
   if (!(caller in balances) || balances[caller] < 1)
     throw new ContractError("You do not have enough koi");
 
+  //clean  10000 block old data
+  state.preRegisterDatas = state.preRegisterDatas.filter(
+    (data) => data.insertBlock + 10000 > SmartWeave.block.height
+  );
   --balances[caller]; // burn 1 koi per registration
-
   state.preRegisterDatas.push({
     contractId: contractId,
     insertBlock: SmartWeave.block.height,

@@ -1,4 +1,4 @@
-<h1 align="center">Template Task</h1>
+<h1 align="center">Storecat Scraping Task</h1>
 <p align="center">
  <img align="center" height=512px src="diagram/koi_task_diagram.jpg?raw=true"></a>
 </p>
@@ -18,7 +18,7 @@ export default function registerExecutableId(state, action) {
   const input = action.input;
   const caller = action.caller;
   const executableId = input.executableId;
-  const owner = SmartWeave.contract.owner;
+  const owner = state.owner;
   if (caller !== owner) {
     throw new ContractError("Only owner can register");
   }

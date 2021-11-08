@@ -24,24 +24,6 @@ const arweave = Arweave.init({
   logging: false
 });
 
-const CORRUPTED_NFT = [
-  "Y4txuRg9l1NXRSDZ7FDtZQiTl7Zv7RQ9impMzoReGDU",
-  "dyLgErL7IJfSH2fU9mWBhfSdb5HOUnU2lOPq5y1twho",
-  "54ExppB1akUYllW4BZhmYx679eMtiA6tSTsrJ8IDCOo",
-  "EpbbtviT8nqC3aCflyfM5sWf0lAq6YsFW6K48T1tAbU",
-  "oOyREnD872TBaOnXDMNG5CM3QYYpqJTNuSe4sL2sCfc",
-  "YYSb3A_VYwgs1l_MEXnhNvKmdIwTBQ2GYBpJa2qNOU0",
-  "O7whFDUayKrP4bKdKAwYRWw1qwJ4-5alQWVoSAI1i_4",
-  "UI2V5Yyd4dW-1KdJnpVZDNFZ3l6reZ4nrKKg_YCN_Wo",
-  "X63sVIgKjL7lf3CBCDRjUrkXEkm8QulJw1mVpc6LHKc",
-  "kpgshM3-SZbK2ChO3lJIPQ84hS90_FnJBNsSr9n3QHA",
-  "A268M4BDGF6y-wA7MZ-1G5QAyfj8Hufcop4fVHu0SFc",
-  "s52dZCUGSTF2Sl3QF2f1Egyv-BCSrqulkMk3fXT9EOw",
-  "QIrGq8VqcqbGEV2QHQOyS7TjMm_Xpa_5mww3edn0TUs",
-  "ZTZDEPuAfh2Nsv9Ad46zJ4k6coHbZcmi7BcJgt126wU"
-];
-
-const DEFAULT_CREATED_AT = 1617000000; // March 29 2021 is default NFT age if field is not specified
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
 
@@ -52,12 +34,14 @@ const OFFSET_PROPOSE_SLASH = 660; //55
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
 const RESPONSE_INTERNAL_ERROR = 500;
+const REDIS_KEY = process.env["SERVICE_URL"];
 
 const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
-let ports = {};
 const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
+const PORT_LOGS_CACHE_OFFSET = 300;
 
+let ports = {};
 let lastBlock = 0;
 let lastLogClose = 0;
 
@@ -69,23 +53,40 @@ let hasVoted = false;
 let hasSubmitBatch = false;
 let hasAudited = false;
 
-let nftStateMapCache = {};
+let portsLog = [];
 
 const logsInfo = {
-  filename: "ports.log",
-  oldFilename: "old-ports.log"
+  redisPortsKey: `${REDIS_KEY}-ports`,
+  lockedRedisPortsKey: `${REDIS_KEY}-lockedPorts`
 };
 
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
+    namespace.express("get", "/close", getClose);
     namespace.express("get", "/id", getId);
+    namespace.express("get", "/latest", latest);
     namespace.express("get", "/cache", servePortCache);
     namespace.express("get", "/nft", getNft);
     namespace.express("get", "/nft-summaries", getNftSummaries);
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
+    initializePorts();
+  }
+}
+
+setInterval(async () => {
+  await namespace.redisSet(logsInfo.redisPortsKey, JSON.stringify(portsLog));
+}, PORT_LOGS_CACHE_OFFSET * 1000);
+
+async function initializePorts() {
+  try {
+    let redisPorts = await namespace.redisGet(logsInfo.redisPortsKey);
+    if (redisPorts) portsLog = JSON.parse(redisPorts);
+  } catch (e) {
+    portsLog = [];
+    console.log(e);
   }
 }
 
@@ -96,47 +97,59 @@ async function root(_req, res) {
     .send(await tools.getState(namespace.taskTxId));
 }
 
+async function getClose(_req, res) {
+  const attentionState = await tools.getState(namespace.taskTxId);
+  res
+    .status(200)
+    .type("application/json")
+    .send(attentionState.task.close.toString());
+}
+
+async function latest(_req, res) {
+  const attentionState = await tools.getState(namespace.taskTxId);
+  const attentionReport = attentionState.task.attentionReport;
+  const latestSummary = attentionReport[attentionReport.length - 1] || {};
+  res
+    .status(200)
+    .type("application/json")
+    .send(latestSummary);
+}
+
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
-
 async function getNft(req, res) {
   try {
+    // Validate nftId
     const id = req.query.id;
-    tools.assertTxId(id);
-    let attentionState;
+    if (!tools.validArId(id))
+      return res.status(400).send({ error: "invalid txId" });
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const nfts = Object.keys(attentionState.nfts);
+    const nftIndex = nfts.indexOf(id);
+    if (nftIndex === -1) return res.status(404).send(id + " is not registered");
 
     // Get NFT state
     let nftState;
-    if (nftStateMapCache.hasOwnProperty(id)) {
-      nftState = nftStateMapCache[id];
-      if (nftState.updatedAttention) return res.status(200).send(nftState);
-      attentionState = await tools.getState(namespace.taskTxId);
-    } else {
-      attentionState = await tools.getState(namespace.taskTxId);
-      const nfts = Object.values(attentionState.nfts).flat();
-      if (!nfts.includes(id))
-        return res.status(404).send(id + " is not registered");
-      try {
-        nftState = await tools.getState(id);
-      } catch (e) {
-        if (e.type !== "TX_NOT_FOUND") throw e;
-        nftState = {
-          owner: Object.keys(attentionState.nfts).find((owner) =>
-            attentionState.nfts[owner].includes(id)
-          ),
-          tags: ["missing"],
-          createdAt: DEFAULT_CREATED_AT
-        };
-      }
-      nftState.id = id;
-      nftStateMapCache[id] = nftState;
+    try {
+      nftState = await tools.getState(id);
+    } catch (e) {
+      if (e.type !== "TX_NOT_FOUND") throw e;
+      nftState = {
+        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
+        balances: attentionState.nfts[id],
+        tags: ["missing"]
+      };
     }
 
-    // Calculate attention and rewards
-    nftState.updatedAttention = true;
+    // Add extra fields
+    nftState.id = id;
+    nftState.next = nfts[(nftIndex + 1) % nfts.length];
+    nftState.prev = nfts[(nftIndex - 1 + nfts.length) % nfts.length];
     nftState.attention = 0;
     nftState.reward = 0;
+
+    // Calculate attention and rewards
     for (const report of attentionState.task.attentionReport) {
       if (id in report) {
         const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
@@ -156,40 +169,35 @@ async function getNftSummaries(req, res) {
     // Initialize NFT map
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
-    const nftMap = {};
 
-    const days = PERIOD_MAP[req.query.period];
+    const period = req.query.period; // TODO rename period to filter or sort
+    const nftMap = {};
+    const days = PERIOD_MAP[period];
     if (days) {
       // Filter by day
       const unixNow = Math.round(Date.now() / 1000);
       const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
-      for (const owner in attentionState.nfts) {
-        for (const id of attentionState.nfts[owner]) {
-          if (CORRUPTED_NFT.includes(id)) continue;
-          if (
-            !(id in nftStateMapCache) || // If not in cache, assume valid age
-            oldestValidTimestamp <
-              (parseInt(nftStateMapCache[id].createdAt) || DEFAULT_CREATED_AT)
-          )
-            nftMap[id] = {
-              id,
-              owner,
-              attention: 0,
-              reward: 0
-            };
-        }
-      }
-    } else
-      for (const owner in attentionState.nfts)
-        for (const id of attentionState.nfts[owner]) {
-          if (CORRUPTED_NFT.includes(id)) continue;
+      const nftRawTxs = getRawTxsCached(Object.keys(attentionState.nfts));
+      for (const tx of nftRawTxs) {
+        const id = tx.node.id;
+        if (oldestValidTimestamp < tx.node.block.timestamp)
           nftMap[id] = {
             id,
-            owner,
+            holders: Object.keys(attentionState.nfts[id]),
             attention: 0,
             reward: 0
           };
-        }
+      }
+    } // Skip filtering if day is not set
+    else
+      for (const id in attentionState.nfts) {
+        nftMap[id] = {
+          id,
+          holders: Object.keys(attentionState.nfts[id]),
+          attention: 0,
+          reward: 0
+        };
+      }
 
     // Calculate attention and rewards
     for (const report of attentionReport) {
@@ -198,7 +206,6 @@ async function getNftSummaries(req, res) {
         totalAttention += report[nftId];
         if (nftId in nftMap) nftMap[nftId].attention += report[nftId];
       }
-
       const rewardPerAttention = 1000 / totalAttention;
       for (const nftId in report)
         if (nftId in nftMap)
@@ -206,10 +213,17 @@ async function getNftSummaries(req, res) {
     }
 
     // Sort and send nft summaries
-    const nftSummaryArr = Object.values(nftMap);
-    nftSummaryArr.sort((a, b) => {
-      return b.attention - a.attention;
-    });
+    let nftSummaryArr = Object.values(nftMap);
+    if (period === "hot") {
+      // add index to sort by hot
+      const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
+      hotArr.sort(
+        (a, b) => b[0].attention + b[1] - (a[0].attention + a[1])
+      );
+      nftSummaryArr = hotArr.map((ele) => ele[0]);
+    } else if (period === "new") nftSummaryArr.reverse();
+    else if (period !== "old")
+      nftSummaryArr.sort((a, b) => b.attention - a.attention);
     res.status(200).send(nftSummaryArr);
   } catch (e) {
     console.error("Error responding with nft summaries:", e);
@@ -250,9 +264,6 @@ async function getAttentionStateAndBlock() {
       hasRanked = false;
       hasDistributed = false;
       hasAudited = false;
-
-      for (const nftId in nftStateMapCache)
-        nftStateMapCache[nftId].updatedAttention = false;
     }
 
     lastLogClose = logClose;
@@ -462,11 +473,12 @@ async function submitPort(req, res) {
       }
     };
     addPortView(data, wallet);
-    await namespace.fs(
-      "appendFile",
-      logsInfo.filename,
-      JSON.stringify(payload) + "\n"
-    );
+    portsLog.push(payload);
+    // await namespace.fs(
+    //   "appendFile",
+    //   logsInfo.redisPortsKey,
+    //   JSON.stringify(payload) + "\n"
+    // );
 
     res.status(RESPONSE_OK).json({
       message: "Port Received"
@@ -482,8 +494,13 @@ function difficultyFunction(hash) {
 }
 
 async function servePortCache(_req, res) {
-  await namespace.fs("appendFile", logsInfo.oldFilename, "");
-  const logs = await namespace.fs("readFile", logsInfo.oldFilename, "utf8");
+  try {
+    let ports = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
+    if (ports) return res.send("ports");
+    return res.send("");
+  } catch (e) {
+    res.send("");
+  }
   res.send(logs);
 }
 
@@ -528,7 +545,7 @@ async function proposePorts() {
 }
 
 async function PublishPoRT() {
-  const portLogs = await readRawLogs();
+  const portLogs = await getLockedPorts();
   const finalLogs = {};
   for (let i = 0; i < portLogs.length; i++) {
     const e = portLogs[i];
@@ -541,22 +558,23 @@ async function PublishPoRT() {
   return finalLogs;
 }
 
-async function readRawLogs() {
-  let fullLogs;
+async function getLockedPorts() {
+  let logs = [];
   try {
-    fullLogs = await namespace.fs("readFile", logsInfo.oldFilename);
+    logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
+    logs = JSON.parse(logs);
+    if (!logs) logs = [];
   } catch {
+    console.log(e);
     console.error("Error reading raw logs");
     return [];
   }
-  const logs = fullLogs.toString().split("\n");
   const prettyLogs = [];
   for (const log of logs) {
     try {
       if (log && !(log === " ") && !(log === "")) {
-        const logJson = JSON.parse(log);
-        if (!verifySignature(logJson)) return;
-        prettyLogs.push(logJson);
+        if (!verifySignature(log)) return;
+        prettyLogs.push(log);
       }
     } catch (err) {
       console.error("Error verifying log signature:", err);
@@ -599,21 +617,15 @@ async function verifySignature(log) {
 
 async function lockPorts() {
   try {
-    await namespace.fs("rm", logsInfo.oldFilename);
+    let redisPorts = JSON.stringify(portsLog);
+    if (redisPorts) {
+      await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
+      portsLog = [];
+      return;
+    }
   } catch (e) {
-    console.log("Unable to remove old ports file");
-  }
-  let data = "";
-  try {
-    data = await namespace.fs("readFile", logsInfo.filename);
-  } catch (e) {
-    console.log("Unable to read previous port file");
-  }
-  try {
-    await namespace.fs("writeFile", logsInfo.oldFilename, data);
-    await namespace.fs("writeFile", logsInfo.filename, "");
-  } catch (e) {
-    console.error("Error writing ports files");
+    console.log(e);
+    console.log("Unable to lock Ports ", e);
   }
 }
 
@@ -965,7 +977,12 @@ async function auditPort(txId, url) {
   const response = await axios.get(`${url}/${namespace.taskTxId}/cache`);
   const fullLogs = response.data;
   const prettyLogs = [];
-  const logs = fullLogs.toString().split("\n");
+  const logs = [];
+  try {
+    logs = JSON.parse(fullLogs);
+  } catch (e) {
+    logs = [];
+  }
   for (const log of logs) {
     try {
       if (log && !(log === " ") && !(log === "")) {
@@ -1067,4 +1084,50 @@ async function proposeSlash(state) {
       }
     })
   );
+}
+
+
+let rawTxCache = [];
+let nextFetch = 0;
+function getRawTxsCached(ids){
+  fetchRawTxs(ids).catch((e) => {
+    console.error("Error fetching raw Txs:", e);
+  })
+  return rawTxCache;
+}
+
+async function fetchRawTxs(ids) {
+  const CHUNK_SIZE = 2000;
+  const FETCH_COOLDOWN = 600000;
+  let now = Date.now();
+  if (now < nextFetch) return;
+  nextFetch = now + FETCH_COOLDOWN;
+
+  let txInfos = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + CHUNK_SIZE);
+
+    let transactions = await getNextPage(chunk);
+    txInfos = txInfos.concat(transactions.edges);
+    while (transactions.pageInfo.hasNextPage) {
+      const cursor = transactions.edges[transactions.edges.length - 1].cursor;
+      transactions = await getNextPage(chunk, cursor);
+      txInfos = txInfos.concat(transactions.edges);
+    }
+  }
+
+  rawTxCache = txInfos;
+}
+
+async function getNextPage(ids, after) {
+  const afterQuery = after ? `,after:"${after}"` : "";
+  const query = `query {
+    transactions(ids: ${JSON.stringify(ids)},
+    sort: HEIGHT_ASC, first: 100${afterQuery}) {
+      pageInfo { hasNextPage }
+      edges { node { id block { timestamp } } cursor }
+    }
+  }`;
+  const res = await arweave.api.post("graphql", { query });
+  return res.data.data.transactions;
 }

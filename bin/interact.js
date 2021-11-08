@@ -12,14 +12,19 @@ const arweave = Arweave.init({
 
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
+//const contractId = "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"; // test attention contract
+//const contractId = "7wfyUmgZZMtMbW8f9VufCKLalOQO_Jlgm0-Ll8KmfRc"; // test koii Contract
+const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production
+//const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 
-//const contractId = "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"; // test attention contract
-const contractId = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"; // test koii Contract
-//const contractId = "mBwqmXIuzmKem6xIQa-3nDwSYyg9OrnatYaTU4L35GA"; // attention in production
-//const contractId = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc"; // koii Contract in production
-//const contractId = "FIlzvqCCfwDUhFI83tOXH2BGFdNCSPndTjluROy_BvE"; // nft id
+//const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
 // const input = {
 //   function: "cleanPreRegister"
+// };
+// const input = {
+//   function: "mint",
+//   qty: 500,
+//   target: "6E4APc5fYbTrEsX3NFkDpxoI-eaChDmRu5nqNKOn37E"
 // };
 // const input = {
 //   function: "syncOwnership",
@@ -30,32 +35,36 @@ const contractId = "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"; // test koii C
 // };
 // const input = {
 //   function: "transfer",
-//   target: "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
+//   target: "K4XidM-x1LXErn0H-w74Czm7LscUITUWfGonbUAXiLU",
 //   qty: 1
 // };
 // const input = {
 //   function: "rankPrepDistribution"
 // };
-const input = {
-  function: "registerTask",
-  taskName: "Attention_Game",
-  taskTxId: "RbHbau1GLamtzyB-Wg3XlJJRGPJaO2hl-xjswFydd1w"
-};
+// const input = {
+//   function: "registerValidContractSrc",
+//   contractSrc: "hmqdldElrUGT23q9dlegLZIABnYO8iQ03CHSEbEZYMo"
+// };
+// const input = {
+//   function: "registerTask",
+//   taskName: "Attention_Game",
+//   taskTxId: "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"
+// };
 // const input = {
 //   function: "burnKoi",
-//   contractId: "COrDoKhQwlplYWgShhTF4YpFtFQRFJ1gunZGCx36Xa0",
+//   contractId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU",
 //   contentType: "nft",
-//   contentTxId: "hAvOySHDaBo9KE4m3cvDhlC4yUh_VjR6rhUIS2c47bs"
+//   contentTxId: "WRlbex123DX3a0xgGbW72x15cPWsVlcrPEUw6CJd1P8"
 // };
 // const input = {
 //   function: "mint",
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
 //   qty: 100
 // };
-// const input = {
-//   function: "registerExecutableId",
-//   executableId: "myseSmK1blWYMcG9KeAZFOsMhBfjngKlxAIxvI9SQXI"
-// };
+const input = {
+  function: "registerExecutableId",
+  executableId: "tdoAg_NVGWjFG_oCckr4h-wU6eURVSuHfl--mlke-Cs"
+};
 async function main() {
   console.log("Writing", input.function);
   const txId = await smartweave.interactWrite(

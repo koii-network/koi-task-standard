@@ -4,7 +4,7 @@ const koiSdk = require("@_koi/sdk/node");
 const kohaku = require("@_koi/kohaku");
 const { argv } = require("process");
 
-const KOII_CONTRACT_ID = "qzVAzvhwr1JFTPE8lIU9ZG_fuihOmBr7ewZFcT3lIUc";
+const KOII_CONTRACT_ID = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8";
 
 const tools = new koiSdk.Node(
   process.env.TRUSTED_SERVICE_URL,
@@ -15,7 +15,7 @@ console.log('args', process,argv)
 const executable = process.argv[2];
 const taskTxId = process.argv[3];
 const operationMode = process.argv[4];
-process.env.NODE_MODE = operationMode;
+process.env.NODE_MODE = process.env.NODE_MODE || operationMode;
 
 async function main() {
   await tools.loadWallet(await tools.loadFile(process.env.WALLET_LOCATION));
@@ -53,7 +53,13 @@ async function main() {
   );
 
   // Init Kohaku
-  if (taskTxId != "test") {
+  if (taskTxId !== "test") {
+    // Comment out if Kohaku not cached
+    // console.log("Restoring Kohaku");
+    // const restore = await tools.redisGetAsync("kohaku");
+    // const { arweave } = require("@_koi/sdk/common")
+    // await kohaku.importCache(arweave, restore);
+
     console.log("Initializing Koii contract for Kohaku");
     await tools.getKoiiStateAwait();
     const initialHeight = kohaku.getCacheHeight();
@@ -102,16 +108,7 @@ class Namespace {
   }
   async fs(method, path, ...args) {
     const basePath = "namespace/" + this.taskTxId;
-    try {
-      try {
-        await fsPromises.access("namespace");
-      } catch {
-        await fsPromises.mkdir("namespace");
-      }
-      await fsPromises.access(basePath);
-    } catch {
-      await fsPromises.mkdir(basePath);
-    }
+    await fsPromises.mkdir(basePath, { recursive: true }).catch(() => {});
     return fsPromises[method](`${basePath}/${path}`, ...args);
   }
   express(method, path, callback) {
