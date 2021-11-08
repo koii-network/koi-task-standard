@@ -31,12 +31,12 @@ export default async function addScrapingRequest(state, action) {
       if (
         element.prepareDistribution[0].isRewarded &&
         element.hasRanked &&
-        element.tId !== ""
+        element.txId !== ""
       ) {
         const completedTask = {
           uuid: element.uuid,
           owner: element.owner,
-          txId: element.tId
+          txId: element.txId
         };
         state.completedTasks.push(completedTask);
       }
@@ -70,8 +70,7 @@ export default async function addScrapingRequest(state, action) {
     bounty: Number(scrapingRequest.bounty) || 1,
     url: scrapingRequest.websiteUrl,
     hasRanked: false,
-    tophash: "",
-    tId: "",
+    txId: "",
     payloads: [],
     hashPayloads: [],
     prepareDistribution: []

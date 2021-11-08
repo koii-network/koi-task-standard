@@ -61,10 +61,11 @@ export default async function rank(state, action) {
       if (topHash !== "" && topTId !== "") {
         // update task
         task.hasRanked = true;
-        task.tophash = topHash;
-        task.tId = topTId;
+        task.txId = topTId;
         task.prepareDistribution.push({ newPrepareDistribution });
       } else {
+        // have an issue in rank - update close
+        task.close = task.close + 720;
         // eslint-disable-next-line no-undef
         throw new ContractError("There is an issue to get distribution");
       }
