@@ -226,6 +226,21 @@ async function test_save_payload(walletAddress, txId, payload) {
     storecatContractId
   );
 }
+async function test_rank(walletAddress) {
+  const scInput = {
+    function: "rank",
+    id: 0
+  };
+  await smartest.interactWrite(
+    arweave,
+    storecatSrc,
+    wallet,
+    scInput,
+    smartest.readContractState(storecatContractId),
+    walletAddress,
+    storecatContractId
+  );
+}
 async function main() {
   const walletAddress = await arweave.wallets.jwkToAddress(wallet);
   // const firstState = smartest.readContractState(storecatContractId);
@@ -254,17 +269,14 @@ async function main() {
     );
   } else {
     // it is not tested area
-    console.log('here');
-    // await test_save_payload(walletAddress, "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE", test_payload_dong);
+    await test_rank(walletAddress);
   }
-  const latestState = smartest.readContractState(storecatContractId);
-  console.log(latestState.tasks[0].payloads);
-  console.log(latestState.tasks[0].hashPayloads);
+  // const latestState = smartest.readContractState(storecatContractId);
 
-  // console.log(
-  //   "Storecat final state:",
-  //   smartest.readContractState(storecatContractId)
-  // );
+  console.log(
+    "Storecat final state:",
+    smartest.readContractState(storecatContractId)
+  );
 }
 
 main().then(() => {
