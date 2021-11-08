@@ -290,9 +290,10 @@ async function main() {
       test_payload_dong
     );
     await test_rank(walletAddress);
+    await test_add_scraping_request2(walletAddress);
   } else {
     // it is not tested area
-    await test_add_scraping_request2(walletAddress);
+    console.log("testing case");
   }
   // const latestState = smartest.readContractState(storecatContractId);
   // console.log(latestState.tasks[0].prepareDistribution);

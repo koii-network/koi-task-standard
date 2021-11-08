@@ -9,7 +9,7 @@ export default async function addScrapingRequest(state, action) {
 
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
-  console.log({isCleaner});
+  // console.log({ isCleaner });
   if (isCleaner) {
     // update distribution rewards
     const contractTask = KoiiTasks.find((task) => task.txId === contractId);
