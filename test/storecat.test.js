@@ -271,12 +271,12 @@ async function main() {
     // it is not tested area
     await test_rank(walletAddress);
   }
-  // const latestState = smartest.readContractState(storecatContractId);
-
-  console.log(
-    "Storecat final state:",
-    smartest.readContractState(storecatContractId)
-  );
+  const latestState = smartest.readContractState(storecatContractId);
+  console.log(latestState.tasks[0].prepareDistribution);
+  // console.log(
+  //   "Storecat final state:",
+  //   smartest.readContractState(storecatContractId)
+  // );
 }
 
 main().then(() => {
