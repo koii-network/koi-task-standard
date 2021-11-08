@@ -167,6 +167,28 @@ async function test_add_scraping_request(walletAddress) {
     storecatContractId
   );
 }
+async function test_add_scraping_request2(walletAddress) {
+  // --- test add scraping request
+  const scInput_scrapingRequest = {
+    function: "addScrapingRequest",
+    scrapingRequest: {
+      clean: true,
+      websiteUrl: "https://gmail.com",
+      uuid: "Cwsx4fw3tEZbSn3iV9OgiSKJ",
+      bounty: 1,
+      owner: "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss"
+    }
+  };
+  await smartest.interactWrite(
+    arweave,
+    storecatSrc,
+    wallet,
+    scInput_scrapingRequest,
+    smartest.readContractState(storecatContractId),
+    walletAddress,
+    storecatContractId
+  );
+}
 async function test_scraping() {
   // --- scraping test
   const test_website = "http://gmail.com";
@@ -267,16 +289,17 @@ async function main() {
       "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
       test_payload_dong
     );
+    await test_rank(walletAddress);
   } else {
     // it is not tested area
-    await test_rank(walletAddress);
+    await test_add_scraping_request2(walletAddress);
   }
-  const latestState = smartest.readContractState(storecatContractId);
-  console.log(latestState.tasks[0].prepareDistribution);
-  // console.log(
-  //   "Storecat final state:",
-  //   smartest.readContractState(storecatContractId)
-  // );
+  // const latestState = smartest.readContractState(storecatContractId);
+  // console.log(latestState.tasks[0].prepareDistribution);
+  console.log(
+    "Storecat final state:",
+    smartest.readContractState(storecatContractId)
+  );
 }
 
 main().then(() => {
