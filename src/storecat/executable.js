@@ -306,14 +306,13 @@ async function scrape(state, block) {
   // upload payload to permaweb because we can't send more than 2kb data to contract
   try {
     const bundle = {
-      payloads: topPayload
+      payloads: payload
     };
     const tId = await bundleAndExport(bundle);
     if (tId) {
       const userPayload = {};
       userPayload.payloadTxId = tId;
       userPayload.hashPayload = md5(JSON.stringify(payload)); // 32byte
-      userPayload.owner = tools.address;
       // call interactWrite function
       // savePayload
       const input = {
