@@ -1,45 +1,59 @@
 {
   "name": "storecat",
-  "tasks": [{
-    "open": 101,
-    "close": 850,
-    "owner": "",
-    "uuid": "60d9cf5970d912231cc4a230",
-    "bounty": 1,
-    "url": "https://npmjs.org",
-    "hasAudit": false,
-    "topHash": "",
-    "hasUploaded": false,
-    "tId": "",
-    "prepareDistribution": {
-      "block": 780,
-      "distribution": {
-        "node1": 0.5, 
-        "node2": 0.25
-      },
-      "isRewarded": false
-    },
-    "payloads": [
-      {
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk"
-      }
-    ],
-    "payloadHashs": [
-      {
-        "payload": {},
-        "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-        "count": 1
-      }
-    ]
-  }],
+  "tasks": [
+    {
+      "open": 803506,
+      "close": 804226,
+      "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+      "uuid": "Bwsx4fw3tEZbSn3iV9OgiSKG",
+      "bounty": 1,
+      "url": "http://gmail.com",
+      "hasRanked": true,
+      "txId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+      "payloads": [
+        {
+          "owner": "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4",
+          "payloadTxId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E",
+          "hashPayload": "9f07e972858861f5be4076e47853c08e"
+        },
+        {
+          "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+          "payloadTxId": "iDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+          "hashPayload": "9f07e972858861f5be4076e47853c08e"
+        },
+        {
+          "owner": "FdcNxFcjz0n2et2vcbdOIIAgOOyWYxVMQHx_DYGjqg8",
+          "payloadTxId": "kDr0GbUHga4-Lz20v7ZLzwRpyA6Yaj6kHMCka0dvcwE",
+          "hashPayload": "64ed490ce337e0b7a64bc2c00ed4afa9"
+        }
+      ],
+      "hashPayloads": [
+        {
+          "hashPayload": "9f07e972858861f5be4076e47853c08e",
+          "count": 2
+        },
+        {
+          "hashPayload": "64ed490ce337e0b7a64bc2c00ed4afa9",
+          "count": 1
+        }
+      ],
+      "prepareDistribution": [{
+        "id": "Bwsx4fw3tEZbSn3iV9OgiSKG_803506",
+        "distribution": {
+          "fkzAiSMXtl6P4wuHjTR_2s88uhvqRgfC33P2v9YGct4": 0.5,
+          "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss": 0.25
+        },
+        "isRewarded": false
+      }]
+    }
+  ],
   "completedTasks": [
     {
-      "uuid": "60d9cf5970d912231cc4a230",
-      "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
-      "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
+      "uuid": "Bwsx4fw3tEZbSn3iV9OgiSKG",
+      "owner": "7ZcchrEyaDZO8v0w3sZ780Y2NlbAWGs2kVXP-z5NBss",
+      "txId": "JlD0F68kcAds3AejyYMSZ3tTUjEAj-wLS7kId_QOX0E"
     }
   ],
   "executableId": "v5wDE7ZsHYtaCHb0z_2e3_RkJWvyEwzze5RZkje_Z00",
-  "koiiContract": "T7NmmpxLSZsWrjl2-A1KgEuOi9kXqb8FAb4tZAjeTm0"
+  "koiiContract": "a1s2d3f4"
 }

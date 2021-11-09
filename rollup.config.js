@@ -25,6 +25,7 @@ export default [
       file: "dist/storecat.js",
       format: "cjs"
     },
+    cache: false,
     plugins: [resolve({ preferBuiltins: false }), commonjs(), nodePolyfills()]
   },
   {

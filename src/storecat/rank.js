@@ -1,30 +1,4 @@
-// The Audit function can be included optionall as a way of invoking a stake slashing behavior to penalize bad actors
-// {
-//   "open": 101,
-//   "close": 850,
-//   "uuid": "60d9cf5970d912231cc4a230",
-//   "bounty": 1,
-//   "url": "https://npmjs.org",
-//   "hasAudit": false,
-//   "hasReward": false,
-//   "payloads": [
-//     {
-//       "payload": {},
-//       "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-//       "owner": "FjA4pYgLA4hdaQT4ltLur8pHAoMo_0hARtfS36cPOSk",
-//       "txId": "LDZY2RB-wPDNkRhVh5s5G0S_r9FNFTp_UjqTcXtn7w4"
-//     }
-//   ],
-// "payloadHashs": [
-//   {
-//     "payload": {},
-//     "hashPayload": "2503e0483fe9bff8e3b18bf4ea1fe23b",
-//     "count": 1
-//   }
-// ]
-// }
-
-export default async function audit(state, action) {
+export default async function rank(state, action) {
   const tasks = state.tasks;
   const matchIndex = action.input.id;
 
@@ -37,16 +11,17 @@ export default async function audit(state, action) {
   if (task.hasOwnProperty("open")) {
     // get Top count of hash
     let topHash = "";
+    let topTId = "";
     let topCt = 0;
-    task.payloadHashs.forEach((hash) => {
+    task.hashPayloads.forEach((hash) => {
       if (hash.count > topCt) {
         topCt = hash.count;
-        topHash = hash.hash;
+        topHash = hash.hashPayload;
       }
     });
 
     // check the top hash is correct
-    if (topCt >= task.payloadHashs.length / 2) {
+    if (topCt >= task.hashPayloads.length / 2) {
       // set bounty process
       // 1 discount bounty from requester
       // -- if the owner of scraper didn't enough bounty balance, this scraper will be ignored
@@ -54,16 +29,24 @@ export default async function audit(state, action) {
       // task.prepareDistribution.push({task.owner: task.bounty * -1})
       // 2 set bounty to winner - top 8 nodes
       let deeper = 0;
+      const newPrepareDistribution = {
+        id: task.uuid + "_" + task.open,
+        distribution: {},
+        isRewarded: false
+      };
 
       task.payloads.forEach((hash) => {
         if (hash.hashPayload == topHash && deeper < 8) {
+          if (deeper === 0) {
+            topTId = hash.payloadTxId;
+          }
           deeper++;
           // pay bounty to winner
           let qty = Number(task.bounty * Math.pow(2, deeper * -1));
           // if (balances[hash.owner]) balances[hash.owner] += qty;
           // else balances[hash.owner] = qty;
           // task.prepareDistribution.push({hash.owner: qty})
-          task.prepareDistribution.distribution[hash.owner] = qty;
+          newPrepareDistribution.distribution[hash.owner] = qty;
           console.log(
             "set bounty target - " +
               hash.owner +
@@ -74,9 +57,18 @@ export default async function audit(state, action) {
           );
         }
       });
-      // update task
-      task.hasAudit = true;
-      task.tophash = topHash;
+
+      if (topHash !== "" && topTId !== "") {
+        // update task
+        task.hasRanked = true;
+        task.txId = topTId;
+        task.prepareDistribution.push(newPrepareDistribution);
+      } else {
+        // have an issue in rank - update close
+        task.close = task.close + 720;
+        // eslint-disable-next-line no-undef
+        throw new ContractError("There is an issue to get distribution");
+      }
     } else {
       // not possible audit - update close
       task.close = task.close + 720;

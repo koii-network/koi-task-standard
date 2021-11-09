@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 export default async function savePayload(state, action) {
   const tasks = state.tasks;
+  const caller = action.caller;
   const input = action.input;
   const matchIndex = input.matchIndex;
   const payload = input.payload;
@@ -13,26 +14,21 @@ export default async function savePayload(state, action) {
     throw new ContractError("Payload should be an object");
   }
 
-  tasks[matchIndex].payloads.push({
-    hashPayload: payload.hashPayload,
-    owner: payload.owner
-  });
-
-  let isFounded = false;
-  for (let index = 0; index < tasks[matchIndex].payloadHashs.length; index++) {
-    const element = tasks[matchIndex].payloadHashs[index];
-    if (element.hashPayload === payload.hashPayload) {
-      isFounded = true;
-      tasks[matchIndex].payloadHashs[index].count++;
-    }
-  }
-
-  if (!isFounded) {
-    tasks[matchIndex].payloadHashs.push({
-      payload: payload.payload,
+  const isExistIndex = tasks[matchIndex].hashPayloads.findIndex(
+    (h) => h.hashPayload === payload.hashPayload
+  );
+  if (isExistIndex < 0) {
+    tasks[matchIndex].hashPayloads.push({
       hashPayload: payload.hashPayload,
       count: 1
     });
+  } else {
+    tasks[matchIndex].hashPayloads[isExistIndex].count++;
   }
+  tasks[matchIndex].payloads.push({
+    owner: caller,
+    payloadTxId: payload.payloadTxId,
+    hashPayload: payload.hashPayload
+  });
   return { state };
 }
