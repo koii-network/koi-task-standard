@@ -6,7 +6,7 @@ const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 
-const puppeteerCluster = require("./cluster");
+const ClusterUtil = require("./cluster");
 const ScraperUtil = require("./scraper");
 const md5 = require("md5");
 
@@ -345,7 +345,7 @@ async function scrape(state, block) {
 */
 async function getPayload(url) {
   try {
-    let cluster = await puppeteerCluster();
+    let cluster = await ClusterUtil.puppeteerCluster();
     const { html } = await cluster.execute({
       url,
       takeScreenshot: false

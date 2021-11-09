@@ -79,4 +79,6 @@ async function puppeteerCluster() {
   });
   return cluster;
 }
-export default puppeteerCluster;
+module.exports = {
+  puppeteerCluster
+};
