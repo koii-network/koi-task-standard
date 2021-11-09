@@ -47,22 +47,22 @@ async function main() {
   //   attentionContractId
   // );
 
-  // const attentionInput0 = {
-  //   function: "submitDistribution",
-  //   distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
-  //   cacheUrl: "http/bundler/cache",
-  //   mainContractId: koiContractId,
-  //   contractId: attentionContractId
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   attentionSrc,
-  //   wallet,
-  //   attentionInput0,
-  //   smartest.readContractState(attentionContractId),
-  //   walletAddress,
-  //   attentionContractId
-  // );
+  const attentionInput0 = {
+    function: "submitDistribution",
+    distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
+    cacheUrl: "http/bundler/cache",
+    mainContractId: koiContractId,
+    contractId: attentionContractId
+  };
+  await smartest.interactWrite(
+    arweave,
+    attentionSrc,
+    wallet,
+    attentionInput0,
+    smartest.readContractState(attentionContractId),
+    walletAddress,
+    attentionContractId
+  );
 
   // const state = smartest.readContractState(attentionContractId);
   // const proposedPaylods = state.task.proposedPaylods.find(
@@ -152,8 +152,23 @@ async function main() {
   //   walletAddress,
   //   attentionContractId
   // );
+  // const koiInput2 = {
+  //   function: "cleanPreRegister"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput2,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
   const koiInput2 = {
-    function: "cleanPreRegister"
+    function: "burnKoi",
+    contractId: "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s",
+    contentType: "nft",
+    contentTxId: "sE9fYGo430gup6UbFwLj5QfUsecsuCjh0_SoxIuLS8w"
   };
   await smartest.interactWrite(
     arweave,

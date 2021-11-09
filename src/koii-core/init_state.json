@@ -1,7 +1,6 @@
 {
-  "ticker": "Koii",
-  "name": "Koii_Core",
-  "owner": "DymtKHHegWz-HWrNnOL12Rxz_7dLrY2R3wVwTFE8788",
+  "ticker": "Test",
+  "name": "test",
   "balances": {
     "13hHcRWT6bEgtyh-0zG8DtvE5amcTqEHhoqKCWmGf6g": 1365.0164277807587,
     "WL32qc-jsTxCe8m8RRQfS3b3MacsTQySDmJklvtkGFc": 15235.01589142876,
@@ -11224,5 +11223,6 @@
   "tasks": [],
   "preRegisterDatas": [],
   "distributionBlock": 677545,
-  "cleanPreRegisterBlock": 677545
+  "cleanPreRegisterBlock": 677545,
+  "frozen": false
 }

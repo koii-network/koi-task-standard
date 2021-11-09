@@ -1,5 +1,5 @@
 export default function mint(state, action) {
-  const owner = state.owner;
+  const owner = SmartWeave.contract.owner;
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;

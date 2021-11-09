@@ -44,19 +44,19 @@ export default async function submitDistribution(state, action) {
   const tasks = koiiState.tasks;
   const contractTask = tasks.find((task) => task.txId === contractId);
   if (contractTask !== undefined) {
-    const rewardedBlock = contractTask.rewardedBlock;
-    const prepareDistribution = task.prepareDistribution.filter(
-      (distribution) => !distribution.isRewarded
-    );
-    prepareDistribution.map((distribution) => {
-      if (rewardedBlock.includes(distribution.block)) {
-        distribution.isRewarded = true;
+    task.prepareDistribution = task.prepareDistribution.filter(
+      (distribution) => {
+        if (
+          contractTask.rewardedBlock.includes(distribution.block) &&
+          !distribution.isRewarded
+        ) {
+          distribution.isRewarded = true;
+        }
+        return !distribution.isRewarded;
       }
-    });
+    );
   }
-  task.prepareDistribution = task.prepareDistribution.filter(
-    (distribution) => !distribution.isRewarded
-  );
+
   const proposedPayload = currentTask.proposedData.find(
     (payload) => payload.distributer === caller
   );

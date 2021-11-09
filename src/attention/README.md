@@ -674,7 +674,7 @@ export default async function rankPrepDistribution(state) {
   if (!txId) throw new ContractError("Invalid inputs");
   if (!Array.isArray(txId) && typeof txId !== "string")
     throw new ContractError("Invalid inputs format");
-  if (Array.isArray(txId) && caller !== state.owner)
+  if (Array.isArray(txId) && caller !== SmartWeave.contract.owner)
     throw new ContractError("Owner can only update in batch");
 
   if (Array.isArray(txId)) {
@@ -734,7 +734,7 @@ export default function registerExecutableId(state, action) {
   const input = action.input;
   const caller = action.caller;
   const executableId = input.executableId;
-  const owner = state.owner;
+  const owner = SmartWeave.contract.owner;
   if (caller !== owner) {
     throw new ContractError("Only owner can register");
   }

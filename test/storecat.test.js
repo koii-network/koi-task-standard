@@ -166,6 +166,7 @@ async function test_add_scraping_request(walletAddress) {
     walletAddress,
     storecatContractId
   );
+
 }
 async function test_add_scraping_request2(walletAddress) {
   // --- test add scraping request
@@ -297,6 +298,7 @@ async function main() {
   }
   // const latestState = smartest.readContractState(storecatContractId);
   // console.log(latestState.tasks[0].prepareDistribution);
+
   console.log(
     "Storecat final state:",
     smartest.readContractState(storecatContractId)

@@ -63,6 +63,7 @@ const logsInfo = {
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
+    namespace.express("get", "/close", getClose);
     namespace.express("get", "/id", getId);
     namespace.express("get", "/latest", latest);
     namespace.express("get", "/cache", servePortCache);
@@ -94,6 +95,14 @@ async function root(_req, res) {
     .status(200)
     .type("application/json")
     .send(await tools.getState(namespace.taskTxId));
+}
+
+async function getClose(_req, res) {
+  const attentionState = await tools.getState(namespace.taskTxId);
+  res
+    .status(200)
+    .type("application/json")
+    .send(attentionState.task.close.toString());
 }
 
 async function latest(_req, res) {
