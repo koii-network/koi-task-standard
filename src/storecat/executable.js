@@ -192,7 +192,7 @@ async function rank(state, block) {
     const element = tasks[index];
     if (
       block >= element.close &&
-      !element.hasAudit &&
+      !element.hasRanked &&
       element.payloads.length > 0
     ) {
       matchIndex = index;
@@ -293,7 +293,7 @@ async function scrape(state, block) {
   const taskIndex = state.tasks.findIndex((t) => {
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if (!t.hasAudit && t.close >= block && !isPayloader) return true;
+    if (!t.hasRanked && t.close >= block && !isPayloader) return true;
     else return false;
   });
   if (taskIndex < 0) {
