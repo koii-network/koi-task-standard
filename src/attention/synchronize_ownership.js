@@ -11,7 +11,7 @@ export default async function syncOwnership(state, action) {
   if (Array.isArray(txId)) {
     // filler the nfts registered to avoid reading invalid nft contract
     const validNfts = txId.filter((nft) =>
-      Object.keys(state.nfts).includes(nft)
+      Object.keys(state.contents.nfts).includes(nft)
     );
     for (const nft of validNfts) {
       const nftState = await SmartWeave.contracts
@@ -30,12 +30,12 @@ export default async function syncOwnership(state, action) {
           )
             owners[owner] = nftState.balances[owner];
         }
-        state.nfts[nft]["owners"] = owners;
+        state.contents.nfts[nft]["owners"] = owners;
       }
     }
   }
   if (typeof txId === "string") {
-    if (!Object.keys(state.nfts).includes(txId)) {
+    if (!Object.keys(state.contents.nfts).includes(txId)) {
       throw new ContractError("Can't update ownership for not registered NFTs");
     }
     const nftState = await SmartWeave.contracts
@@ -54,7 +54,7 @@ export default async function syncOwnership(state, action) {
         )
           owners[owner] = nftState.balances[owner];
       }
-      state.nfts[txId]["owners"] = owners;
+      state.contents.nfts[txId]["owners"] = owners;
     }
   }
   return { state };

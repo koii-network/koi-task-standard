@@ -27,9 +27,9 @@ const arweave = Arweave.init({
 const SECONDS_PER_DAY = 86400;
 const PERIOD_MAP = { "24h": 1, "1w": 7, "1m": 30, "1y": 365 };
 
-const OFFSET_PROPOSE_PORTS_END = 300; // 300; //25
-const OFFSET_BATCH_VOTE_SUBMIT = 600; //50
-const OFFSET_PROPOSE_SLASH = 660; //55
+const OFFSET_PROPOSE_PORTS_END = 25; // 300;
+const OFFSET_BATCH_VOTE_SUBMIT = 50; //600
+const OFFSET_PROPOSE_SLASH = 55; //660
 
 const RESPONSE_OK = 200;
 const RESPONSE_ACTION_FAILED = 411;
@@ -102,17 +102,14 @@ async function getClose(_req, res) {
   res
     .status(200)
     .type("application/json")
-    .send(attentionState.task.close.toString());
+    .send(attentionState.tasks[0].close.toString());
 }
 
 async function latest(_req, res) {
   const attentionState = await tools.getState(namespace.taskTxId);
-  const attentionReport = attentionState.task.attentionReport;
+  const attentionReport = attentionState.tasks[0].attentionReport;
   const latestSummary = attentionReport[attentionReport.length - 1] || {};
-  res
-    .status(200)
-    .type("application/json")
-    .send(latestSummary);
+  res.status(200).type("application/json").send(latestSummary);
 }
 
 function getId(_req, res) {
@@ -125,7 +122,7 @@ async function getNft(req, res) {
     if (!tools.validArId(id))
       return res.status(400).send({ error: "invalid txId" });
     const attentionState = await tools.getState(namespace.taskTxId);
-    const nfts = Object.keys(attentionState.nfts);
+    const nfts = Object.keys(attentionState.contents.nfts);
     const nftIndex = nfts.indexOf(id);
     if (nftIndex === -1) return res.status(404).send(id + " is not registered");
 
@@ -136,8 +133,10 @@ async function getNft(req, res) {
     } catch (e) {
       if (e.type !== "TX_NOT_FOUND") throw e;
       nftState = {
-        owner: Object.keys(attentionState.nfts[id])[0] || "unknown",
-        balances: attentionState.nfts[id],
+        creator:
+          Object.keys(attentionState.contents.nfts[id].creatorShare)[0] ||
+          "unknown",
+        balances: attentionState.contents.nfts[id].owners,
         tags: ["missing"]
       };
     }
@@ -150,7 +149,7 @@ async function getNft(req, res) {
     nftState.reward = 0;
 
     // Calculate attention and rewards
-    for (const report of attentionState.task.attentionReport) {
+    for (const report of attentionState.tasks[0].attentionReport) {
       if (id in report) {
         const totalAttention = Object.values(report).reduce((a, b) => a + b, 0);
         nftState.attention += report[id];
@@ -168,7 +167,7 @@ async function getNftSummaries(req, res) {
   try {
     // Initialize NFT map
     const attentionState = await tools.getState(namespace.taskTxId);
-    const attentionReport = attentionState.task.attentionReport;
+    const attentionReport = attentionState.tasks[0].attentionReport;
 
     const period = req.query.period; // TODO rename period to filter or sort
     const nftMap = {};
@@ -177,23 +176,25 @@ async function getNftSummaries(req, res) {
       // Filter by day
       const unixNow = Math.round(Date.now() / 1000);
       const oldestValidTimestamp = unixNow - days * SECONDS_PER_DAY;
-      const nftRawTxs = getRawTxsCached(Object.keys(attentionState.nfts));
+      const nftRawTxs = getRawTxsCached(
+        Object.keys(attentionState.contents.nfts)
+      );
       for (const tx of nftRawTxs) {
         const id = tx.node.id;
         if (oldestValidTimestamp < tx.node.block.timestamp)
           nftMap[id] = {
             id,
-            holders: Object.keys(attentionState.nfts[id]),
+            holders: Object.keys(attentionState.contents.nfts[id].owners),
             attention: 0,
             reward: 0
           };
       }
     } // Skip filtering if day is not set
     else
-      for (const id in attentionState.nfts) {
+      for (const id in attentionState.contents.nfts) {
         nftMap[id] = {
           id,
-          holders: Object.keys(attentionState.nfts[id]),
+          holders: Object.keys(attentionState.contents.nfts[id].owners),
           attention: 0,
           reward: 0
         };
@@ -217,9 +218,7 @@ async function getNftSummaries(req, res) {
     if (period === "hot") {
       // add index to sort by hot
       const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
-      hotArr.sort(
-        (a, b) => b[0].attention + b[1] - (a[0].attention + a[1])
-      );
+      hotArr.sort((a, b) => b[0].attention + b[1] - (a[0].attention + a[1]));
       nftSummaryArr = hotArr.map((ele) => ele[0]);
     } else if (period === "new") nftSummaryArr.reverse();
     else if (period !== "old")
@@ -232,17 +231,17 @@ async function getNftSummaries(req, res) {
 }
 
 async function execute(_init_state) {
-  let state, block;
+  let state, koiiState, block;
   for (;;) {
     await rateLimit();
     try {
-      [state, block] = await getAttentionStateAndBlock();
+      [state, koiiState, block] = await getAttentionStateAndBlock();
     } catch (e) {
       console.error("Error while fetching attention state and block", e);
       continue;
     }
     try {
-      await (namespace.app ? service : witness)(state, block);
+      await (namespace.app ? service : witness)(state, koiiState, block);
     } catch (e) {
       console.error("Error while performing attention task:", e);
     }
@@ -251,11 +250,12 @@ async function execute(_init_state) {
 
 async function getAttentionStateAndBlock() {
   const state = await tools.getState(namespace.taskTxId);
+  const koiiState = await tools.getState(tools.contractId);
   let block = await tools.getBlockHeight();
   if (block < lastBlock) block = lastBlock;
 
-  if (!state || !state.task) console.error("State or task invalid:", state);
-  const logClose = state.task.close;
+  if (!state || !state.tasks[0]) console.error("State or task invalid:", state);
+  const logClose = state.tasks[0].close;
   if (logClose > lastLogClose) {
     if (lastLogClose !== 0) {
       console.log("Task updated, resetting trackers");
@@ -277,15 +277,15 @@ async function getAttentionStateAndBlock() {
       "blocks"
     );
   lastBlock = block;
-  return [state, block];
+  return [state, koiiState, block];
 }
 
-async function service(state, block) {
+async function service(state, koiiState, block) {
   if (canProposePorts(state, block)) await proposePorts();
   if (canAudit(state, block)) await audit(state);
   if (canSubmitBatch(state, block)) await submitBatch(state);
   if (canRankPrepDistribution(state, block)) await rankPrepDistribution();
-  if (canDistributeReward(state)) await distribute();
+  if (canDistributeReward(koiiState, block)) await distribute();
 }
 setInterval(checkViews, REALTIME_PORTS_CHECK_OFFSET * 1000); //converting seconds to ms
 
@@ -505,7 +505,8 @@ async function servePortCache(_req, res) {
 }
 
 function canProposePorts(state, block) {
-  const open = state.task.open;
+  const task = state.tasks[0];
+  const open = task.open;
   return (
     block < open + OFFSET_PROPOSE_PORTS_END && // block in time frame
     !hasSubmittedPorts // ports not submitted
@@ -692,7 +693,7 @@ async function bundleAndExport(bundle) {
 }
 
 function canAudit(state, block) {
-  const task = state.task;
+  const task = state.tasks[0];
   if (block >= task.close) return false;
 
   const activeProposedData = task.proposedPayloads.find(
@@ -709,7 +710,7 @@ function canAudit(state, block) {
 }
 
 async function audit(state) {
-  const task = state.task;
+  const task = state.tasks[0];
   const activeProposedData = task.proposedPayloads.find(
     (proposedData) => proposedData.block === task.open
   );
@@ -742,7 +743,7 @@ async function audit(state) {
 }
 
 function canRankPrepDistribution(state, block) {
-  const task = state.task;
+  const task = state.tasks[0];
   if (
     block < task.close || // not time to rank and distribute or
     hasRanked // we've already rank and distribute
@@ -761,7 +762,8 @@ function canRankPrepDistribution(state, block) {
 
 function canSubmitBatch(state, block) {
   if (hasSubmitBatch) return false;
-  const open = state.task.open;
+  const task = state.tasks[0];
+  const open = task.open;
   return (
     open + OFFSET_BATCH_VOTE_SUBMIT < block &&
     block < open + OFFSET_PROPOSE_SLASH
@@ -860,15 +862,10 @@ async function rankPrepDistribution() {
   }
 }
 
-function canDistributeReward(subContractState) {
+function canDistributeReward(koiiState, block) {
   if (hasDistributed) return false;
-
-  const prepareDistribution = subContractState.task.prepareDistribution;
-  // check if there is not rewarded distributions
-  const unrewardedDistribution = prepareDistribution.filter(
-    (distribution) => !distribution.isRewarded
-  );
-  return unrewardedDistribution.length !== 0;
+  const distributionBlock = koiiState.distributionBlock;
+  return distributionBlock + 600 < block;
 }
 
 async function distribute() {
@@ -896,7 +893,7 @@ async function witness(state, block) {
 }
 
 function checkForVote(state, block) {
-  const task = state.task;
+  const task = state.tasks[0];
   const votes = state.votes;
   const activeVotes = votes.filter((vote) => vote.status === "active");
   if (!activeVotes.length || !votes.length || hasVoted) {
@@ -942,8 +939,9 @@ async function createReadVotRec() {
 }
 
 async function validateAndVote(id, state) {
-  const currentPayload = state.task.proposedPayloads.find(
-    (payload) => payload.block === state.task.open
+  const task = state.tasks[0];
+  const currentPayload = task.proposedPayloads.find(
+    (payload) => payload.block === task.open
   );
   const suspectedProposedData = currentPayload.proposedData.find(
     (proposedData) => proposedData.txId === id
@@ -1040,7 +1038,7 @@ async function activeVotesVoted(state) {
 }
 
 async function checkProposeSlash(state, block) {
-  const task = state.task;
+  const task = state.tasks[0];
   const { receipts, activeVotes, ids } = await activeVotesVoted(state);
   if (!activeVotes.length || !ids || hasProposedSlash || !receipts.length) {
     return false;
@@ -1086,13 +1084,12 @@ async function proposeSlash(state) {
   );
 }
 
-
 let rawTxCache = [];
 let nextFetch = 0;
-function getRawTxsCached(ids){
+function getRawTxsCached(ids) {
   fetchRawTxs(ids).catch((e) => {
     console.error("Error fetching raw Txs:", e);
-  })
+  });
   return rawTxCache;
 }
 

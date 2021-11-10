@@ -28,7 +28,7 @@ export default async function registerTask(state, action) {
         name: taskName,
         txId: taskTxId,
         bounty: koiReward,
-        rewardedBlock: [],
+        rewardedTaskId: [],
         lockBounty: {
           [caller]: koiReward
         }
@@ -38,7 +38,7 @@ export default async function registerTask(state, action) {
         owner: caller,
         name: taskName,
         txId: taskTxId,
-        rewardedBlock: []
+        rewardedTaskId: []
       });
 
   return { state };

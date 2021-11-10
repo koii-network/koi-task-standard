@@ -3,10 +3,11 @@ export default async function proposeSlash(state, action) {
   const validBundlers = state.validBundlers;
   const receiptTxId = action.input.receiptTxId;
   const blacklist = state.blacklist;
-  //55
+  const task = state.tasks[0];
+  //660
   if (
-    SmartWeave.block.height > state.task.close ||
-    SmartWeave.block.height < state.task.open + 660
+    SmartWeave.block.height > task.close ||
+    SmartWeave.block.height < task.open + 55
   ) {
     throw new ContractError("slash time have passed or not reached yet");
   }

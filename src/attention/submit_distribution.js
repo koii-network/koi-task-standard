@@ -1,13 +1,13 @@
 export default async function submitDistribution(state, action) {
-  const task = state.task;
+  const task = state.tasks[0];
   const caller = action.caller;
   const blacklist = state.blacklist;
   const input = action.input;
   const distributionTxId = input.distributionTxId;
   const url = input.cacheUrl;
   const koiiContract = state.koiiContract;
-  //25
-  if (SmartWeave.block.height > task.open + 300) {
+  //300
+  if (SmartWeave.block.height > task.open + 25) {
     throw new ContractError("proposing is closed. wait for another round");
   }
   if (!distributionTxId || !url) throw new ContractError("Invalid inputs");
@@ -46,7 +46,7 @@ export default async function submitDistribution(state, action) {
     task.prepareDistribution = task.prepareDistribution.filter(
       (distribution) => {
         if (
-          contractTask.rewardedBlock.includes(distribution.block) &&
+          contractTask.rewardedTaskId.includes(distribution.id) &&
           !distribution.isRewarded
         ) {
           distribution.isRewarded = true;

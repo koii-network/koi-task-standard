@@ -7,10 +7,8 @@ export default function registerValidContractSrc(state, action) {
   if (typeof contractSrc !== "string") throw new ContractError("Invalid input");
   if (contractSrc.length !== 43) throw new ContractError("Invalid format");
 
-  const encodeContractSrc =
-    SmartWeave.arweave.utils.stringToB64Url(contractSrc);
-  if (state.validContractSrcsB64.includes(encodeContractSrc))
+  if (state.validContractSrcs.includes(contractSrc))
     throw new ContractError("The contract source already registered");
-  state.validContractSrcsB64.push(encodeContractSrc);
+  state.validContractSrcs.push(contractSrc);
   return { state };
 }

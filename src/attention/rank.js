@@ -1,10 +1,10 @@
 export default async function rankPrepDistribution(state) {
   const votes = state.votes;
-  const task = state.task;
+  const task = state.tasks[0];
   const blacklist = state.blacklist;
   const prepareDistribution = task.prepareDistribution;
   const attentionReport = task.attentionReport;
-  const nfts = state.nfts;
+  const nfts = state.contents.nfts;
   if (SmartWeave.block.height < task.close) {
     throw new ContractError(
       `Ranking is in ${task.close - SmartWeave.block.height} blocks`
@@ -34,6 +34,10 @@ export default async function rankPrepDistribution(state) {
   // deduplicate PoRts
   const distribution = {};
   const registeredNfts = Object.keys(nfts);
+  let registeredContents = [];
+  for (let data of Object.values(state.contents)) {
+    registeredContents.push(Object.keys(data));
+  }
   for (const acceptedProposedTxId of acceptedProposedTxIds) {
     const data = await SmartWeave.unsafeClient.transactions
       .getData(acceptedProposedTxId, {
@@ -47,18 +51,30 @@ export default async function rankPrepDistribution(state) {
       );
       let scoreSum = 0;
       const parseData = JSON.parse(data.split());
-
       const parseDataKeys = Object.keys(parseData);
-      parseDataKeys.forEach((nftId) => {
-        if (registeredNfts.includes(nftId)) {
-          const balances = Object.values(nfts[nftId]["owners"]);
-          const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
-          if (sumNftBalances > 0) {
-            scoreSum += [...new Set(parseData[nftId])].length;
-            !(nftId in distribution)
-              ? (distribution[nftId] = [...new Set(parseData[nftId])])
-              : (distribution[nftId] = [
-                  ...new Set(distribution[nftId].concat(parseData[nftId]))
+      parseDataKeys.forEach((contentId) => {
+        if (registeredContents.flat().includes(contentId)) {
+          if (registeredNfts.includes(contentId)) {
+            const balances = Object.values(nfts[contentId]["owners"]);
+            const sumNftBalances = balances.reduce((pv, cv) => pv + cv, 0);
+            if (sumNftBalances > 0) {
+              scoreSum += [...new Set(parseData[contentId])].length;
+              !(contentId in distribution)
+                ? (distribution[contentId] = [...new Set(parseData[contentId])])
+                : (distribution[contentId] = [
+                    ...new Set(
+                      distribution[contentId].concat(parseData[contentId])
+                    )
+                  ]);
+            }
+          } else {
+            scoreSum += [...new Set(parseData[contentId])].length;
+            !(contentId in distribution)
+              ? (distribution[contentId] = [...new Set(parseData[contentId])])
+              : (distribution[contentId] = [
+                  ...new Set(
+                    distribution[contentId].concat(parseData[contentId])
+                  )
                 ]);
           }
         }
@@ -76,50 +92,64 @@ export default async function rankPrepDistribution(state) {
     totalAttention += distribution[key].length;
   }
   const rewardPerAttention = totalAttention !== 0 ? 1000 / totalAttention : 0;
-  // Distributing Reward to owners and creator.
+  // Distributing Reward
   const distributionReward = {};
-  for (const nft of Object.keys(distribution)) {
-    let reward = distribution[nft].length * rewardPerAttention;
-    const creator = Object.keys(nfts[nft]["creatorShare"])[0];
-    const owners = nfts[nft]["owners"];
-    // Creator reward
-    if (!(creator in owners)) {
-      const creatorShare = nfts[nft]["creatorShare"][creator];
-      const creatorReward = reward * creatorShare;
-      if (
-        creatorReward > 0 &&
-        typeof creator === "string" &&
-        creator.length === 43 &&
-        !(creator.indexOf(" ") >= 0)
-      ) {
-        creator in distributionReward
-          ? (distributionReward[creator] += creatorReward)
-          : (distributionReward[creator] = creatorReward);
-        reward = distribution[nft].length * rewardPerAttention - creatorReward;
+  for (const content of Object.keys(distribution)) {
+    //Rewarding nfts owners and creator
+    if (registeredNfts.includes(content)) {
+      let reward = distribution[content].length * rewardPerAttention;
+      const creator = Object.keys(nfts[content]["creatorShare"])[0];
+      const owners = nfts[content]["owners"];
+      // Creator reward
+      if (!(creator in owners)) {
+        const creatorShare = nfts[content]["creatorShare"][creator];
+        const creatorReward = reward * creatorShare;
+        if (
+          creatorReward > 0 &&
+          typeof creator === "string" &&
+          creator.length === 43 &&
+          !(creator.indexOf(" ") >= 0)
+        ) {
+          creator in distributionReward
+            ? (distributionReward[creator] += creatorReward)
+            : (distributionReward[creator] = creatorReward);
+          reward =
+            distribution[content].length * rewardPerAttention - creatorReward;
+        }
       }
-    }
-    //Current owners reward
-    const balances = Object.values(owners);
-    const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
-    for (let owner in owners) {
-      let rewardPer = owners[owner] / balancesSum;
-      if (rewardPer > 0 && !isNaN(rewardPer)) {
-        owner in distributionReward
-          ? (distributionReward[owner] += reward * rewardPer)
-          : (distributionReward[owner] = reward * rewardPer);
+      //Current owners reward
+      const balances = Object.values(owners);
+      const balancesSum = balances.reduce((pv, cv) => pv + cv, 0);
+      for (let owner in owners) {
+        let rewardPer = owners[owner] / balancesSum;
+        if (rewardPer > 0 && !isNaN(rewardPer)) {
+          owner in distributionReward
+            ? (distributionReward[owner] += reward * rewardPer)
+            : (distributionReward[owner] = reward * rewardPer);
+        }
+      }
+    } else {
+      // Rewarding other contents owner
+      let reward = distribution[content].length * rewardPerAttention;
+      for (let data of Object.values(state.contents)) {
+        if (content in data) {
+          data[content] in distributionReward
+            ? (distributionReward[data[content]] += reward)
+            : (distributionReward[data[content]] = reward);
+        }
       }
     }
   }
   currentProposed.isRanked = true;
   prepareDistribution.push({
-    block: task.open,
+    id: task.open,
     distribution: distributionReward,
     isRewarded: false
   });
   attentionReport.push(attentionScore);
   // Open a new game
   task.open = SmartWeave.block.height;
-  task.close = SmartWeave.block.height + 720; //60
+  task.close = SmartWeave.block.height + 60; //720
   const newTask = {
     block: task.open,
     proposedData: [],

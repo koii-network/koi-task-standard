@@ -99,18 +99,18 @@ async function main() {
   //   attentionContractId
   // );
 
-  // const attentionInput3 = {
-  //   function: "rankPrepDistribution"
-  // };
-  // await smartest.interactWrite(
-  //   arweave,
-  //   attentionSrc,
-  //   wallet,
-  //   attentionInput3,
-  //   smartest.readContractState(attentionContractId),
-  //   walletAddress,
-  //   attentionContractId
-  // );
+  const attentionInput3 = {
+    function: "rankPrepDistribution"
+  };
+  await smartest.interactWrite(
+    arweave,
+    attentionSrc,
+    wallet,
+    attentionInput3,
+    smartest.readContractState(attentionContractId),
+    walletAddress,
+    attentionContractId
+  );
 
   // const koiInput = {
   //   function: "registerTask",
@@ -164,30 +164,30 @@ async function main() {
   //   walletAddress,
   //   koiContractId
   // );
-  const koiInput2 = {
-    function: "burnKoi",
-    contractId: "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s",
-    contentType: "nft",
-    contentTxId: "sE9fYGo430gup6UbFwLj5QfUsecsuCjh0_SoxIuLS8w"
-  };
-  await smartest.interactWrite(
-    arweave,
-    koiSrc,
-    wallet,
-    koiInput2,
-    smartest.readContractState(koiContractId),
-    walletAddress,
-    koiContractId
-  );
+  // const koiInput2 = {
+  //   function: "burnKoi",
+  //   contractId: "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s",
+  //   contentType: "nft",
+  //   contentTxId: "sE9fYGo430gup6UbFwLj5QfUsecsuCjh0_SoxIuLS8w"
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   koiSrc,
+  //   wallet,
+  //   koiInput2,
+  //   smartest.readContractState(koiContractId),
+  //   walletAddress,
+  //   koiContractId
+  // );
 
   console.log(
     "Koi final state: ",
-    smartest.readContractState(koiContractId)
+    smartest.readContractState(attentionContractId)
     // "Attention final state:",
     // smartest.readContractState(attentionContractId)
   );
-  const state = smartest.readContractState(koiContractId);
-  console.log(state.preRegisterDatas);
+  const state = smartest.readContractState(attentionContractId);
+  console.log(state.tasks[0].prepareDistribution[0]);
 }
 
 main().then(() => {
