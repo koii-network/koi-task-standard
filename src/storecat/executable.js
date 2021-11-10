@@ -6,9 +6,8 @@ const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 
-const ClusterUtil = require("./cluster");
+let mainCluster = null;
 const { Cluster } = require("puppeteer-cluster");
-let cluster = null;
 const ScraperUtil = require("./scraper");
 const md5 = require("md5");
 
@@ -374,9 +373,9 @@ function rateLimit() {
  * cluster functions
  */
 async function puppeteerCluster() {
-  if (cluster) return cluster;
+  if (mainCluster) return mainCluster;
   try {
-    cluster = await Cluster.launch({
+    mainCluster = await Cluster.launch({
       concurrency: Cluster.CONCURRENCY_CONTEXT,
       maxConcurrency: 4
     });
@@ -385,7 +384,7 @@ async function puppeteerCluster() {
     console.log(e);
     return false;
   }
-  await cluster.task(async ({ page, data }) => {
+  await mainCluster.task(async ({ page, data }) => {
     await page.evaluateOnNewDocument(() => {
       Object.defineProperty(navigator, "webdriver", {
         get: () => false
@@ -443,5 +442,5 @@ async function puppeteerCluster() {
       html
     };
   });
-  return cluster;
+  return mainCluster;
 }
