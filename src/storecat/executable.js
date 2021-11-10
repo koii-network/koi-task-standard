@@ -347,7 +347,7 @@ async function scrape(state, block) {
 */
 async function getPayload(url) {
   try {
-    let cluster = await ClusterUtil.puppeteerCluster();
+    let cluster = await puppeteerCluster();
     const { html } = await cluster.execute({
       url,
       takeScreenshot: false
@@ -373,17 +373,12 @@ function rateLimit() {
 /****
  * cluster functions
  */
- async function puppeteerCluster() {
+async function puppeteerCluster() {
   if (cluster) return cluster;
   try {
     cluster = await Cluster.launch({
       concurrency: Cluster.CONCURRENCY_CONTEXT,
       maxConcurrency: 4
-      // puppeteerOptions: {
-      //   headless: true,
-      //   args: ["--no-sandbox", "--disable-setuid-sandbox"]
-      // },
-      // skipDuplicateUrls: true
     });
   } catch (e) {
     console.log("create cluster failed");
