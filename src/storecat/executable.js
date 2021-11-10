@@ -218,7 +218,7 @@ async function rank(state, block) {
     await checkTxConfirmation(tx, task_name);
     return true;
   } catch (error) {
-    console.log('error rank', error);
+    console.log("error rank", error);
     return false;
   }
 }
