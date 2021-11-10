@@ -267,9 +267,11 @@ async function getScrapingRequest() {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   try {
     const data = await axios.get(url);
+    console.log("external url response");
     console.log(data);
     // check the owner has some koii
     if (data.status === "success") {
+      console.log(data.data);
       const input = {
         function: "addScrapingRequest",
         scrapingRequest: data.data
