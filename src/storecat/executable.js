@@ -265,23 +265,27 @@ async function bundleAndExport(data, tag = false) {
 */
 async function getScrapingRequest() {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
-  const data = await axios.get(url);
-
-  // check the owner has some koii
-  if (data.status === "success") {
-    const input = {
-      function: "addScrapingRequest",
-      scrapingRequest: data.data
-    };
-    const task_name = "add scraping request";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
+  try {
+    const data = await axios.get(url);
+    console.log(data);
+    // check the owner has some koii
+    if (data.status === "success") {
+      const input = {
+        function: "addScrapingRequest",
+        scrapingRequest: data.data
+      };
+      const task_name = "add scraping request";
+      const tx = await kohaku.interactWrite(
+        arweave,
+        tools.wallet,
+        namespace.taskTxId,
+        input
+      );
+      await checkTxConfirmation(tx, task_name);
+      return true;
+    }
+  } catch (error) {
+    console.log("getScrapingRequest error", error);
   }
   return false;
 }

@@ -56,36 +56,6 @@ const test_payload_dong = {
   },
   image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
 };
-const test_payload_yang = {
-  title: "一个帐号，畅享 Google 所有服务！",
-  content: {
-    Image: [
-      {
-        label: "Payload Image0",
-        selector: "0$img[class='circle-mask']",
-        text: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
-        type: "Image"
-      }
-    ],
-    Link: [
-      {
-        label: "Payload Link0",
-        selector: "0$a[class='need-help']",
-        text: "https://accounts.google.com/signin/usernamerecovery?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&service=mail&osid=1&hl=en",
-        type: "Link"
-      }
-    ],
-    Text: [
-      {
-        label: "Payload Text0",
-        selector: "0$div[class='banner']>h1",
-        text: "One account. All of Google.",
-        type: "Text"
-      }
-    ]
-  },
-  image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
-};
 const test_payload = {
   title: "一个帐号，畅享 Google 所有服务！",
   content: {
@@ -166,7 +136,6 @@ async function test_add_scraping_request(walletAddress) {
     walletAddress,
     storecatContractId
   );
-
 }
 async function test_add_scraping_request2(walletAddress) {
   // --- test add scraping request
