@@ -8,6 +8,7 @@ const axios = require("axios");
 
 let mainCluster = null;
 const { Cluster } = require("puppeteer-cluster");
+const cheerio = require("cheerio");
 const ScraperUtil = require("./scraper");
 const md5 = require("md5");
 
@@ -351,7 +352,7 @@ async function getPayload(url) {
       url,
       takeScreenshot: false
     });
-    const scrapingData = await ScraperUtil.getPayload(html);
+    const scrapingData = await getPayloadFromHtml(html);
     console.log(
       "**************** finished scraping *******************",
       scrapingData
@@ -448,4 +449,52 @@ async function puppeteerCluster() {
     console.log(error);
   }
   return mainCluster;
+}
+/**
+ * scraper utils functions
+ */
+async function getPayloadFromHtml(html) {
+  let $ = await cheerio.load(html);
+  $("script").remove();
+  $("style").remove();
+  $("noscript").remove();
+  $("link").remove();
+  var payload = {
+    title: "",
+    content: "",
+    image: ""
+  };
+  var title = "";
+  // eslint-disable-next-line no-cond-assign
+  if ((title = $('meta[property="og:title"]').attr("content"))) {
+    payload.title = title;
+    // eslint-disable-next-line no-cond-assign
+  } else if ((title = $("meta[name=title]").attr("content"))) {
+    payload.title = title;
+  } else {
+    $("h1,h2,h3,h4,h5,h6,p").each(function (i, elem) {
+      if (i === 0) {
+        title = $(elem).text().trim();
+      }
+    });
+    if (!title) {
+      title = $("title").text().trim();
+    }
+    payload.title = title;
+  }
+  var image = "";
+  // image: meta:ogimage OR document.images[0]
+  // eslint-disable-next-line no-cond-assign
+  if ((image = $('meta[property="og:image"]').attr("content"))) {
+    payload.image = image;
+  } else {
+    $("img").each(function (i) {
+      if (i === 0) {
+        image = $(this).attr("src");
+      }
+    });
+    payload.image = image;
+  }
+  payload.content = await getScrapData($("body").html());
+  return payload;
 }
