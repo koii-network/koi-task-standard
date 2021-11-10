@@ -9,7 +9,6 @@ const axios = require("axios");
 let mainCluster = null;
 const { Cluster } = require("puppeteer-cluster");
 const cheerio = require("cheerio");
-const ScraperUtil = require("./scraper");
 const md5 = require("md5");
 
 const arweave = Arweave.init({
@@ -600,13 +599,9 @@ async function getScrapData(html) {
   $("meta").remove();
   $("footer").remove();
 
-  const dataImage = await module.exports.parseAndSaveAllSelctor(
-    $,
-    "img",
-    "Image"
-  );
-  const dataLink = await module.exports.parseAndSaveAllSelctor($, "a", "Link");
-  const dataText = await module.exports.parseAndSaveAllSelctor(
+  const dataImage = await parseAndSaveAllSelctor($, "img", "Image");
+  const dataLink = await parseAndSaveAllSelctor($, "a", "Link");
+  const dataText = await parseAndSaveAllSelctor(
     $,
     "h1, h2, h3, h4, h5, span, p",
     "Text"
