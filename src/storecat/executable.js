@@ -308,12 +308,19 @@ async function getScrapingRequest(state) {
   @returns scraping payload, hashpayload
 */
 async function scrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => {
+  let taskIndex = state.tasks.findIndex((t) => {
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if (!t.hasRanked && t.close >= block && !isPayloader) return true;
+    if (!t.hasRanked && t.close >= block && isPayloader.length === 0) return true;
     else return false;
   });
+  for (let task of state.tasks) {
+    // if current owner already scraped : return true
+    const isPayloader = task.payloads.filter((p) => p.owner === tools.address);
+    if (!t.hasRanked && task.close >= block && isPayloader.length === 0)
+      return true;
+    else return false;
+  }
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
