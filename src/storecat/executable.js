@@ -181,47 +181,6 @@ async function checkTxConfirmation(txId, task) {
     await rateLimit();
   }
 }
-
-/*
-  rank: find top payload and prepareDistribution rewards
-  @returns 
-*/
-async function rank(state, block) {
-  const tasks = state.tasks;
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (
-      block >= element.close &&
-      !element.hasRanked &&
-      element.payloads.length > 0
-    ) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if (matchIndex === -1) {
-    return false;
-  }
-  try {
-    const input = {
-      function: "rank",
-      id: matchIndex
-    };
-    const task_name = "submit rank";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
-  } catch (error) {
-    console.log("error rank", error);
-    return false;
-  }
-}
 /*
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
@@ -270,11 +229,22 @@ async function getScrapingRequest(state) {
     // check the owner has some koii
     if (data.status === "success") {
       console.log("external url response");
-      console.log(data.data);
+      const result = data.data;
+      console.log(result);
       // confirm duplicate scraping request
+      for (let task of state.tasks) {
+        if (task.uuid === result.uuid) {
+          task.payloads.forEach((payload) => {
+            if (payload.owner === tools.address) {
+              console.log("This scraping request was already scraped.")
+              return false;
+            }
+          });
+        }
+      }
       const input = {
         function: "addScrapingRequest",
-        scrapingRequest: data.data
+        scrapingRequest: result
       };
       const task_name = "add scraping request";
       const tx = await kohaku.interactWrite(
@@ -297,12 +267,16 @@ async function getScrapingRequest(state) {
   @returns scraping payload, hashpayload
 */
 async function scrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => {
+  let taskIndex = -1;
+  for (let index = 0; index < state.tasks.length; index++) {
+    const t = state.tasks[index];
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if (!t.hasRanked && t.close >= block && !isPayloader) return true;
-    else return false;
-  });
+    if (!t.hasRanked && t.close >= block && isPayloader.length === 0) {
+      taskIndex = index;
+      break;
+    }
+  }
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
@@ -328,6 +302,7 @@ async function scrape(state, block) {
         payload: userPayload
       };
       const task_name = "save payload";
+      console.log("save payload contract request", input);
       const tx = await kohaku.interactWrite(
         arweave,
         tools.wallet,
@@ -365,6 +340,48 @@ async function getPayload(url) {
     return scrapingData;
   } catch (error) {
     console.log("get payload error", error);
+    return false;
+  }
+}
+
+/*
+  rank: find top payload and prepareDistribution rewards
+  @returns 
+*/
+async function rank(state, block) {
+  const tasks = state.tasks;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (
+      block >= element.close &&
+      !element.hasRanked &&
+      element.payloads.length > 0
+    ) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if (matchIndex === -1) {
+    return false;
+  }
+  try {
+    const input = {
+      function: "rank",
+      id: matchIndex
+    };
+    const task_name = "submit rank";
+    console.log("rank submit", input);
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  } catch (error) {
+    console.log("error rank", error);
     return false;
   }
 }
