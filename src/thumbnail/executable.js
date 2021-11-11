@@ -30,6 +30,8 @@ const IPFS = require('ipfs-core');
 const CID = require('multiformats/cid');
 const { response } = require("express");
 let ipfs;
+require("dotenv").config();
+let contractInitialStateTx = "-cH8D20W-5Rql6sVcKWQ0j0NkjDGqWfqpWkCVNjdsn0";
 
 const walletPath = process.env.WALLET_LOCATION;
 if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
@@ -43,6 +45,12 @@ const arweave = Arweave.init({
   timeout: 60000,
   logging: false
 });
+
+async function getLatestState() {
+  const latestState = await Smartweave.readContract(arweave, contractInitialStateTx);
+  console.log(latestState);
+}
+getLatestState();
 
 // Define system constants
 const FOO = "BAR";
@@ -117,7 +125,6 @@ async function generateCard(_req, res) {
   gatewayURI = "arweave.net"
   console.log("trying to create card with ", data);
   data.imgSrc = `https://${gatewayURI}/${data.id}`;
-
   let thumb = await createThumbnail(data);
   console.log('thumbnail created', thumb);
   res.send(thumb);
@@ -177,7 +184,7 @@ async function createThumbnail (data, hasImg) {
         console.error(err);
       })
         .then(async () => {
-          // await generateanduploadHTML(data)         
+          await update(data.id, cid)         
       })
 
     // upload text/html thumbnail
