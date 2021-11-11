@@ -6,24 +6,31 @@ export default async function addScrapingRequest(state, action) {
   const koiiContract = state.koiiContract;
   const koiiState = await SmartWeave.contracts.readContractState(koiiContract);
   const balances = koiiState.balances;
-
   const contractId = SmartWeave.contract.id; // storecat contract id
   const KoiiTasks = koiiState.tasks;
-  // console.log({ isCleaner });
+  const contractTask = KoiiTasks.find((task) => task.txId === contractId);
+  if (!contractTask)
+    throw new ContractError("contract not found in the koii core contract");
+
+  // check if the bounty is locked
+  if (
+    !(scrapingRequest.owner in contractTask.lockedBounty) ||
+    contractTask.lockedBounty[scrapingRequest.owner] < scrapingRequest.bounty
+  )
+    throw new ContractError(
+      "Bounties are not locked or locked bounties are less than the bounty add in the scrappingRequest"
+    );
   if (isCleaner) {
     // update distribution rewards
-    const contractTask = KoiiTasks.find((task) => task.txId === contractId);
-    if (contractTask) {
-      for (let task of state.tasks) {
-        task.prepareDistribution.forEach((distribution) => {
-          if (
-            contractTask.rewardedTaskId.includes(distribution.id) &&
-            !distribution.isRewarded
-          ) {
-            distribution.isRewarded = true;
-          }
-        });
-      }
+    for (let task of state.tasks) {
+      task.prepareDistribution.forEach((distribution) => {
+        if (
+          contractTask.rewardedTaskId.includes(distribution.id) &&
+          !distribution.isRewarded
+        ) {
+          distribution.isRewarded = true;
+        }
+      });
     }
     // update completed tasks
     for (let index = 0; index < state.tasks.length; index++) {

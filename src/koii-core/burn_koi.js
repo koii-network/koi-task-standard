@@ -1,4 +1,4 @@
-export default async function burnKoi(state, action) {
+export default function burnKoi(state, action) {
   const balances = state.balances;
   const caller = action.caller;
   const input = action.input;

@@ -7,6 +7,7 @@ import transfer from "./transfer";
 import withdraw from "./withdraw";
 import burnKoi from "./burn_koi";
 import freeze from "./freeze";
+import lockBounty from "./lockBounty";
 
 const handlers = [
   burnKoi,
@@ -17,7 +18,8 @@ const handlers = [
   registerTask,
   stake,
   transfer,
-  withdraw
+  withdraw,
+  lockBounty
 ];
 
 export async function handle(state, action) {
