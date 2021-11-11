@@ -181,47 +181,6 @@ async function checkTxConfirmation(txId, task) {
     await rateLimit();
   }
 }
-
-/*
-  rank: find top payload and prepareDistribution rewards
-  @returns 
-*/
-async function rank(state, block) {
-  const tasks = state.tasks;
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (
-      block >= element.close &&
-      !element.hasRanked &&
-      element.payloads.length > 0
-    ) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if (matchIndex === -1) {
-    return false;
-  }
-  try {
-    const input = {
-      function: "rank",
-      id: matchIndex
-    };
-    const task_name = "submit rank";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
-  } catch (error) {
-    console.log("error rank", error);
-    return false;
-  }
-}
 /*
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
@@ -343,6 +302,7 @@ async function scrape(state, block) {
         payload: userPayload
       };
       const task_name = "save payload";
+      console.log("save payload contract request", input);
       const tx = await kohaku.interactWrite(
         arweave,
         tools.wallet,
@@ -380,6 +340,48 @@ async function getPayload(url) {
     return scrapingData;
   } catch (error) {
     console.log("get payload error", error);
+    return false;
+  }
+}
+
+/*
+  rank: find top payload and prepareDistribution rewards
+  @returns 
+*/
+async function rank(state, block) {
+  const tasks = state.tasks;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (
+      block >= element.close &&
+      !element.hasRanked &&
+      element.payloads.length > 0
+    ) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if (matchIndex === -1) {
+    return false;
+  }
+  try {
+    const input = {
+      function: "rank",
+      id: matchIndex
+    };
+    const task_name = "submit rank";
+    console.log("rank submit", input);
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  } catch (error) {
+    console.log("error rank", error);
     return false;
   }
 }
