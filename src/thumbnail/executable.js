@@ -31,6 +31,11 @@ const CID = require('multiformats/cid');
 const { response } = require("express");
 let ipfs;
 
+const walletPath = process.env.WALLET_LOCATION;
+if (!walletPath) throw new Error("WALLET_LOCATION not specified in .env");
+
+const wallet = JSON.parse(fs.readFileSync(walletPath));
+
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
@@ -263,4 +268,28 @@ async function createThumbnail (data, hasImg) {
   }
 };      
 
+async function update() {
+
+  const input = {
+      function: "proposeUpdate",
+      aid: 'gtSQKcx3Ex8eOdgZxNh0rWSNiKQCt3Xi02cGnJQ_uSM',
+      cid: 'QmVhDHYYas6rnt8frPqKp6T2KjobJfCDVEYEUUH8ZgBZhF'
+  }
+
+  // const input = {
+  //         function: "proposeSlash",
+  //         "uid": 'oDApIgwavkt2Ks2egnIF27iMMLMaVY41raK2l07ONp0',
+  //         "data": 'Soma'
+  //     }
+
+  // `interactWrite` will return the transaction ID.
+  const txid = await interactWrite(
+      arweave,   
+      wallet,          
+      contractInitialStateTx,
+      input
+  )
+  console.log(txid)
+}
+update();
 
