@@ -6,8 +6,9 @@ const Arweave = require("arweave");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
 
-const ClusterUtil = require("./cluster");
-const ScraperUtil = require("./scraper");
+let mainCluster = null;
+const { Cluster } = require("puppeteer-cluster");
+const cheerio = require("cheerio");
 const md5 = require("md5");
 
 const arweave = Arweave.init({
@@ -132,7 +133,7 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  await getScrapingRequest();
+  await getScrapingRequest(state);
   await scrape(state, block);
   await rank(state, block);
 }
@@ -180,47 +181,6 @@ async function checkTxConfirmation(txId, task) {
     await rateLimit();
   }
 }
-
-/*
-  rank: find top payload and prepareDistribution rewards
-  @returns 
-*/
-async function rank(state, block) {
-  const tasks = state.tasks;
-  let matchIndex = -1;
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    if (
-      block >= element.close &&
-      !element.hasRanked &&
-      element.payloads.length > 0
-    ) {
-      matchIndex = index;
-      break;
-    }
-  }
-  if (matchIndex === -1) {
-    return false;
-  }
-  try {
-    const input = {
-      function: "rank",
-      id: matchIndex
-    };
-    const task_name = "submit rank";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
-  } catch (error) {
-    console.log('error rank', error);
-    return false;
-  }
-}
 /*
   bundleAndExport: upload data to permaweb (arweave )
   @returns 
@@ -233,7 +193,7 @@ async function bundleAndExport(data, tag = false) {
       },
       tools.wallet
     );
-    
+
     if (tag) {
       myTx.addTag("owner", data.owner);
       myTx.addTag("task", "storecat");
@@ -262,25 +222,42 @@ async function bundleAndExport(data, tag = false) {
   get scraping request from outside server(app.getstorecat.com)
   @returns scraping url, bounty, uuid, owner
 */
-async function getScrapingRequest() {
+async function getScrapingRequest(state) {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
-  const data = await axios.get(url);
-
-  // check the owner has some koii
-  if (data.status === "success") {
-    const input = {
-      function: "addScrapingRequest",
-      scrapingRequest: data.data
-    };
-    const task_name = "add scraping request";
-    const tx = await kohaku.interactWrite(
-      arweave,
-      tools.wallet,
-      namespace.taskTxId,
-      input
-    );
-    await checkTxConfirmation(tx, task_name);
-    return true;
+  try {
+    const { data } = await axios.get(url);
+    // check the owner has some koii
+    if (data.status === "success") {
+      console.log("external url response");
+      const result = data.data;
+      console.log(result);
+      // confirm duplicate scraping request
+      for (let task of state.tasks) {
+        if (task.uuid === result.uuid) {
+          task.payloads.forEach((payload) => {
+            if (payload.owner === tools.address) {
+              console.log("This scraping request was already scraped.")
+              return false;
+            }
+          });
+        }
+      }
+      const input = {
+        function: "addScrapingRequest",
+        scrapingRequest: result
+      };
+      const task_name = "add scraping request";
+      const tx = await kohaku.interactWrite(
+        arweave,
+        tools.wallet,
+        namespace.taskTxId,
+        input
+      );
+      await checkTxConfirmation(tx, task_name);
+      return true;
+    }
+  } catch (error) {
+    console.log("getScrapingRequest error", error);
   }
   return false;
 }
@@ -290,12 +267,16 @@ async function getScrapingRequest() {
   @returns scraping payload, hashpayload
 */
 async function scrape(state, block) {
-  const taskIndex = state.tasks.findIndex((t) => {
+  let taskIndex = -1;
+  for (let index = 0; index < state.tasks.length; index++) {
+    const t = state.tasks[index];
     // if current owner already scraped : return true
     const isPayloader = t.payloads.filter((p) => p.owner === tools.address);
-    if (!t.hasRanked && t.close >= block && !isPayloader) return true;
-    else return false;
-  });
+    if (!t.hasRanked && t.close >= block && isPayloader.length === 0) {
+      taskIndex = index;
+      break;
+    }
+  }
   if (taskIndex < 0) {
     console.log("There is no task for scraping");
     return false;
@@ -321,6 +302,7 @@ async function scrape(state, block) {
         payload: userPayload
       };
       const task_name = "save payload";
+      console.log("save payload contract request", input);
       const tx = await kohaku.interactWrite(
         arweave,
         tools.wallet,
@@ -345,12 +327,12 @@ async function scrape(state, block) {
 */
 async function getPayload(url) {
   try {
-    let cluster = await ClusterUtil.puppeteerCluster();
+    let cluster = await puppeteerCluster();
     const { html } = await cluster.execute({
       url,
       takeScreenshot: false
     });
-    const scrapingData = await ScraperUtil.getPayload(html);
+    const scrapingData = await getPayloadFromHtml(html);
     console.log(
       "**************** finished scraping *******************",
       scrapingData
@@ -361,10 +343,298 @@ async function getPayload(url) {
     return false;
   }
 }
+
+/*
+  rank: find top payload and prepareDistribution rewards
+  @returns 
+*/
+async function rank(state, block) {
+  const tasks = state.tasks;
+  let matchIndex = -1;
+  for (let index = 0; index < tasks.length; index++) {
+    const element = tasks[index];
+    if (
+      block >= element.close &&
+      !element.hasRanked &&
+      element.payloads.length > 0
+    ) {
+      matchIndex = index;
+      break;
+    }
+  }
+  if (matchIndex === -1) {
+    return false;
+  }
+  try {
+    const input = {
+      function: "rank",
+      id: matchIndex
+    };
+    const task_name = "submit rank";
+    console.log("rank submit", input);
+    const tx = await kohaku.interactWrite(
+      arweave,
+      tools.wallet,
+      namespace.taskTxId,
+      input
+    );
+    await checkTxConfirmation(tx, task_name);
+    return true;
+  } catch (error) {
+    console.log("error rank", error);
+    return false;
+  }
+}
 /**
  * Awaitable rate limit
  * @returns
  */
 function rateLimit() {
   return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
+}
+/****
+ * cluster functions
+ */
+async function puppeteerCluster() {
+  if (mainCluster) return mainCluster;
+  try {
+    mainCluster = await Cluster.launch({
+      concurrency: Cluster.CONCURRENCY_CONTEXT,
+      maxConcurrency: 4
+    });
+  } catch (e) {
+    console.log("create cluster failed");
+    console.log(e);
+    return false;
+  }
+  try {
+    await mainCluster.task(async ({ page, data }) => {
+      await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, "webdriver", {
+          get: () => false
+        });
+      });
+      await page.evaluateOnNewDocument(() => {
+        // We can mock this in as much depth as we need for the test.
+        window.navigator.chrome = {
+          runtime: {}
+          // etc.
+        };
+      });
+
+      await page.evaluateOnNewDocument(() => {
+        const originalQuery = window.navigator.permissions.query;
+        return (window.navigator.permissions.query = (parameters) =>
+          parameters.name === "notifications"
+            ? Promise.resolve({
+                state: Notification.permission
+              })
+            : originalQuery(parameters));
+      });
+      await page.evaluateOnNewDocument(() => {
+        // Overwrite the `plugins` property to use a custom getter.
+        Object.defineProperty(navigator, "plugins", {
+          // This just needs to have `length > 0` for the current test,
+          // but we could mock the plugins too if necessary.
+          get: () => [1, 2, 3, 4, 5]
+        });
+      });
+      // Pass the Languages Test.
+      await page.evaluateOnNewDocument(() => {
+        // Overwrite the `plugins` property to use a custom getter.
+        Object.defineProperty(navigator, "languages", {
+          get: () => ["en-US", "en"]
+        });
+      });
+      await page.goto(data.url);
+      const html = await page.content();
+      if (data.takeScreenshot) {
+        await page.setViewport({
+          width: 1920,
+          height: 1080
+        });
+        await page.screenshot({
+          path: data.imagePath,
+          type: "jpeg"
+        });
+        return {
+          imagePath: data.imagePath,
+          html
+        };
+      }
+      return {
+        html
+      };
+    });
+  } catch (error) {
+    console.log("cluster create error");
+    console.log(error);
+  }
+  return mainCluster;
+}
+/**
+ * scraper utils functions
+ */
+async function getPayloadFromHtml(html) {
+  let $ = await cheerio.load(html);
+  $("script").remove();
+  $("style").remove();
+  $("noscript").remove();
+  $("link").remove();
+  var payload = {
+    title: "",
+    content: "",
+    image: ""
+  };
+  var title = "";
+  // eslint-disable-next-line no-cond-assign
+  if ((title = $('meta[property="og:title"]').attr("content"))) {
+    payload.title = title;
+    // eslint-disable-next-line no-cond-assign
+  } else if ((title = $("meta[name=title]").attr("content"))) {
+    payload.title = title;
+  } else {
+    $("h1,h2,h3,h4,h5,h6,p").each(function (i, elem) {
+      if (i === 0) {
+        title = $(elem).text().trim();
+      }
+    });
+    if (!title) {
+      title = $("title").text().trim();
+    }
+    payload.title = title;
+  }
+  var image = "";
+  // image: meta:ogimage OR document.images[0]
+  // eslint-disable-next-line no-cond-assign
+  if ((image = $('meta[property="og:image"]').attr("content"))) {
+    payload.image = image;
+  } else {
+    $("img").each(function (i) {
+      if (i === 0) {
+        image = $(this).attr("src");
+      }
+    });
+    payload.image = image;
+  }
+  payload.content = await getScrapData($("body").html());
+  return payload;
+}
+
+async function parseAndSaveAllSelctor($, selector, contentType) {
+  let totalContent = [];
+  $(selector).each((index, element) => {
+    if (index < 500) {
+      // add limitation 500 nodes
+      let content = "";
+      if (selector === "img") {
+        content = $(element).attr("src");
+      } else if (selector === "a") {
+        content = $(element).attr("href");
+      } else {
+        content = $(element).text().trim();
+      }
+      let ids = $(element).attr("id");
+      let classNames = $(element).attr("class");
+      let subSelectorsArr = [];
+      let subSelector = "";
+      try {
+        while ($(element)[0] && $(element)[0].name && !ids && !classNames) {
+          subSelectorsArr.push($(element)[0].name);
+          element = $(element).parent();
+          ids = $(element).attr("id");
+          classNames = $(element).attr("class");
+        }
+      } catch (e) {
+        console.log(e);
+        return;
+      }
+      for (let i = subSelectorsArr.length - 1; i >= 0; i--) {
+        subSelector += `>${subSelectorsArr[i]}`;
+      }
+      if ($(element)[0] && $(element)[0].name) {
+        const elementType = $(element)[0].name;
+        let modifiedClassNames = ""; //contains .
+        let modifiedIds = ""; //contains #
+
+        if (classNames) {
+          modifiedClassNames = `[class='${classNames}']`;
+        }
+        if (ids) {
+          modifiedIds = `[id='${ids}']`;
+        }
+        let finalSelector = `${elementType}`;
+        if (modifiedClassNames) finalSelector += `${modifiedClassNames}`;
+        if (modifiedIds) finalSelector += `${modifiedIds}`;
+        finalSelector += subSelector;
+        let found = false;
+        if ($(finalSelector).length >= 0) {
+          $(finalSelector).each(async (i, item) => {
+            if (selector === "img") {
+              content = $(item).attr("src");
+            } else if (selector === "a") {
+              content = $(item).attr("href");
+            } else {
+              content = $(item).text().trim();
+            }
+            if (!found) {
+              // finalSelectorIndex = i;
+              let finalSelectorWithIndex = `${i}$` + finalSelector;
+              if (
+                content &&
+                content.trim() !== "" &&
+                content[0] !== "#" &&
+                totalContent.filter((x) => x.text === content).length === 0
+              ) {
+                totalContent.push({
+                  text: content,
+                  type: contentType,
+                  selector: finalSelectorWithIndex,
+                  label: "sitemap " + contentType
+                });
+                found = true;
+              }
+            }
+          });
+        }
+      } else {
+        return;
+      }
+    }
+  });
+  return totalContent;
+}
+
+async function getScrapData(html) {
+  let $ = await cheerio.load(html);
+
+  //If element consists main tag
+  if ($("main").length) {
+    // console.log('Contains main tag');
+    $ = await cheerio.load($("main").html());
+  }
+  $("script").remove();
+  $("style").remove();
+  $("nav").remove();
+  $("head").remove();
+  $("noscript").remove();
+  $("link").remove();
+  $("meta").remove();
+  $("footer").remove();
+
+  const dataImage = await parseAndSaveAllSelctor($, "img", "Image");
+  const dataLink = await parseAndSaveAllSelctor($, "a", "Link");
+  const dataText = await parseAndSaveAllSelctor(
+    $,
+    "h1, h2, h3, h4, h5, span, p",
+    "Text"
+  );
+  // console.log(dataImage)
+  // console.log(dataLink)
+  // console.log(dataText)
+  return {
+    Image: dataImage,
+    Link: dataLink,
+    Text: dataText
+  };
 }
