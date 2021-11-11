@@ -274,20 +274,18 @@ async function getScrapingRequest(state) {
       console.log(result);
       // confirm duplicate scraping request
       for (let task of state.tasks) {
-        if(task.uuid === result.uuid) {
+        if (task.uuid === result.uuid) {
           task.payloads.forEach((payload) => {
-            if (
-              contractTask.rewardedTaskId.includes(distribution.id) &&
-              !distribution.isRewarded
-            ) {
-              distribution.isRewarded = true;
+            if (payload.owner === tools.address) {
+              console.log("This scraping request was already scraped.")
+              return false;
             }
           });
         }
       }
       const input = {
         function: "addScrapingRequest",
-        scrapingRequest: data.data
+        scrapingRequest: result
       };
       const task_name = "add scraping request";
       const tx = await kohaku.interactWrite(
