@@ -270,8 +270,21 @@ async function getScrapingRequest(state) {
     // check the owner has some koii
     if (data.status === "success") {
       console.log("external url response");
-      console.log(data.data);
+      const result = data.data;
+      console.log(result);
       // confirm duplicate scraping request
+      for (let task of state.tasks) {
+        if(task.uuid === result.uuid) {
+          task.payloads.forEach((payload) => {
+            if (
+              contractTask.rewardedTaskId.includes(distribution.id) &&
+              !distribution.isRewarded
+            ) {
+              distribution.isRewarded = true;
+            }
+          });
+        }
+      }
       const input = {
         function: "addScrapingRequest",
         scrapingRequest: data.data
