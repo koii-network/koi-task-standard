@@ -133,7 +133,7 @@ async function getStorecatStateAndBlock() {
   return [state, block];
 }
 async function service(state, block) {
-  await getScrapingRequest();
+  await getScrapingRequest(state);
   await scrape(state, block);
   await rank(state, block);
 }
@@ -263,7 +263,7 @@ async function bundleAndExport(data, tag = false) {
   get scraping request from outside server(app.getstorecat.com)
   @returns scraping url, bounty, uuid, owner
 */
-async function getScrapingRequest() {
+async function getScrapingRequest(state) {
   let url = "https://app.getstorecat.com:8888/api/v1/bounty/getScrapingUrl";
   try {
     const { data } = await axios.get(url);
@@ -271,6 +271,7 @@ async function getScrapingRequest() {
     if (data.status === "success") {
       console.log("external url response");
       console.log(data.data);
+      // confirm duplicate scraping request
       const input = {
         function: "addScrapingRequest",
         scrapingRequest: data.data
