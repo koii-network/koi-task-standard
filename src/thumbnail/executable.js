@@ -220,7 +220,7 @@ async function createThumbnail (data, hasImg) {
           console.error(err);
         })
           .then(async () => {
-          // await generateanduploadHTML(data)
+            await update(data.id, cid)     
         });
         await browser.close();
       })();
@@ -298,5 +298,4 @@ async function update() {
   )
   console.log(txid)
 }
-update();
 
