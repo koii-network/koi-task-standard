@@ -16,6 +16,6 @@ export default function lockBounty(state, action) {
   if (!(caller in balances) || balances[caller] < bounty)
     throw new ContractError("You do not have enough koi");
   balances[caller] -= bounty;
-  contractId.lockedBounty[caller] = bounty;
+  contractTask.lockedBounty[SmartWeave.transaction.id] = { caller: bounty };
   return { state };
 }

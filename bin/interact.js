@@ -12,15 +12,15 @@ const arweave = Arweave.init({
 
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
-//const contractId = "p1fnx1unoxJ1txvIzc8NcQybMvY78UdHSZBm6XPeEj4"; // test attention contract
+const contractId = "p1fnx1unoxJ1txvIzc8NcQybMvY78UdHSZBm6XPeEj4"; // test attention contract
 //const contractId = "gPWdE3c2nkuB_46mdxt3RQvrRELj_oN1g0uk8xwsqII"; // test koii Contract
 //const contractId = "rCgc9NOBriEv21wV98FWb7n_ySggRibpPJpWxEgNxqI"; // attention in production
-const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
+//const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 
 //const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
-const input = {
-  function: "cleanPreRegister"
-};
+// const input = {
+//   function: "cleanPreRegister"
+// };
 // const input = {
 //   function: "mint",
 //   qty: 500,
@@ -61,10 +61,10 @@ const input = {
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
 //   qty: 100
 // };
-// const input = {
-//   function: "registerExecutableId",
-//   executableId: "-uyftyWYXsjLD9nMKxyfFn2xPAFq2Y-kpLF9TbyM-u0"
-// };
+const input = {
+  function: "registerExecutableId",
+  executableId: "A2LQ5-Kaom_AMb0jBj82-Z-T6D_BkURVWhDZyocWEEA"
+};
 async function main() {
   console.log("Writing", input.function);
   const txId = await smartweave.interactWrite(

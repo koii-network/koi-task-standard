@@ -14,8 +14,9 @@ export default async function addScrapingRequest(state, action) {
 
   // check if the bounty is locked
   if (
-    !(scrapingRequest.owner in contractTask.lockedBounty) ||
-    contractTask.lockedBounty[scrapingRequest.owner] < scrapingRequest.bounty
+    !(scrapingRequest.uuid in contractTask.lockedBounty) ||
+    contractTask.lockedBounty[scrapingRequest.uuid][scrapingRequest.owner] <
+      scrapingRequest.bounty
   )
     throw new ContractError(
       "Bounties are not locked or locked bounties are less than the bounty add in the scrappingRequest"

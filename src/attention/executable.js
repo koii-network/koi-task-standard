@@ -865,7 +865,8 @@ async function rankPrepDistribution() {
 function canDistributeReward(koiiState, block) {
   if (hasDistributed) return false;
   const distributionBlock = koiiState.distributionBlock;
-  return distributionBlock + 600 < block;
+  //600
+  return distributionBlock + 40 < block;
 }
 
 async function distribute() {

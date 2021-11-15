@@ -12,7 +12,24 @@ export default async function distributeReward(state) {
         if (e.type !== "TX_NOT_FOUND") throw e;
       });
     if (contractState) {
-      contractState.tasks.forEach((subtask) => {
+      // Filter tasks with prepareDistribution
+      const tasksWithDistribution = contractState.tasks.filter(
+        (subtask) => subtask.prepareDistribution.length !== 0
+      );
+
+      // clean lockedBounty for completed task
+      const taskIds = Object.keys(task.lockedBounty);
+      for (let taskId of taskIds) {
+        const completeTask = contractState.completedTasks.find(
+          (task) => task.uuid === taskId
+        );
+        if (completeTask) {
+          delete task.lockedBounty[taskId];
+        }
+      }
+
+      // Distribute Rewards
+      tasksWithDistribution.forEach((subtask) => {
         const prepareDistribution = subtask.prepareDistribution;
         const rewardedTaskId = task.rewardedTaskId;
         // clean rewarded block
@@ -31,9 +48,8 @@ export default async function distributeReward(state) {
             !rewardedTaskId.includes(distribution.id)
         );
         if ("bounty" in subtask) {
+          let bounty = subtask.bounty;
           unRewardedPrepareDistribution.forEach((prepareDistribution) => {
-            //const lockBounty = task.lockBounty[task.owner];
-            let bounty = subtask.bounty;
             const taskDistribution = Object.values(
               prepareDistribution.distribution
             ).reduce((preValue, curValue) => preValue + curValue);
@@ -47,8 +63,6 @@ export default async function distributeReward(state) {
               }
               rewardedTaskId.push(prepareDistribution.id);
               bounty -= taskDistribution;
-              balances[subtask.owner] -= taskDistribution;
-              //task.lockBounty[task.owner] -= taskDistribution;
             }
           });
         } else if (
