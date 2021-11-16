@@ -236,7 +236,7 @@ async function getScrapingRequest(state) {
         if (task.uuid === result.uuid) {
           task.payloads.forEach((payload) => {
             if (payload.owner === tools.address) {
-              console.log("This scraping request was already scraped.")
+              console.log("This scraping request was already scraped.");
               return false;
             }
           });
