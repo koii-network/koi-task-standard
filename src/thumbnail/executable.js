@@ -1,18 +1,3 @@
-/*
-Available APIs:
-
-tools
-require
-namespace {
-  redisGet()
-  redisSet()
-  fs()
-  express()
-}
-*/
-
-// Import SDK modules if you want to use them (optional)
-
 const fs = require("fs");
 const Arweave = require("arweave");
 const kweb = require("@_koi/sdk/web");
@@ -84,13 +69,13 @@ async function execute(_init_state) {
   let state, block;
   for (;;) {
     try {
-      // await setTimeout(async () => {
-      //   console.log('ss')
-      // }, 5000)
+      await setTimeout(async () => {
+        console.log('ss')
+      }, 5000)
       await rateLimit()
       console.log('still running')
-      // [nodes] = await getRegisteredNodeList();
-      // auditNodes();
+      [nodes] = await getRegisteredNodeList();
+      auditNodes();
     } catch (e) {
       console.error("Error", e);
       continue;
@@ -246,7 +231,10 @@ async function createThumbnail (data, hasImg) {
           if (err) throw err;
           console.log(imagePath, ' was deleted');
         }
-)
+);
+
+  await update(data.id, cid);   
+
   // upload image thumbnail  
   } else {
     axios({
@@ -268,7 +256,7 @@ async function createThumbnail (data, hasImg) {
         console.log(resize) 
         const { cid } = await ipfs.add(resize)
         console.info(cid)
-
+        await update(data.id, cid);
         return cid
     })
       
@@ -277,10 +265,13 @@ async function createThumbnail (data, hasImg) {
 
 async function update() {
 
+  let aid = data.id
+  let cid = cid
+
   const input = {
       function: "proposeUpdate",
-      aid: 'gtSQKcx3Ex8eOdgZxNh0rWSNiKQCt3Xi02cGnJQ_uSM',
-      cid: 'QmVhDHYYas6rnt8frPqKp6T2KjobJfCDVEYEUUH8ZgBZhF'
+      aid: aid,
+      cid: cid
   }
 
   // const input = {
@@ -297,5 +288,55 @@ async function update() {
       input
   )
   console.log(txid)
+}
+
+async function audit(state) {
+  const task = state.task;
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
+  );
+  const address = tools.address;
+  const proposedData = activeProposedData.proposedData;
+  await Promise.allSettled(
+    proposedData.map(async (proposedData) => {
+      if (proposedData.distributer !== address) {
+        const valid = await auditPort(proposedData.txId, proposedData.cacheUrl);
+        if (!valid) {
+          const input = {
+            function: "audit",
+            id: proposedData.txId
+          };
+          const task = "submit audit";
+          const tx = await kohaku.interactWrite(
+            arweave,
+            tools.wallet,
+            namespace.taskTxId,
+            input
+          );
+
+          if (await checkTxConfirmation(tx, task))
+            console.log("audit submitted");
+        }
+      }
+    })
+  );
+  hasAudited = true;
+}
+
+function canAudit(state, block) {
+  const task = state.task;
+  if (block >= task.close) return false;
+
+  const activeProposedData = task.proposedPayloads.find(
+    (proposedData) => proposedData.block === task.open
+  );
+
+  const proposedData = activeProposedData.proposedData;
+
+  return (
+    block < task.open + OFFSET_BATCH_VOTE_SUBMIT && // block in time frame
+    !hasAudited && // ports not submitted
+    proposedData.length !== 0
+  );
 }
 
