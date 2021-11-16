@@ -36,8 +36,13 @@ export default function registerExecutableId(state, action) {
 
 ```
 
+## Deploy Contract
+
+`yarn deploy_task storecat`
+
 ## Testing Contract
 
 `yarn build`
 
 - `node test/attention.test.js path/to/wallet.json`
+- `yarn execute storecat [contractID] service`
