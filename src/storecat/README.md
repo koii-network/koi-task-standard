@@ -46,3 +46,9 @@ export default function registerExecutableId(state, action) {
 
 - `node test/attention.test.js path/to/wallet.json`
 - `yarn execute storecat [contractID] service`
+
+## Running
+`yarn`
+
+- 1. `npm config set PUPPETEER_SKIP_DOWNLOAD=true`
+- 2. `node node_modules/puppeteer/instal.js`
