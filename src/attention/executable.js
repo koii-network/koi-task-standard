@@ -41,6 +41,8 @@ const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
 const PORT_LOGS_CACHE_OFFSET = 300;
 
+const NFT_CACHE_TIME = 300000; // 5m
+
 let ports = {};
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -124,12 +126,29 @@ async function getNft(req, res) {
     const id = req.query.id;
     if (!tools.validArId(id))
       return res.status(400).send({ error: "invalid txId" });
+
+    // Try using state from redis cache
+    const now = Date.now();
+    const cacheStateStr = await namespace.redisGet(id)
+      .catch((e) => {console.error("Error fetching from redis:", e)});
+    if (cacheStateStr) {
+      const cacheSplit = cacheStateStr.split("_", 1);
+      if (now < parseInt(cacheSplit[0])) {
+        console.log("Responding from caache");
+        return res
+          .status(200)
+          .type("application/json")
+          .send(cacheSplit[1]);
+      }
+    }
+
+    // Check NFT registration
     const attentionState = await tools.getState(namespace.taskTxId);
     const nfts = Object.keys(attentionState.nfts);
     const nftIndex = nfts.indexOf(id);
     if (nftIndex === -1) return res.status(404).send(id + " is not registered");
 
-    // Get NFT state
+    // Get nft state from arweave
     let nftState;
     try {
       nftState = await tools.getState(id);
@@ -157,7 +176,14 @@ async function getNft(req, res) {
         nftState.reward += (report[id] * 1000) / totalAttention; // Int multiplication first for better perf
       }
     }
-    res.status(200).send(nftState);
+
+    // Respond and cache
+    const nftStateStr = JSON.stringify(nftState);
+    res
+      .status(200)
+      .type("application/json")
+      .send(nftStateStr);
+    await namespace.redisSet(id, (now + NFT_CACHE_TIME) + "_" + nftStateStr);
   } catch (e) {
     console.error("getNft error:", e.message);
     res.status(400).send({ error: e });
