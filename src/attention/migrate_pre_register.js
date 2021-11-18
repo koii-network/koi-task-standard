@@ -16,16 +16,16 @@ export default async function migratePreRegister(state) {
       !registeredContents.flat().includes(Object.values(data.content)[0])
   );
   const newNfts = [];
-  const newContents = [];
+  const newgenericContents = [];
   for (const data of preRegisterContents) {
     if ("nft" in data.content && !newNfts.includes(data.content.nft)) {
       newNfts.push(data.content.nft);
     } else if (
       !("nft" in data.content) &&
-      !newContents.includes({ ...data.content, owner: data.owner })
+      !newgenericContents.includes({ ...data.content, owner: data.owner })
     ) {
       const content = { ...data.content, owner: data.owner };
-      newContents.push(content);
+      newgenericContents.push(content);
     }
   }
   // add nfts
@@ -92,13 +92,10 @@ export default async function migratePreRegister(state) {
     }
   }
   //add other contents different from nft
-  if (newContents.length !== 0) {
-    for (let content of newContents) {
-      const contentType = Object.keys(content)[0];
-      const contentId = content[contentType];
-      contentType in state.contents
-        ? (state.contents[contentType][contentId] = content.owner)
-        : (state.contents[contentType] = { [contentId]: content.owner });
+  if (newgenericContents.length !== 0) {
+    for (let content of newgenericContents) {
+      const contentId = Object.values(content)[0];
+      state.contents.genericContents[contentId] = content.owner;
     }
   }
 

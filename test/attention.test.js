@@ -47,22 +47,22 @@ async function main() {
   //   attentionContractId
   // );
 
-  const attentionInput0 = {
-    function: "submitDistribution",
-    distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
-    cacheUrl: "http/bundler/cache",
-    mainContractId: koiContractId,
-    contractId: attentionContractId
-  };
-  await smartest.interactWrite(
-    arweave,
-    attentionSrc,
-    wallet,
-    attentionInput0,
-    smartest.readContractState(attentionContractId),
-    walletAddress,
-    attentionContractId
-  );
+  // const attentionInput0 = {
+  //   function: "submitDistribution",
+  //   distributionTxId: "KFyrB4SBIv5XPyRu-sBUdfuQlvDpBGQ6-q9ujVek34A",
+  //   cacheUrl: "http/bundler/cache",
+  //   mainContractId: koiContractId,
+  //   contractId: attentionContractId
+  // };
+  // await smartest.interactWrite(
+  //   arweave,
+  //   attentionSrc,
+  //   wallet,
+  //   attentionInput0,
+  //   smartest.readContractState(attentionContractId),
+  //   walletAddress,
+  //   attentionContractId
+  // );
 
   // const state = smartest.readContractState(attentionContractId);
   // const proposedPaylods = state.task.proposedPaylods.find(
@@ -187,7 +187,8 @@ async function main() {
     // smartest.readContractState(attentionContractId)
   );
   const state = smartest.readContractState(attentionContractId);
-  console.log(state.tasks[0].prepareDistribution[0]);
+  console.log(state.tasks[0].attentionReport);
+  console.log(state.tasks[0].prepareDistribution);
 }
 
 main().then(() => {

@@ -129,15 +129,12 @@ export default async function rankPrepDistribution(state) {
         }
       }
     } else {
-      // Rewarding other contents owner
+      // Rewarding  genericContents owners
       let reward = distribution[content].length * rewardPerAttention;
-      for (let data of Object.values(state.contents)) {
-        if (content in data) {
-          data[content] in distributionReward
-            ? (distributionReward[data[content]] += reward)
-            : (distributionReward[data[content]] = reward);
-        }
-      }
+      const genericContents = state.contents.genericContents;
+      genericContents[content] in distributionReward
+        ? (distributionReward[genericContents[content]] += reward)
+        : (distributionReward[genericContents[content]] = reward);
     }
   }
   currentProposed.isRanked = true;

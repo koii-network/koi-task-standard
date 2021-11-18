@@ -11221,7 +11221,20 @@
     ]
   },
   "tasks": [],
-  "preRegisterDatas": [],
+  "preRegisterDatas": [
+    {
+      "contractId": "q5w6e7r8",
+      "insertBlock": 808352,
+      "content": { "song": "jEjsFhzXF6KHKrUPLX26ePOrz3rfF1HyJ05n3WF-2Zo" },
+      "owner": "gmWmvNMS-OFiI3GR7_EzLi8w_zEExZMYhIO5soI_I8Y"
+    },
+    {
+      "contractId": "q5w6e7r8",
+      "insertBlock": 808355,
+      "content": { "nft": "KWkhOuWf4iXGwgxICsxWA1W0fv8WxnDwasAvxskadAk" },
+      "owner": "50JVvg84zA2ae-lQ7j9tL_CIXFlNXr2FXjEcDNXfTkc"
+    }
+  ],
   "distributionBlock": 677545,
   "frozen": false
 }
