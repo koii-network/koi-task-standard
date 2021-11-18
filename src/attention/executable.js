@@ -41,7 +41,7 @@ const REALTIME_PORTS_OFFSET = 86400;
 const REALTIME_PORTS_CHECK_OFFSET = 1600;
 const PORT_LOGS_CACHE_OFFSET = 300;
 
-const NFT_CACHE_TIME = 300000; // 5m
+const NFT_CACHE_TIME = 600000; // 10m
 
 let ports = {};
 let lastBlock = 0;
