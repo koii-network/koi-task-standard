@@ -134,7 +134,6 @@ async function getNft(req, res) {
     if (cacheStateStr) {
       const cacheSplit = cacheStateStr.split("_", 1);
       if (now < parseInt(cacheSplit[0])) {
-        console.log("Responding from caache");
         return res
           .status(200)
           .type("application/json")
