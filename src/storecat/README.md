@@ -50,5 +50,9 @@ export default function registerExecutableId(state, action) {
 ## Running
 `yarn`
 
+### Windows
 - 1. `npm config set PUPPETEER_SKIP_DOWNLOAD=true`
-- 2. `node node_modules/puppeteer/instal.js`
+- 2. `node node_modules/puppeteer/install.js`
+### Mac
+- 1. `PUPPETEER_SKIP_DOWNLOAD=true npm install puppeteer`
+- 2. `node node_modules/puppeteer/install.js`
