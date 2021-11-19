@@ -26,12 +26,10 @@ export default function withdraw(state, action) {
       balances[caller] += qty;
       break;
     }
-    if (qty > stake.value) {
-      balances[caller] += stake.value;
-      qty -= stake.value;
-      stake.value -= stake.value;
-    }
+    balances[caller] += stake.value;
+    qty -= stake.value;
+    stake.value -= stake.value;
   }
-
+  stakes[caller] = stakes[caller].filter((stake) => stake.value > 0);
   return { state };
 }

@@ -12,8 +12,8 @@ const arweave = Arweave.init({
 
 const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
-const contractId = "rCgc9NOBriEv21wV98FWb7n_ySggRibpPJpWxEgNxqI"; // test attention contract
-//const contractId = "gPWdE3c2nkuB_46mdxt3RQvrRELj_oN1g0uk8xwsqII"; // test koii Contract
+//const contractId = "p1fnx1unoxJ1txvIzc8NcQybMvY78UdHSZBm6XPeEj4"; // test attention contract
+const contractId = "gPWdE3c2nkuB_46mdxt3RQvrRELj_oN1g0uk8xwsqII"; // test koii Contract
 //const contractId = "rCgc9NOBriEv21wV98FWb7n_ySggRibpPJpWxEgNxqI"; // attention in production
 //const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 
@@ -45,17 +45,17 @@ const contractId = "rCgc9NOBriEv21wV98FWb7n_ySggRibpPJpWxEgNxqI"; // test attent
 //   function: "registerValidContractSrc",
 //   contractSrc: "hmqdldElrUGT23q9dlegLZIABnYO8iQ03CHSEbEZYMo"
 // };
-const input = {
-  function: "registerTask",
-  taskName: "storecat",
-  taskTxId: "lx1W5RKfGyeY-OUxmjMQsxnK7iYPMeq5wFPZ0K-X7fg"
-};
 // const input = {
-//   function: "burnKoi",
-//   contractId: "p1fnx1unoxJ1txvIzc8NcQybMvY78UdHSZBm6XPeEj4",
-//   contentType: "song",
-//   contentTxId: "zM1t8lVqi8zztoNF8CYe8tr3g7FvYHfkCdmyxwySYqs"
+//   function: "registerTask",
+//   taskName: "storecat",
+//   taskTxId: "lx1W5RKfGyeY-OUxmjMQsxnK7iYPMeq5wFPZ0K-X7fg"
 // };
+const input = {
+  function: "burnKoi",
+  contractId: "p1fnx1unoxJ1txvIzc8NcQybMvY78UdHSZBm6XPeEj4",
+  contentType: "video",
+  contentTxId: "zM1t8lVqi8zztoNF8CYe8tr3g7FvYHfkCdmyxwySYqs"
+};
 // const input = {
 //   function: "mint",
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
