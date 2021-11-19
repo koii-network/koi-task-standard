@@ -132,8 +132,14 @@ async function getNft(req, res) {
     const cacheStateStr = await namespace.redisGet(id)
       .catch((e) => {console.error("Error fetching from redis:", e)});
     if (cacheStateStr) {
-      const cacheSplit = cacheStateStr.split("_", 1);
-      if (now < parseInt(cacheSplit[0])) {
+      const cacheSplit = cacheStateStr.split("_", 2);
+      const cacheTime = parseInt(cacheSplit[0]);
+      if (
+        cacheSplit.length > 1 &&
+        cacheTime !== NaN &&
+        now < cacheTime &&
+        cacheSplit[1].length > 1
+      ) {
         return res
           .status(200)
           .type("application/json")
