@@ -120,6 +120,7 @@ async function latest(_req, res) {
 function getId(_req, res) {
   res.status(200).send(namespace.taskTxId);
 }
+
 async function getNft(req, res) {
   try {
     // Validate nftId
@@ -132,18 +133,18 @@ async function getNft(req, res) {
     const cacheStateStr = await namespace.redisGet(id)
       .catch((e) => {console.error("Error fetching from redis:", e)});
     if (cacheStateStr) {
-      const cacheSplit = cacheStateStr.split("_", 2);
-      const cacheTime = parseInt(cacheSplit[0]);
+      const splitIndex = cacheStateStr.indexOf('_');
+      const cacheTime = parseInt(cacheStateStr.substr(0, splitIndex));
       if (
-        cacheSplit.length > 1 &&
-        cacheTime !== NaN &&
+        splitIndex > 0 &&
+        !Number.isNaN(cacheTime) &&
         now < cacheTime &&
-        cacheSplit[1].length > 1
+        cacheStateStr.length - splitIndex > 2
       ) {
         return res
           .status(200)
           .type("application/json")
-          .send(cacheSplit[1]);
+          .send(cacheStateStr.substr(splitIndex + 1));
       }
     }
 
