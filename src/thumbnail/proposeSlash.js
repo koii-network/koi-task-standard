@@ -11,7 +11,6 @@ export default function proposeSlash(state, action) {
      // checks for data
      if (!data) throw new ContractError("Invalid input");
      if (typeof data !== "string") throw new ContractError("Invalid input format");
-     const 
     // checks caller
     if (!caller) throw new ContractError("Invalid input");
     

@@ -1,4 +1,4 @@
-const smartest = require("@_koi/smartest");
+// const smartest = require("@_koi/smartest");
 let Arweave = require("arweave");
 const {interactWrite, interactWriteDryRun} = require("smartweave")
 let Smartweave = require('smartweave');

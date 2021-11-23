@@ -135,7 +135,6 @@ async function generateCardWithData(_req, res) {
 }
 
 async function createThumbnail (data, hasImg) {
-
     // NFT thumbnail upload
     const imagePath = "./src/thumbnail/" + data.id + ".png";
     console.log("conent type is " + data.contentType + "  hasImg is " + hasImg)
