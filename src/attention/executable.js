@@ -43,6 +43,8 @@ const PORT_LOGS_CACHE_OFFSET = 300;
 
 const NFT_CACHE_TIME = 600000; // 10m
 
+const CHUNK_SIZE = 2;
+
 let ports = {};
 let lastBlock = 0;
 let lastLogClose = 0;
@@ -54,14 +56,139 @@ let hasDistributed = false;
 let hasVoted = false;
 let hasSubmitBatch = false;
 let hasAudited = false;
+let portFlag = true;
 
 let portsLog = [];
 
 const logsInfo = {
-  redisPortsKey: `${REDIS_KEY}-ports`,
-  lockedRedisPortsKey: `${REDIS_KEY}-lockedPorts`
+  currentRedisPortsKey: `${REDIS_KEY}++ports`,
+  lockedRedisPortsKey: `${REDIS_KEY}++lockedPorts`,
+  currentChunkCount: `${REDIS_KEY}++currentChunkCount`,
+  lockedChunkCount: `${REDIS_KEY}++lockedChunkCount`,
+  currentChunk: `${REDIS_KEY}++currentChunk-`,
+  lockedChunk: `${REDIS_KEY}++lockedChunk-`
 };
+let currentChunk = [];
+let currentChunkCount = 1;
+let lockedChunkCount = 1;
 
+async function setupPorts() {
+  currentChunkCount = await namespace.redisGet(logsInfo.currentChunkCount);
+  console.log(`current VhunkmCount redis`, currentChunkCount);
+  if (!currentChunkCount) {
+    currentChunkCount = 1;
+    await namespace.redisSet(logsInfo.currentChunkCount, currentChunkCount);
+    return;
+  }
+  // await namespace.redisSet(logsInfo.currentChunkCount, currentChunkCount);
+  let currentChunkStr = await namespace.redisGet(
+    logsInfo.currentChunk + currentChunkCount
+  );
+
+  currentChunk = JSON.parse(currentChunkStr);
+  console.log(currentChunk);
+  if (!currentChunk) currentChunk = [];
+}
+
+/**
+ * Ad Port to current chunk array
+ * @param {Object} port
+ * @returns {Promise} void
+ */
+
+async function addPortsToChunk(port) {
+  console.log("length ", currentChunk.length);
+  // console.log(typeof currentChunk);
+  currentChunk.push(port);
+  await checkChunkSize();
+  return;
+}
+/**
+ * Checks if current chunk is full or not if yes crates a new chunk.
+ * PUT or PATCH files/:id
+ *
+ * @returns {Promise} void
+ */
+async function checkChunkSize() {
+  if (currentChunk.length >= CHUNK_SIZE) {
+    await namespace.redisSet(
+      logsInfo.currentChunk + currentChunkCount,
+      JSON.stringify(currentChunk)
+    );
+    currentChunkCount++;
+    await namespace.redisSet(logsInfo.currentChunkCount, currentChunkCount);
+    currentChunk = [];
+  }
+  return;
+}
+
+async function getPortChunk(id) {
+  let chunk = await namespace.redisGet(logsInfo.lockedChunk + id);
+  chunk = JSON.parse(chunk);
+  if (chunk && chunk.length) return [];
+  return chunk;
+}
+async function syncLastCurrentChunkWithRedis() {
+  await namespace.redisSet(
+    logsInfo.currentChunk + currentChunkCount,
+    JSON.stringify(currentChunk)
+  );
+}
+setInterval(() => {
+  syncLastCurrentChunkWithRedis();
+}, 1000);
+
+async function resetPorts() {
+  return;
+}
+// setTimeout(lockPorts, 1);
+async function lockPorts() {
+  console.log("Locking ports");
+  let lockedKeys = await namespace.redisKeys(logsInfo.lockedChunk + "*");
+  for (let i = 1; i <= lockedKeys.length; i++) {
+    await namespace.redisDel(logsInfo.lockedChunk + i);
+    console.log("delete locked port ", logsInfo.lockedChunk + i);
+  }
+  let currentCountTemp = await namespace.redisGet(logsInfo.currentChunkCount);
+  console.log("current Chunk count ", currentCountTemp);
+  if (!currentCountTemp) {
+    console.log("ji");
+    return;
+  }
+  await syncLastCurrentChunkWithRedis();
+  for (let i = 1; i <= currentCountTemp; i++) {
+    let current = await namespace.redisGet(logsInfo.currentChunk + i);
+    if (current) {
+      current = JSON.parse(current);
+      await namespace.redisSet(
+        logsInfo.lockedChunk + i,
+        JSON.stringify(current)
+      );
+      await namespace.redisDel(logsInfo.currentChunk + i);
+    }
+  }
+  await namespace.redisSet(logsInfo.lockedChunkCount, currentCountTemp);
+  currentCount = 1;
+  currentChunk = [];
+  await namespace.redisSet(logsInfo.currentChunkCount, 1);
+  await namespace.redisSet(logsInfo.currentChunk + 1, JSON.stringify([]));
+  console.log("ports locked");
+  return;
+
+  // for (let i = 1; i <= currentChunkCount; i++) {}
+
+  // try {
+  //   let redisPorts = JSON.stringify(portsLog);
+  //   if (redisPorts) {
+  //     await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
+  //     portsLog = [];
+  //     return;
+  //   }
+  // } catch (e) {
+  //   console.log(e);
+  //   console.log("Unable to lock Ports ", e);
+  // }
+}
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("get", "/", root);
@@ -74,17 +201,21 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    initializePorts();
+    // initializePorts();
+    setupPorts();
   }
 }
 
-setInterval(async () => {
-  await namespace.redisSet(logsInfo.redisPortsKey, JSON.stringify(portsLog));
-}, PORT_LOGS_CACHE_OFFSET * 1000);
+// setInterval(async () => {
+//   await namespace.redisSet(
+//     logsInfo.currentRedisPortsKey,
+//     JSON.stringify(portsLog)
+//   );
+// }, PORT_LOGS_CACHE_OFFSET * 1000);
 
 async function initializePorts() {
   try {
-    let redisPorts = await namespace.redisGet(logsInfo.redisPortsKey);
+    let redisPorts = await namespace.redisGet(logsInfo.currentRedisPortsKey);
     if (redisPorts) portsLog = JSON.parse(redisPorts);
   } catch (e) {
     portsLog = [];
@@ -111,10 +242,7 @@ async function latest(_req, res) {
   const attentionState = await tools.getState(namespace.taskTxId);
   const attentionReport = attentionState.task.attentionReport;
   const latestSummary = attentionReport[attentionReport.length - 1] || {};
-  res
-    .status(200)
-    .type("application/json")
-    .send(latestSummary);
+  res.status(200).type("application/json").send(latestSummary);
 }
 
 function getId(_req, res) {
@@ -130,10 +258,11 @@ async function getNft(req, res) {
 
     // Try using state from redis cache
     const now = Date.now();
-    const cacheStateStr = await namespace.redisGet(id)
-      .catch((e) => {console.error("Error fetching from redis:", e)});
+    const cacheStateStr = await namespace.redisGet(id).catch((e) => {
+      console.error("Error fetching from redis:", e);
+    });
     if (cacheStateStr) {
-      const splitIndex = cacheStateStr.indexOf('_');
+      const splitIndex = cacheStateStr.indexOf("_");
       const cacheTime = parseInt(cacheStateStr.substr(0, splitIndex));
       if (
         splitIndex > 0 &&
@@ -185,11 +314,8 @@ async function getNft(req, res) {
 
     // Respond and cache
     const nftStateStr = JSON.stringify(nftState);
-    res
-      .status(200)
-      .type("application/json")
-      .send(nftStateStr);
-    await namespace.redisSet(id, (now + NFT_CACHE_TIME) + "_" + nftStateStr);
+    res.status(200).type("application/json").send(nftStateStr);
+    await namespace.redisSet(id, now + NFT_CACHE_TIME + "_" + nftStateStr);
   } catch (e) {
     console.error("getNft error:", e.message);
     res.status(400).send({ error: e });
@@ -249,9 +375,7 @@ async function getNftSummaries(req, res) {
     if (period === "hot") {
       // add index to sort by hot
       const hotArr = nftSummaryArr.map((nft, i) => [nft, i]);
-      hotArr.sort(
-        (a, b) => b[0].attention + b[1] - (a[0].attention + a[1])
-      );
+      hotArr.sort((a, b) => b[0].attention + b[1] - (a[0].attention + a[1]));
       nftSummaryArr = hotArr.map((ele) => ele[0]);
     } else if (period === "new") nftSummaryArr.reverse();
     else if (period !== "old")
@@ -505,7 +629,8 @@ async function submitPort(req, res) {
       }
     };
     addPortView(data, wallet);
-    portsLog.push(payload);
+    addPortsToChunk(payload);
+    // portsLog.push(payload);
     // await namespace.fs(
     //   "appendFile",
     //   logsInfo.redisPortsKey,
@@ -528,7 +653,7 @@ function difficultyFunction(hash) {
 async function servePortCache(_req, res) {
   try {
     let ports = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
-    if (ports) return res.send("ports");
+    if (ports) return res.send(ports);
     return res.send("");
   } catch (e) {
     res.send("");
@@ -577,23 +702,28 @@ async function proposePorts() {
 }
 
 async function PublishPoRT() {
-  const portLogs = await getLockedPorts();
   const finalLogs = {};
-  for (let i = 0; i < portLogs.length; i++) {
-    const e = portLogs[i];
-    const keys = Object.keys(finalLogs);
-    if (keys.includes(e["trxId"])) {
-      if (!finalLogs[e["trxId"]].includes(e["wallet"]))
-        finalLogs[e["trxId"]].push(e["wallet"]);
-    } else finalLogs[e["trxId"]] = [e["wallet"]];
+  let locketChunkCountTemp = await namespace.redisGet(
+    logsInfo.lockedChunkCount
+  );
+  for (let i = i; i <= locketChunkCountTemp; i++) {
+    const portLogs = await getLockedPorts(i);
+    for (let i = 0; i < portLogs.length; i++) {
+      const e = portLogs[i];
+      const keys = Object.keys(finalLogs);
+      if (keys.includes(e["trxId"])) {
+        if (!finalLogs[e["trxId"]].includes(e["wallet"]))
+          finalLogs[e["trxId"]].push(e["wallet"]);
+      } else finalLogs[e["trxId"]] = [e["wallet"]];
+    }
   }
   return finalLogs;
 }
 
-async function getLockedPorts() {
+async function getLockedPorts(id) {
   let logs = [];
   try {
-    logs = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
+    logs = await getPortChunk(id);
     logs = JSON.parse(logs);
     if (!logs) logs = [];
   } catch {
@@ -647,20 +777,6 @@ async function verifySignature(log) {
   }
 }
 
-async function lockPorts() {
-  try {
-    let redisPorts = JSON.stringify(portsLog);
-    if (redisPorts) {
-      await namespace.redisSet(logsInfo.lockedRedisPortsKey, redisPorts);
-      portsLog = [];
-      return;
-    }
-  } catch (e) {
-    console.log(e);
-    console.log("Unable to lock Ports ", e);
-  }
-}
-
 /**
  *
  * @param {string} txId // Transaction ID
@@ -703,7 +819,7 @@ async function checkTxConfirmation(txId, task) {
 
 /**
  * Awaitable rate limit
- * @returns
+ * @returns <Promise>
  */
 function rateLimit() {
   return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
@@ -1118,13 +1234,12 @@ async function proposeSlash(state) {
   );
 }
 
-
 let rawTxCache = [];
 let nextFetch = 0;
-function getRawTxsCached(ids){
+function getRawTxsCached(ids) {
   fetchRawTxs(ids).catch((e) => {
     console.error("Error fetching raw Txs:", e);
-  })
+  });
   return rawTxCache;
 }
 

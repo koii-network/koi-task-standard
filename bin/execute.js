@@ -98,6 +98,12 @@ class Namespace {
   redisSet(path, data) {
     return tools.redisSetAsync(this.taskTxId + path, data);
   }
+  redisKeys(pattern){
+    return tools.redisKeysAsync(this.taskTxId+pattern)
+  }
+  redisDel(key){
+    return tools.redisDelAsync(this.taskTxId+key)
+  }
   async fs(method, path, ...args) {
     const basePath = "namespace/" + this.taskTxId;
     await fsPromises.mkdir(basePath, { recursive: true }).catch(() => {});
