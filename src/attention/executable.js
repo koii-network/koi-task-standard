@@ -43,7 +43,7 @@ const PORT_LOGS_CACHE_OFFSET = 300;
 
 const NFT_CACHE_TIME = 600000; // 10m
 
-const CHUNK_SIZE = 2;
+const CHUNK_SIZE = 50000;
 
 let ports = {};
 let lastBlock = 0;
@@ -125,54 +125,65 @@ async function checkChunkSize() {
 async function getPortChunk(id) {
   let chunk = await namespace.redisGet(logsInfo.lockedChunk + id);
   chunk = JSON.parse(chunk);
-  if (chunk && chunk.length) return [];
+  if (!chunk && !chunk.length) return [];
   return chunk;
 }
-async function syncLastCurrentChunkWithRedis() {
-  await namespace.redisSet(
-    logsInfo.currentChunk + currentChunkCount,
-    JSON.stringify(currentChunk)
-  );
+async function syncLastCurrentChunkWithRedis(force) {
+  if (portFlag || force)
+    await namespace.redisSet(
+      logsInfo.currentChunk + currentChunkCount,
+      JSON.stringify(currentChunk)
+    );
 }
 setInterval(() => {
   syncLastCurrentChunkWithRedis();
-}, 1000);
+}, 100000);
 
 async function resetPorts() {
   return;
 }
 // setTimeout(lockPorts, 1);
 async function lockPorts() {
+  portFlag = false;
   console.log("Locking ports");
   let lockedKeys = await namespace.redisKeys(logsInfo.lockedChunk + "*");
   for (let i = 1; i <= lockedKeys.length; i++) {
-    await namespace.redisDel(logsInfo.lockedChunk + i);
+    await namespace
+      .redisDel(logsInfo.lockedChunk + i)
+      .then((res) => console.log(res));
     console.log("delete locked port ", logsInfo.lockedChunk + i);
   }
   let currentCountTemp = await namespace.redisGet(logsInfo.currentChunkCount);
   console.log("current Chunk count ", currentCountTemp);
   if (!currentCountTemp) {
     console.log("ji");
+    portFlag = true;
     return;
   }
-  await syncLastCurrentChunkWithRedis();
+  await syncLastCurrentChunkWithRedis(true);
+
   for (let i = 1; i <= currentCountTemp; i++) {
     let current = await namespace.redisGet(logsInfo.currentChunk + i);
     if (current) {
+      console.log("g", logsInfo.currentChunk + i);
       current = JSON.parse(current);
       await namespace.redisSet(
         logsInfo.lockedChunk + i,
         JSON.stringify(current)
       );
+      console.log("c ", logsInfo.lockedChunk + i);
+      console.log("d ", logsInfo.currentChunk + i);
       await namespace.redisDel(logsInfo.currentChunk + i);
     }
   }
   await namespace.redisSet(logsInfo.lockedChunkCount, currentCountTemp);
-  currentCount = 1;
+  currentChunkCount = 1;
   currentChunk = [];
+
   await namespace.redisSet(logsInfo.currentChunkCount, 1);
   await namespace.redisSet(logsInfo.currentChunk + 1, JSON.stringify([]));
   console.log("ports locked");
+  portFlag = true;
   return;
 
   // for (let i = 1; i <= currentChunkCount; i++) {}
@@ -201,6 +212,8 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
+    namespace.express("get", "/lock", proposePorts); // temp
+
     // initializePorts();
     setupPorts();
   }
@@ -669,9 +682,10 @@ function canProposePorts(state, block) {
   );
 }
 
-async function proposePorts() {
+async function proposePorts(req, res) {
   await lockPorts();
   const payload = await PublishPoRT();
+  if (res) res.json(payload);
   if (Object.keys(payload).length === 0) {
     hasSubmittedPorts = true;
     console.error("Payload empty, skipping submission");
@@ -706,9 +720,12 @@ async function PublishPoRT() {
   let locketChunkCountTemp = await namespace.redisGet(
     logsInfo.lockedChunkCount
   );
-  for (let i = i; i <= locketChunkCountTemp; i++) {
-    const portLogs = await getLockedPorts(i);
+  console.log("locked chunk Count ", locketChunkCountTemp);
+  for (let j = 1; j <= locketChunkCountTemp; j++) {
+    const portLogs = await getLockedPorts(j);
+    console.log("portLogsLength ", portsLog.length);
     for (let i = 0; i < portLogs.length; i++) {
+      console.log(portsLog.length);
       const e = portLogs[i];
       const keys = Object.keys(finalLogs);
       if (keys.includes(e["trxId"])) {
@@ -724,9 +741,8 @@ async function getLockedPorts(id) {
   let logs = [];
   try {
     logs = await getPortChunk(id);
-    logs = JSON.parse(logs);
     if (!logs) logs = [];
-  } catch {
+  } catch (e) {
     console.log(e);
     console.error("Error reading raw logs");
     return [];
