@@ -43,7 +43,7 @@ const PORT_LOGS_CACHE_OFFSET = 300;
 
 const NFT_CACHE_TIME = 600000; // 10m
 
-const CHUNK_SIZE = 50000;
+const CHUNK_SIZE = 20;
 
 let ports = {};
 let lastBlock = 0;
@@ -57,6 +57,7 @@ let hasVoted = false;
 let hasSubmitBatch = false;
 let hasAudited = false;
 let portFlag = true;
+let waiting = [];
 
 let portsLog = [];
 
@@ -74,7 +75,7 @@ let lockedChunkCount = 1;
 
 async function setupPorts() {
   currentChunkCount = await namespace.redisGet(logsInfo.currentChunkCount);
-  console.log(`current VhunkmCount redis`, currentChunkCount);
+  console.log(`current Count redis`, currentChunkCount);
   if (!currentChunkCount) {
     currentChunkCount = 1;
     await namespace.redisSet(logsInfo.currentChunkCount, currentChunkCount);
@@ -86,7 +87,7 @@ async function setupPorts() {
   );
 
   currentChunk = JSON.parse(currentChunkStr);
-  console.log(currentChunk);
+  // console.log(currentChunk);
   if (!currentChunk) currentChunk = [];
 }
 
@@ -97,10 +98,10 @@ async function setupPorts() {
  */
 
 async function addPortsToChunk(port) {
-  console.log("length ", currentChunk.length);
+  // console.log("length ", currentChunk.length);
   // console.log(typeof currentChunk);
-  currentChunk.push(port);
   await checkChunkSize();
+  currentChunk.push(port);
   return;
 }
 /**
@@ -109,15 +110,23 @@ async function addPortsToChunk(port) {
  *
  * @returns {Promise} void
  */
+let sync = false;
 async function checkChunkSize() {
-  if (currentChunk.length >= CHUNK_SIZE) {
+  if (sync) {
+    waiting.push(new Promise((resolve, reject) => {}));
+  }
+  if (currentChunk.length >= CHUNK_SIZE && !sync) {
+    sync = true;
     await namespace.redisSet(
       logsInfo.currentChunk + currentChunkCount,
       JSON.stringify(currentChunk)
     );
+
     currentChunkCount++;
+    // console.log("current chunk Count ", currentChunkCount);
     await namespace.redisSet(logsInfo.currentChunkCount, currentChunkCount);
     currentChunk = [];
+    sync = false;
   }
   return;
 }
@@ -145,7 +154,7 @@ async function resetPorts() {
 // setTimeout(lockPorts, 1);
 async function lockPorts() {
   portFlag = false;
-  console.log("Locking ports");
+  // console.log("Locking ports");
   let lockedKeys = await namespace.redisKeys(logsInfo.lockedChunk + "*");
   for (let i = 1; i <= lockedKeys.length; i++) {
     await namespace
@@ -165,14 +174,14 @@ async function lockPorts() {
   for (let i = 1; i <= currentCountTemp; i++) {
     let current = await namespace.redisGet(logsInfo.currentChunk + i);
     if (current) {
-      console.log("g", logsInfo.currentChunk + i);
+      // console.log("g", logsInfo.currentChunk + i);
       current = JSON.parse(current);
       await namespace.redisSet(
         logsInfo.lockedChunk + i,
         JSON.stringify(current)
       );
-      console.log("c ", logsInfo.lockedChunk + i);
-      console.log("d ", logsInfo.currentChunk + i);
+      // console.log("c ", logsInfo.lockedChunk + i);
+      // console.log("d ", logsInfo.currentChunk + i);
       await namespace.redisDel(logsInfo.currentChunk + i);
     }
   }
@@ -665,13 +674,36 @@ function difficultyFunction(hash) {
 
 async function servePortCache(_req, res) {
   try {
-    let ports = await namespace.redisGet(logsInfo.lockedRedisPortsKey);
-    if (ports) return res.send(ports);
-    return res.send("");
+    let page = _req.params.page || 1;
+
+    if (!isNaN(parseInt(page))) {
+      let data = await namespace.redisGet(logsInfo.lockedChunk + page);
+      console.log(logsInfo.lockedChunk + page)
+      if (data) {
+        data = JSON.parse(data);
+        let total = await namespace.redisGet(logsInfo.lockedChunkCount);
+        res.json({
+          page,
+          total,
+          data
+        });
+      } else {
+        return res.status(400).json({
+
+          message: "page not found"
+        });
+      }
+    }else {
+      return res.status(400).json({
+        message: "page must be a type of integer."
+      })
+    }
   } catch (e) {
-    res.send("");
+    console.log(e)
+    return res.status(400).json({
+      message:"Something went wrong!"
+    });
   }
-  res.send(logs);
 }
 
 function canProposePorts(state, block) {

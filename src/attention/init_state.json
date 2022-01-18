@@ -36455,12 +36455,18 @@
   "reputation": {},
   "blacklist": [],
   "validContractSrcsB64": [
-    "I8xgq3361qpR8_DvqcGpkCYAUTMktyAgvkm6kGhJzEQ",
-    "NTEpP9crI-fd83-RmGauxSjGjRQZnCvm1Y5fbxIUZhc",
-    "46pfUHiTdlIfksVmtBWO4yc1uXtmCvvr-HLOopRs2Go",
-    "r_ibeOTHJW8McJvivPJjHxjMwkYfAKRjs-LjAeaBcLc"
+    "STh4Z3EzMzYxcXBSOF9EdnFjR3BrQ1lBVVRNa3R5QWd2a202a0doSnpFUQ",
+        "TlRFcFA5Y3JJLWZkODMtUm1HYXV4U2pHalJRWm5Ddm0xWTVmYnhJVVpoYw",
+        "NDZwZlVIaVRkbElma3NWbXRCV080eWMxdVh0bUN2dnItSExPb3BSczJHbw",
+        "cl9pYmVPVEhKVzhNY0p2aXZQSmpIeGpNd2tZZkFLUmpzLUxqQWVhQmNMYw",
+        "NXlKRHdPUGJrNW03YVlrMTdZdWNrTWs5Y2g1Rzl0bldkeFdLdmM4VzlTNA",
+        "aG1xZGxkRWxyVUdUMjNxOWRsZWdMWklBQm5ZTzhpUTAzQ0hTRWJFWllNbw",
+        "a3NpZjlfUFZzdE9TN1BIQjlnUlhmWXJfV3F2b2d6R2RTY3R0MjNycjJFbw",
+        "T2NXTkRuRHVEbXRVUjJQTk9GR2IxN19yS3lVOUFkVXlzcG9WSUlkOFdWcw",
+        "azNSN3hKZldNZEt1cUJXSHhvNU42V3llX3hjUEpqWjVjbWFCWE9rS0dlUQ",
+        "WURqbS1VbGhPRUE1WVljMXd4aU9TQzh2d3FCOERtb1F5M3RzS0NqZVk4VQ"
   ],
-  "executableId": "ER_gAIuBsI5-OVt6GrCGUPfgiu8hjtvFgEO-Eow6aoc",
-  "koiiContract": "7wfyUmgZZMtMbW8f9VufCKLalOQO_Jlgm0-Ll8KmfRc",
+  "executableId": "SQZGgnlbVde242OvnmhdqTlmlRtz-H3GYF45nk5XR-E",
+  "koiiContract": "S2aB4jHaxSPlDzobOk3KTmAk1_N_rykgjRTKMii-KOY",
   "frozen": false
 }
