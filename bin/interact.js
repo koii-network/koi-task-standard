@@ -14,7 +14,7 @@ const walletPath = process.env.WALLET_LOCATION;
 const wallet = JSON.parse(fs.readFileSync(walletPath));
 //const contractId = "TwcsQHW5ucGrTZg_MP1Jmc67b5TVqzogH24wSWgFag4"; // test attention contract
 //const contractId = "7wfyUmgZZMtMbW8f9VufCKLalOQO_Jlgm0-Ll8KmfRc"; // test koii Contract
-const contractId = "S2aB4jHaxSPlDzobOk3KTmAk1_N_rykgjRTKMii-KOY"; // attention in production
+const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention in production
 //const contractId = "QA7AIFVx1KBBmzC7WUNhJbDsHlSJArUT0jWrhZMZPS8"; // koii Contract in production
 
 //const contractId = "F4EzkpUtE01G6FFJ08TJ3V2fZ5jWuhWQhg9OezOshIM"; // nft id
@@ -45,11 +45,11 @@ const contractId = "S2aB4jHaxSPlDzobOk3KTmAk1_N_rykgjRTKMii-KOY"; // attention i
 //   function: "registerValidContractSrc",
 //   contractSrc: "hmqdldElrUGT23q9dlegLZIABnYO8iQ03CHSEbEZYMo"
 // };
-const input = {
-  function: "registerTask",
-  taskName: "Attention_Game",
-  taskTxId: "70e06zTVapvjgpGNMLFl-VuS7rc4aISZ_swa3RNa3T4"
-};
+// const input = {
+//   function: "registerTask",
+//   taskName: "Attention_Game",
+//   taskTxId: "70e06zTVapvjgpGNMLFl-VuS7rc4aISZ_swa3RNa3T4"
+// };
 // const input = {
 //   function: "burnKoi",
 //   contractId: "XRM5UNc1t_Syu0j9sISHysxVcAAb5zCb3VG6SyFu0KU",
@@ -61,10 +61,10 @@ const input = {
 //   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
 //   qty: 100
 // };
-// const input = {
-//   function: "registerExecutableId",
-//   executableId: "tdoAg_NVGWjFG_oCckr4h-wU6eURVSuHfl--mlke-Cs"
-// };
+const input = {
+  function: "registerExecutableId",
+  executableId: "xojfXVYNU_UYu_k8QpzIpl-jHxkw3mdoAMrel1luoO8"
+};
 async function main() {
   console.log("Writing", input.function);
   const txId = await smartweave.interactWrite(
@@ -96,3 +96,4 @@ async function checkTxConfirmation(txId) {
 }
 
 main();
+//GyeoTFxpZUDlxxg5T8Fdju0i8iDmGwU6SviyKaOdWlg

@@ -43,7 +43,7 @@ const PORT_LOGS_CACHE_OFFSET = 300;
 
 const NFT_CACHE_TIME = 600000; // 10m
 
-const CHUNK_SIZE = 20;
+const CHUNK_SIZE = 5000;
 
 let ports = {};
 let lastBlock = 0;
@@ -221,7 +221,7 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
-    namespace.express("get", "/lock", proposePorts); // temp
+    // namespace.express("get", "/lock", proposePorts); // temp
 
     // initializePorts();
     setupPorts();
@@ -714,10 +714,9 @@ function canProposePorts(state, block) {
   );
 }
 
-async function proposePorts(req, res) {
+async function proposePorts() {
   await lockPorts();
   const payload = await PublishPoRT();
-  if (res) res.json(payload);
   if (Object.keys(payload).length === 0) {
     hasSubmittedPorts = true;
     console.error("Payload empty, skipping submission");
