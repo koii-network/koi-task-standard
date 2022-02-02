@@ -231,7 +231,7 @@ function setup(_init_state) {
     setupPorts();
   }
 }
-setInterval(SyncAttentionCount, 24 * 60 * 60 * 1000);
+setInterval(SyncAttentionCount, 2 * 60 * 60 * 1000);
 
 // setInterval(async () => {
 //   await namespace.redisSet(
