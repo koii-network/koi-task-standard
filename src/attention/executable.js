@@ -58,6 +58,7 @@ let hasSubmitBatch = false;
 let hasAudited = false;
 let portFlag = true;
 let waiting = [];
+let attentionViewsRewards = {};
 
 let portsLog = [];
 
@@ -221,12 +222,16 @@ function setup(_init_state) {
     namespace.express("get", "/realtime-attention", getRealtimeAttention);
     namespace.express("post", "/submit-vote", submitVote);
     namespace.express("post", "/submit-port", submitPort);
+    namespace.express("get", "/nft-attentions", getAttentionRewardsInfo);
+
     // namespace.express("get", "/lock", proposePorts); // temp
 
     // initializePorts();
+    SyncAttentionCount();
     setupPorts();
   }
 }
+setInterval(SyncAttentionCount, 2 * 60 * 60 * 1000);
 
 // setInterval(async () => {
 //   await namespace.redisSet(
@@ -344,9 +349,56 @@ async function getNft(req, res) {
   }
 }
 
+async function SyncAttentionCount() {
+  try {
+    const attentionState = await tools.getState(namespace.taskTxId);
+    const attentionReport = attentionState.task.attentionReport;
+    // TODO rename period to filter or sort
+    // const days = PERIOD_MAP[period];
+    let periods = Object.keys(PERIOD_MAP);
+    console.log(periods);
+    for (let periodKey of periods) {
+      let days = PERIOD_MAP[periodKey];
+
+      // console.log(period, days);
+      let attention = 0;
+      let reward = 0;
+      if (days) {
+        attentionReportSlice = attentionReport.slice(
+          attentionReport.length - days
+        );
+        for (const report of attentionReportSlice) {
+          let keys = Object.keys(report);
+          for (const key of keys) {
+            attention += report[key];
+          }
+          if (keys.length > 0) reward += 1000;
+        }
+      }
+      attentionViewsRewards[periodKey] = {
+        attention,
+        reward
+      };
+    }
+    console.log(attentionViewsRewards);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function getAttentionRewardsInfo(req, res) {
+  try {
+    console.log(req.query.period)
+    return res.json(attentionViewsRewards[req.query.period] || {});
+  } catch (e) {
+    console.log(e);
+    res.json({});
+  }
+}
 async function getNftSummaries(req, res) {
   try {
     // Initialize NFT map
+
     const attentionState = await tools.getState(namespace.taskTxId);
     const attentionReport = attentionState.task.attentionReport;
 
@@ -678,7 +730,7 @@ async function servePortCache(_req, res) {
 
     if (!isNaN(parseInt(page))) {
       let data = await namespace.redisGet(logsInfo.lockedChunk + page);
-      console.log(logsInfo.lockedChunk + page)
+      console.log(logsInfo.lockedChunk + page);
       if (data) {
         data = JSON.parse(data);
         let total = await namespace.redisGet(logsInfo.lockedChunkCount);
@@ -689,19 +741,18 @@ async function servePortCache(_req, res) {
         });
       } else {
         return res.status(400).json({
-
           message: "page not found"
         });
       }
-    }else {
+    } else {
       return res.status(400).json({
         message: "page must be a type of integer."
-      })
+      });
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
     return res.status(400).json({
-      message:"Something went wrong!"
+      message: "Something went wrong!"
     });
   }
 }

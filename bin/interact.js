@@ -56,15 +56,15 @@ const contractId = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s"; // attention i
 //   contentType: "nft",
 //   contentTxId: "WRlbex123DX3a0xgGbW72x15cPWsVlcrPEUw6CJd1P8"
 // };
-// const input = {
-//   function: "mint",
-//   target: "6VJYLb6lvBISrgRbhd1ODHzJ1xAh3ZA3OdSY20E88Bg",
-//   qty: 100
-// };
 const input = {
-  function: "registerExecutableId",
-  executableId: "xojfXVYNU_UYu_k8QpzIpl-jHxkw3mdoAMrel1luoO8"
+  function: "mint",
+  target: "50JVvg84zA2ae-lQ7j9tL_CIXFlNXr2FXjEcDNXfTkc",
+  qty: 1100
 };
+// const input = {
+//   function: "registerExecutableId",
+//   executableId: "xojfXVYNU_UYu_k8QpzIpl-jHxkw3mdoAMrel1luoO8"
+// };
 async function main() {
   console.log("Writing", input.function);
   const txId = await smartweave.interactWrite(
