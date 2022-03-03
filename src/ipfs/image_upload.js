@@ -42,6 +42,11 @@ async function main() {
     hash: result.path
   };
 
+  const vote_input = {
+    function: "vote",
+    vote: "yes"
+  };
+
   const upload_id = await smartest.interactWrite(
     arweave,
     imageSrc,
@@ -53,6 +58,17 @@ async function main() {
   );
 
   console.log("Upload state", upload_id);
+
+  const vote_id = await smartest.interactWrite(
+    arweave,
+    imageSrc,
+    wallet,
+    vote_input,
+    smartest.readContractState(imageContractId),
+    walletAddress,
+    imageContractId
+  );
+  console.log("vote_state", vote_id);
 
   console.log(smartest.readContractState(imageContractId));
 }
