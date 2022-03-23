@@ -111,3 +111,6 @@ typings/
 # TernJS port file
 .tern-port
 
+#Testing wallet
+wallet.json
+wallet_new.json

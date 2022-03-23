@@ -6,20 +6,20 @@ const Arweave = require("arweave");
 if (process.argv[2] === undefined) throw "Wallet path not defined";
 
 async function main() {
-  let ipfs = await create({
-    host: "ipfs.infura.io",
-    port: 5001,
-    protocol: "https"
-  });
+  // let ipfs = await create({
+  //   host: "ipfs.infura.io",
+  //   port: 5001,
+  //   protocol: "https",
+  // });
 
-  let data = fs.readFileSync("../../diagram/attention_diagram.jpg");
+  // let data = fs.readFileSync("./diagram/attention_diagram.jpg");
 
-  let options = {
-    warpWithDirectory: false,
-    progress: (prog) => console.log(`Saved :${prog}`)
-  };
-  let result = await ipfs.add(data, options);
-  console.log(result);
+  // let options = {
+  //   warpWithDirectory: false,
+  //   progress: (prog) => console.log(`Saved :${prog}`),
+  // };
+  // let result = await ipfs.add(data, options);
+  // console.log(result);
   const arweave = Arweave.init({
     host: "arweave.net",
     port: 443,
@@ -39,13 +39,13 @@ async function main() {
 
   const upload_input = {
     function: "upload",
-    hash: result.path
+    hash: "QmWfVY9y3xjsixTgbd9AorQxH7VtMpzfx2HaWtsoUYecaX"
   };
 
-  const vote_input = {
-    function: "vote",
-    vote: "yes"
-  };
+  // const vote_input = {
+  //   function: "vote",
+  //   vote: "yes",
+  // };
 
   const upload_id = await smartest.interactWrite(
     arweave,
@@ -59,16 +59,16 @@ async function main() {
 
   console.log("Upload state", upload_id);
 
-  const vote_id = await smartest.interactWrite(
-    arweave,
-    imageSrc,
-    wallet,
-    vote_input,
-    smartest.readContractState(imageContractId),
-    walletAddress,
-    imageContractId
-  );
-  console.log("vote_state", vote_id);
+  // const vote_id = await smartest.interactWrite(
+  //   arweave,
+  //   imageSrc,
+  //   wallet,
+  //   vote_input,
+  //   smartest.readContractState(imageContractId),
+  //   walletAddress,
+  //   imageContractId
+  // );
+  // console.log("vote_state", vote_id);
 
   console.log(smartest.readContractState(imageContractId));
 }

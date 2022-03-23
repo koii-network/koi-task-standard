@@ -1,28 +1,17 @@
 {
-  "imageHashArray": [
+  "name": "IPFS",
+  "cid": [
     {
       "hash": "bvwjekbsbghghk",
       "Creator": "finxI3rygo2rLJ58e2_6hY9rlqApe9U9T_CS_jjuFHY",
-      "voteCount": 0,
       "date": "2022-03-03"
     }
   ],
-  "voting": [
+  "leaderBoard": [
     {
-      "date": "2022-03-03",
-      "voters": []
-    },
-    {
-      "date": "2022-03-04",
-      "voters": []
-    },
-    {
-      "date": "2022-03-05",
-      "voters": []
-    },
-    {
-      "date": "2022-03-06",
-      "voters": []
+      "nftId": "",
+      "viewCounts": ""
     }
-  ]
+  ],
+  "executableId": ""
 }
