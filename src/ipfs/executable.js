@@ -14,6 +14,7 @@ namespace {
 
 const Arweave = require("arweave");
 const fetch = require("node-fetch");
+const koiSdk = require("@_koi/sdk/node");
 const smartest = require("@_koi/smartest");
 const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
@@ -23,7 +24,7 @@ const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
   port: 443,
-  timeout: 10000,
+  timeout: 100000,
   logging: false
 });
 
@@ -39,6 +40,7 @@ let lastLogClose = 0;
 
 const REDIS_KEY = process.env["SERVICE_URL"];
 const ARWEAVE_RATE_LIMIT = 60000;
+const ATTENTION_CONTRACT = "NwaSMGCdz6Yu5vNjlMtCNBmfEkjYfT-dfYkbQQDGn5s";
 
 let hasSubmittedPorts = false;
 let hasProposedSlash = false;
@@ -201,6 +203,50 @@ async function acceptNft(req, res) {
   // return res.status(200).send({ Result: `Request recorded` });
 }
 
+async function checkTxConfirmation(txId) {
+  console.log(`TxId: ${txId}\nWaiting for confirmation`);
+  const start = Date.now();
+  for (;;) {
+    try {
+      await tools.getTransaction(txId);
+      console.log(`Transaction found`);
+      return true;
+    } catch (e) {
+      if (e.type === "TX_FAILED") {
+        console.error(e.type, "While checking tx confirmation");
+        return false;
+      }
+    }
+    console.log(Math.round((Date.now() - start) / 60000) + "m waiting");
+    await sleepAsync(60000); // Wait 1m before checks to not get rate limited
+  }
+}
+
+async function sleepAsync(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+async function registerNft(req, res) {
+  try {
+    const nftToRegister = req.body.txId;
+    await tools.loadWallet(await tools.wallet);
+    console.log("Wallet loaded");
+    console.log("Burning Koii");
+    const burnTxId = await tools.burnKoi(
+      ATTENTION_CONTRACT,
+      "nft",
+      nftToRegister
+    );
+    await checkTxConfirmation(burnTxId);
+    console.log("Migrating content");
+    const migrateTxId = await tools.migrate(ATTENTION_CONTRACT);
+    await checkTxConfirmation(migrateTxId);
+  } catch (error) {
+    console.log("error in running registering NFT", error);
+    res.status(404).send({ error: "ERROR: " + error });
+  }
+}
+
 async function setupPorts() {
   currentChunkCount = await namespace.redisGet(logsInfo.currentChunkCount);
   console.log(`current Count redis`, currentChunkCount);
@@ -222,6 +268,7 @@ async function setupPorts() {
 function setup(_init_state) {
   if (namespace.app) {
     namespace.express("post", "/cid", acceptNft);
+    namespace.express("post", "/registerNft", registerNft);
     // namespace.express("get", "/lock", proposePorts); // temp
 
     // initializePorts();
